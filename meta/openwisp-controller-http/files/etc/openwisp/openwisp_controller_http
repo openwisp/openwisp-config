@@ -1,0 +1,68 @@
+#!/bin/sh
+
+WORKING_DIR="/tmp/openwisp"
+CONFIGURATION_FILE="$WORKING_DIR/configuration.tar.gz"
+CONFIGURATION_CHECKSUM="$WORKING_DIR/configuration_checksum"
+INTERVAL=$(uci get openwisp.@controller_http[0].interval)
+BASE_URL=$(uci get openwisp.@controller_http[0].url)
+KEY=$(uci get openwisp.@controller_http[0].key)
+CONFIGURATION_URL="$BASE_URL/get_config/$KEY"
+CHECKSUM_URL="$CONFIGURATION_URL.md5"
+
+if [ -z "$BASE_URL" ] || [ -z "$KEY" ]; then
+    echo "ERR: Required configuration keys are empty, check /etc/config/openwisp"
+    return 1
+fi
+
+mkdir -p $WORKING_DIR
+
+configuration_changed() {
+    # local LOCAL_CHECKSUM=$(uci get openwisp.@controller_http[0].checksum)
+    local LOCAL_CHECKSUM=$(cat $CONFIGURATION_CHECKSUM)
+    REMOTE_CHECKSUM=$(uclient-fetch $CHECKSUM_URL -q -O -)
+
+    if [ -z "$REMOTE_CHECKSUM" ]; then
+        echo "ERR: Could not retrieve checksum from controller"
+        return 2
+    fi
+
+    if [ "$LOCAL_CHECKSUM" != "$REMOTE_CHECKSUM" ]; then
+        # store checksum
+        # uci set openwisp.@controller_http[0].checksum=$REMOTE_CHECKSUM
+        # uci commit
+        printf $REMOTE_CHECKSUM > $CONFIGURATION_CHECKSUM
+        return 1
+    fi
+
+    return 0
+}
+
+update_configuration() {
+    uclient-fetch $CONFIGURATION_URL -O $CONFIGURATION_FILE
+
+    if [ "$?" != "4" ]; then
+        echo "ERR: Could not retrieve configuration from controller"
+        return 3
+    fi
+
+    # restore configuration
+    sysupgrade -r $CONFIGURATION_FILE
+
+    if [ "$?" != "0" ]; then
+        echo "ERR: Could not restore configuration successfully"
+        return 4
+    fi
+
+    /sbin/reload_config
+}
+
+while true
+do
+    configuration_changed
+
+    if [ "$?" == "1" ]; then
+        update_configuration
+    fi
+
+    sleep $INTERVAL
+done

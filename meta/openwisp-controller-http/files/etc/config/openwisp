@@ -1,0 +1,4 @@
+config controller_http
+        option url ''
+        option key ''
+        option interval '120'

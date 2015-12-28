@@ -1,0 +1,10 @@
+menu "Configuration"
+        depends on PACKAGE_openwisp-config-http
+
+config OPENWISP_BUSYBOX_OPTIONS
+	bool "Enable busybox extras for openwisp-config-http"
+	default y
+	select BUSYBOX_CUSTOM
+	select BUSYBOX_CONFIG_LOGIN
+
+endmenu
