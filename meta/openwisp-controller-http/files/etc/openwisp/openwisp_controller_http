@@ -10,27 +10,31 @@ CONFIGURATION_URL="$BASE_URL/get_config/$KEY"
 CHECKSUM_URL="$CONFIGURATION_URL.md5"
 
 if [ -z "$BASE_URL" ] || [ -z "$KEY" ]; then
-    echo "ERR: Required configuration keys are empty, check /etc/config/openwisp"
+    logger -s "Required configuration keys are empty, check /etc/config/openwisp" \
+           -t "openwisp" \
+           -p 3
     return 1
 fi
 
 mkdir -p $WORKING_DIR
 
 configuration_changed() {
-    # local LOCAL_CHECKSUM=$(uci get openwisp.@controller_http[0].checksum)
     local LOCAL_CHECKSUM=$(cat $CONFIGURATION_CHECKSUM)
     REMOTE_CHECKSUM=$(uclient-fetch $CHECKSUM_URL -q -O -)
 
     if [ -z "$REMOTE_CHECKSUM" ]; then
-        echo "ERR: Could not retrieve checksum from controller"
+        logger -s "Could not retrieve checksum from controller" \
+               -t "openwisp" \
+               -p 3
         return 2
     fi
 
     if [ "$LOCAL_CHECKSUM" != "$REMOTE_CHECKSUM" ]; then
         # store checksum
-        # uci set openwisp.@controller_http[0].checksum=$REMOTE_CHECKSUM
-        # uci commit
         printf $REMOTE_CHECKSUM > $CONFIGURATION_CHECKSUM
+        logger -s "Configuration in controller has changed" \
+               -t "openwisp" \
+               -p 6
         return 1
     fi
 
@@ -38,10 +42,13 @@ configuration_changed() {
 }
 
 update_configuration() {
+    # download configuration
     uclient-fetch $CONFIGURATION_URL -O $CONFIGURATION_FILE
 
     if [ "$?" != "4" ]; then
-        echo "ERR: Could not retrieve configuration from controller"
+        logger -s "Could not retrieve configuration from controller" \
+               -t "openwisp" \
+               -p 3
         return 3
     fi
 
@@ -49,11 +56,17 @@ update_configuration() {
     sysupgrade -r $CONFIGURATION_FILE
 
     if [ "$?" != "0" ]; then
-        echo "ERR: Could not restore configuration successfully"
+        logger -s "Could not restore configuration successfully" \
+               -t "openwisp" \
+               -p 2
         return 4
     fi
 
     /sbin/reload_config
+
+    logger -s "Configuration restored and applied" \
+           -t "openwisp" \
+           -p 6
 }
 
 while true
