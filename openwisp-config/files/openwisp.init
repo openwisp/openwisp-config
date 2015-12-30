@@ -33,34 +33,12 @@ service_triggers() {
 }
 
 stop_service() {
-    if process_running; then
-        logger -s "$PROG_NAME is stopping" \
-               -t "openwisp" \
-               -p 6
-        return 0
-    else
-        logger -s "$PROG_NAME is not running" \
-               -t "openwisp" \
-               -p 4
-        return 1
-    fi
+    logger -s "$PROG_NAME stopping" \
+           -t "openwisp" \
+           -p 6
 }
 
 reload_service() {
     stop
     start
-}
-
-service_running() {
-    if process_running; then
-        logger -s "$PROG_NAME is running" \
-               -t "openwisp" \
-               -p 6
-        return 0
-    else
-        logger -s "$PROG_NAME is not running" \
-               -t "openwisp" \
-               -p 6
-        return 1
-    fi
 }
