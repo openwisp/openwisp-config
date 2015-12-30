@@ -5,52 +5,52 @@
 
 include $(TOPDIR)/rules.mk
 
-PKG_NAME:=openwisp-controller-http
+PKG_NAME:=openwisp
 PKG_VERSION:=$(shell git describe --always --tags 2> /dev/null || echo 0.1)
+PKG_LICENSE:=GPL3
 
 include $(INCLUDE_DIR)/package.mk
 
-
-define Package/openwisp-controller-http
+define Package/openwisp-config
 	SECTION:=openwisp
-	CATEGORY:=OpenWisp
-	TITLE:=OpenWISP Configuration Updater (HTTP)
-	MAINTAINER:=info@openwisp.org
-	#this is a meta package suitable for any archs...
+	CATEGORY:=utils
+	TITLE:=OpenWISP Configuration Agent
+	MAINTAINER:=OpenWISP Project info@openwisp.org
 	PKG_ARCH:=all
 	DEPENDS:=+libpolarssl libustream-polarssl libuclient uclient-fetch
 endef
 
-define Package/openwisp-controller-http/description
+define Package/openwisp-config/description
 	OpenWISP controller agent, updates configuration via HTTP
 endef
 
-define Package/openwisp-fw/config
+define Package/openwisp-config/config
   source "$(SOURCE)/Config.in"
 endef
 
 define Build/Compile
 endef
 
-define Package/openwisp-controller-http/install
-	$(INSTALL_DIR) $(1)/
-	$(CP) -r ./files/* $(1)/
+define Package/openwisp-config/install
+	$(INSTALL_DIR) \
+		$(1)/usr/sbin \
+		$(1)/etc/init.d \
+		$(1)/etc/config \
 
-	#unpack external configuration
-	if [ -z "$(OPENWISP_CONF)" ]; then exit 2; fi      # system unconfigured
-	if [ -d $(OPENWISP_CONF) ]; then \
-		cp -fr $(OPENWISP_CONF) $(1)/; \
-	fi
-	if [ -f $(OPENWISP_CONF) ]; then \
-		tar xvzf $(OPENWISP_CONF) -C $(1)/; \
-	fi
-	if [ `echo $(OPENWISP_CONF) | grep '^http' -` ]; then \
-		wget $(OPENWISP_CONF) -qO - | tar xvz -C $(1)/; \
-	fi
+	$(INSTALL_BIN) \
+		files/openwisp.agent \
+		$(1)/usr/sbin/openwisp_config
 
-	git describe --tags --always || echo 'no-git-version' > $(1)/etc/openwisp_version
+	$(INSTALL_BIN) \
+		files/openwisp.agent \
+		$(1)/usr/sbin/apply_config
+
+	$(INSTALL_BIN) \
+		files/openwisp.init \
+		$(1)/etc/init.d/openwisp_config
+
+	$(INSTALL_CONF) files/openwisp.config \
+		$(1)/etc/config/openwisp
 endef
 
-
-$(eval $(call BuildPackage,openwisp-fw-base))
-$(eval $(call BuildPackage,openwisp-fw))
+$(eval $(call BuildPackage,openwisp-config))
