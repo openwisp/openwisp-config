@@ -1,0 +1,26 @@
+#!/bin/sh
+# variant of /sbin/reload_config
+
+rm -rf /var/run/config.check
+mkdir -p /var/run/config.check
+for config in /etc/config/*; do
+    file=${config##*/}
+    uci show "${file##*/}" > /var/run/config.check/$file
+done
+MD5FILE=/var/run/config.md5
+[ -f $MD5FILE ] && {
+    for c in `md5sum -c $MD5FILE 2>/dev/null| grep FAILED | cut -d: -f1`; do
+        local service="$(basename $c)"
+        local initd="/etc/init.d/$service"
+        local service_triggers=$(grep -s -q "service_triggers()" "$initd")
+        # try reloading service via ubus
+        ubus call service event "{ \"type\": \"config.change\", \"data\": { \"package\": \"$service\" }}"
+        # if init.d file exists and service_triggers have not been defined
+        # do explicit reload
+        if [ -f $initd ] && [ "$service_triggers" != "0" ]; then
+            $($initd reload)
+        fi
+    done
+}
+md5sum /var/run/config.check/* > $MD5FILE
+rm -rf /var/run/config.check
