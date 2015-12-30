@@ -29,8 +29,7 @@ start_service() {
            -p 6
 }
 
-service_triggers()
-{
+service_triggers() {
     procd_add_reload_trigger "openwisp"
 }
 
