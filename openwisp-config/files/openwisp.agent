@@ -6,8 +6,14 @@ CONFIGURATION_CHECKSUM="$WORKING_DIR/configuration_checksum"
 INTERVAL=$(uci get openwisp.@controller_http[0].interval)
 BASE_URL=$(uci get openwisp.@controller_http[0].url)
 KEY=$(uci get openwisp.@controller_http[0].key)
+VERIFY_SSL=$(uci get openwisp.@controller_http[0].verify_ssl)
 CONFIGURATION_URL="$BASE_URL/get_config/$KEY"
 CHECKSUM_URL="$CONFIGURATION_URL.md5"
+FETCH_COMMAND="curl -s"
+
+if [ "$VERIFY_SSL" != "1" ]; then
+    FETCH_COMMAND="$FETCH_COMMAND -k"
+fi
 
 if [ -z "$BASE_URL" ] || [ -z "$KEY" ]; then
     logger -s "Required configuration keys are empty, check /etc/config/openwisp" \
@@ -20,7 +26,7 @@ mkdir -p $WORKING_DIR
 
 configuration_changed() {
     local LOCAL_CHECKSUM=$(cat $CONFIGURATION_CHECKSUM)
-    REMOTE_CHECKSUM=$(uclient-fetch $CHECKSUM_URL -q -O -)
+    REMOTE_CHECKSUM=$($FETCH_COMMAND $CHECKSUM_URL)
 
     if [ -z "$REMOTE_CHECKSUM" ]; then
         logger -s "Could not retrieve checksum from controller" \
@@ -43,9 +49,9 @@ configuration_changed() {
 
 update_configuration() {
     # download configuration
-    uclient-fetch $CONFIGURATION_URL -O $CONFIGURATION_FILE
+    $($FETCH_COMMAND $CONFIGURATION_URL -o $CONFIGURATION_FILE)
 
-    if [ "$?" != "4" ]; then
+    if [ "$?" != "0" ]; then
         logger -s "Could not retrieve configuration from controller" \
                -t "openwisp" \
                -p 3

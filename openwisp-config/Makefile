@@ -13,11 +13,11 @@ include $(INCLUDE_DIR)/package.mk
 
 define Package/openwisp-config
 	SECTION:=openwisp
-	CATEGORY:=utils
+	CATEGORY:=OpenWISP
 	TITLE:=OpenWISP Configuration Agent
 	MAINTAINER:=OpenWISP Project info@openwisp.org
 	PKG_ARCH:=all
-	DEPENDS:=+libpolarssl libustream-polarssl libuclient uclient-fetch
+	DEPENDS:=+libpolarssl +curl +ca-certificates
 endef
 
 define Package/openwisp-config/description

@@ -29,7 +29,7 @@ start_service() {
 }
 
 service_triggers() {
-    procd_add_reload_trigger "openwisp"
+    procd_add_reload_trigger openwisp
 }
 
 stop_service() {
