@@ -6,8 +6,9 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=openwisp
-PKG_VERSION:=$(shell git describe --always --tags 2> /dev/null || echo 0.1)
-PKG_LICENSE:=GPL3
+PKG_VERSION:=$(shell cat VERSION)
+PKG_RELEASE:=1
+PKG_LICENSE:=GPL-3.0
 
 include $(INCLUDE_DIR)/package.mk
 
