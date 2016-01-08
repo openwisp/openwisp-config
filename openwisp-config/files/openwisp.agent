@@ -1,13 +1,13 @@
 #!/bin/sh
 
+URL=$1
+KEY=$2
+INTERVAL=${3:-120}
+VERIFY_SSL=${4:-1}
 WORKING_DIR="/tmp/openwisp"
 CONFIGURATION_FILE="$WORKING_DIR/configuration.tar.gz"
 CONFIGURATION_CHECKSUM="$WORKING_DIR/configuration_checksum"
-INTERVAL=$(uci get openwisp.@controller_http[0].interval)
-BASE_URL=$(uci get openwisp.@controller_http[0].url)
-KEY=$(uci get openwisp.@controller_http[0].key)
-VERIFY_SSL=$(uci get openwisp.@controller_http[0].verify_ssl)
-CONFIGURATION_URL="$BASE_URL/get_config/$KEY"
+CONFIGURATION_URL="$URL/get_config/$KEY"
 CHECKSUM_URL="$CONFIGURATION_URL.md5"
 FETCH_COMMAND="curl -s"
 
@@ -15,7 +15,7 @@ if [ "$VERIFY_SSL" != "1" ]; then
     FETCH_COMMAND="$FETCH_COMMAND -k"
 fi
 
-if [ -z "$BASE_URL" ] || [ -z "$KEY" ]; then
+if [ -z "$URL" ] || [ -z "$KEY" ]; then
     logger -s "Required configuration keys are empty, check /etc/config/openwisp" \
            -t "openwisp" \
            -p 3
