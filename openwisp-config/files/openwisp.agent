@@ -12,76 +12,76 @@ CHECKSUM_URL="$CONFIGURATION_URL.md5"
 FETCH_COMMAND="curl -s"
 
 if [ "$VERIFY_SSL" != "1" ]; then
-    FETCH_COMMAND="$FETCH_COMMAND -k"
+	FETCH_COMMAND="$FETCH_COMMAND -k"
 fi
 
 if [ -z "$URL" ] || [ -z "$KEY" ]; then
-    logger -s "Required configuration keys are empty, check /etc/config/openwisp" \
-           -t "openwisp" \
-           -p 3
-    return 1
+	logger -s "Required configuration keys are empty, check /etc/config/openwisp" \
+	       -t "openwisp" \
+	       -p 3
+	return 1
 fi
 
 mkdir -p $WORKING_DIR
 
 configuration_changed() {
-    local LOCAL_CHECKSUM=$(cat $CONFIGURATION_CHECKSUM)
-    REMOTE_CHECKSUM=$($FETCH_COMMAND $CHECKSUM_URL)
+	local LOCAL_CHECKSUM=$(cat $CONFIGURATION_CHECKSUM)
+	REMOTE_CHECKSUM=$($FETCH_COMMAND $CHECKSUM_URL)
 
-    if [ -z "$REMOTE_CHECKSUM" ]; then
-        logger -s "Could not retrieve checksum from controller" \
-               -t "openwisp" \
-               -p 3
-        return 2
-    fi
+	if [ -z "$REMOTE_CHECKSUM" ]; then
+		logger -s "Could not retrieve checksum from controller" \
+		       -t "openwisp" \
+		       -p 3
+		return 2
+	fi
 
-    if [ "$LOCAL_CHECKSUM" != "$REMOTE_CHECKSUM" ]; then
-        # store checksum
-        printf $REMOTE_CHECKSUM > $CONFIGURATION_CHECKSUM
-        logger -s "Configuration in controller has changed" \
-               -t "openwisp" \
-               -p 6
-        return 1
-    fi
+	if [ "$LOCAL_CHECKSUM" != "$REMOTE_CHECKSUM" ]; then
+		# store checksum
+		printf $REMOTE_CHECKSUM > $CONFIGURATION_CHECKSUM
+		logger -s "Configuration in controller has changed" \
+		       -t "openwisp" \
+		       -p 6
+		return 1
+	fi
 
-    return 0
+	return 0
 }
 
 update_configuration() {
-    # download configuration
-    $($FETCH_COMMAND $CONFIGURATION_URL -o $CONFIGURATION_FILE)
+	# download configuration
+	$($FETCH_COMMAND $CONFIGURATION_URL -o $CONFIGURATION_FILE)
 
-    if [ "$?" != "0" ]; then
-        logger -s "Could not retrieve configuration from controller" \
-               -t "openwisp" \
-               -p 3
-        return 3
-    fi
+	if [ "$?" != "0" ]; then
+		logger -s "Could not retrieve configuration from controller" \
+		       -t "openwisp" \
+		       -p 3
+		return 3
+	fi
 
-    # restore configuration
-    sysupgrade -r $CONFIGURATION_FILE
+	# restore configuration
+	sysupgrade -r $CONFIGURATION_FILE
 
-    if [ "$?" != "0" ]; then
-        logger -s "Could not restore configuration successfully" \
-               -t "openwisp" \
-               -p 2
-        return 4
-    fi
+	if [ "$?" != "0" ]; then
+		logger -s "Could not restore configuration successfully" \
+		       -t "openwisp" \
+		       -p 2
+		return 4
+	fi
 
-    /sbin/apply_config
+	/sbin/apply_config
 
-    logger -s "Configuration restored and applied" \
-           -t "openwisp" \
-           -p 6
+	logger -s "Configuration restored and applied" \
+	       -t "openwisp" \
+	       -p 6
 }
 
 while true
 do
-    configuration_changed
+	configuration_changed
 
-    if [ "$?" == "1" ]; then
-        update_configuration
-    fi
+	if [ "$?" == "1" ]; then
+		update_configuration
+	fi
 
-    sleep $INTERVAL
+	sleep $INTERVAL
 done

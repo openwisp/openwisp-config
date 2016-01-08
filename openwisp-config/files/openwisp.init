@@ -6,39 +6,39 @@ USE_PROCD=1
 PROG="openwisp_config"
 PROG_NAME="OpenWISP config agent"
 
-EXTRA_HELP="        running Check if process is running"
+EXTRA_HELP="		running Check if process is running"
 
 process_running() {
-    running=$(ps w | grep -v "grep" | grep -v "init.d" | grep $PROG | wc -l)
+	running=$(ps w | grep -v "grep" | grep -v "init.d" | grep $PROG | wc -l)
 
-    if [ "$running" != "0" ]; then
-        return 0  # running
-    else
-        return 1  # not running
-    fi
+	if [ "$running" != "0" ]; then
+		return 0  # running
+	else
+		return 1  # not running
+	fi
 }
 
 start_service() {
-    config_load openwisp
-    url=$(config_get http url)
-    key=$(config_get http key)
-    interval=$(config_get http interval)
-    verify_ssl=$(config_get http verify_ssl)
-    procd_open_instance
-    procd_set_param command /usr/sbin/$PROG $url $key $interval $verify_ssl
-    procd_set_param respawn
-    procd_close_instance
-    logger -s "$PROG_NAME started" \
-           -t "openwisp" \
-           -p 6
+	config_load openwisp
+	url=$(config_get http url)
+	key=$(config_get http key)
+	interval=$(config_get http interval)
+	verify_ssl=$(config_get http verify_ssl)
+	procd_open_instance
+	procd_set_param command /usr/sbin/$PROG $url $key $interval $verify_ssl
+	procd_set_param respawn
+	procd_close_instance
+	logger -s "$PROG_NAME started" \
+	       -t "openwisp" \
+	       -p 6
 }
 
 service_triggers() {
-    procd_add_reload_trigger openwisp
+	procd_add_reload_trigger openwisp
 }
 
 stop_service() {
-    logger -s "$PROG_NAME stopping" \
-           -t "openwisp" \
-           -p 6
+	logger -s "$PROG_NAME stopping" \
+	       -t "openwisp" \
+	       -p 6
 }
