@@ -6,18 +6,6 @@ USE_PROCD=1
 PROG="openwisp_config"
 PROG_NAME="OpenWISP config agent"
 
-EXTRA_HELP="		running Check if process is running"
-
-process_running() {
-	running=$(ps w | grep -v "grep" | grep -v "init.d" | grep $PROG | wc -l)
-
-	if [ "$running" != "0" ]; then
-		return 0  # running
-	else
-		return 1  # not running
-	fi
-}
-
 start_service() {
 	config_load openwisp
 	url=$(config_get http url)
