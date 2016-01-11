@@ -43,7 +43,7 @@ define Package/openwisp-config/install
 		$(1)/usr/sbin/openwisp_config
 
 	$(INSTALL_BIN) \
-		files/openwisp.agent \
+		files/apply_config \
 		$(1)/usr/sbin/apply_config
 
 	$(INSTALL_BIN) \

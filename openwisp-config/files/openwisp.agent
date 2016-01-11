@@ -68,7 +68,7 @@ update_configuration() {
 		return 4
 	fi
 
-	/sbin/apply_config
+	/usr/sbin/apply_config
 
 	logger -s "Configuration restored and applied" \
 	       -t "openwisp" \
