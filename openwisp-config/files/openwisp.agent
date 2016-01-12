@@ -1,28 +1,85 @@
 #!/bin/sh
 
-URL=$1
-KEY=$2
-INTERVAL=${3:-120}
-VERIFY_SSL=${4:-1}
+# parse options
+while [ -n "$1" ]; do
+	case "$1" in
+		--url) export URL="$2"; shift;;
+		--interval) export INTERVAL=$2; shift;;
+		--verify-ssl) export VERIFY_SSL=$2; shift;;
+		--uuid) export UUID="$2"; shift;;
+		--key) export KEY="$2"; shift;;
+		--shared-secret) export SHARED_SECRET="$2"; shift;;
+		-*)
+			echo "Invalid option: $1"
+			exit 1
+		;;
+		*) break;;
+	esac
+	shift;
+done
+
+if [ -z "$URL" ]; then
+        logger -s "missing required --url option" \
+               -t "openwisp" \
+               -p 3
+        exit 1
+fi
+
+if ([ -z "$UUID" ] || [ -z "$KEY" ]) && [ -z "$SHARED_SECRET" ]; then
+        logger -s "you must either specify --uuid and --key, or --shared-secret" \
+               -t "openwisp" \
+               -p 3
+        exit 1
+fi
+
+INTERVAL=${INTERVAL:-120}
+VERIFY_SSL=${VERIFY_SSL:-1}
 WORKING_DIR="/tmp/openwisp"
-CONFIGURATION_FILE="$WORKING_DIR/configuration.tar.gz"
+mkdir -p $WORKING_DIR
+CONFIGURATION_ARCHIVE="$WORKING_DIR/configuration.tar.gz"
 CONFIGURATION_CHECKSUM="$WORKING_DIR/configuration_checksum"
-CONFIGURATION_URL="$URL/get_config/$KEY"
-CHECKSUM_URL="$CONFIGURATION_URL.md5"
+REGISTRATION_PARAMETERS="$WORKING_DIR/registration_parameters"
+CONFIGURATION_URL="$URL/controller/download-config/$UUID/?key=$KEY"
+CHECKSUM_URL="$URL/controller/checksum/$UUID/?key=$KEY"
+REGISTRATION_URL="$URL/controller/register/"
 FETCH_COMMAND="curl -s"
 
 if [ "$VERIFY_SSL" != "1" ]; then
 	FETCH_COMMAND="$FETCH_COMMAND -k"
 fi
 
-if [ -z "$URL" ] || [ -z "$KEY" ]; then
-	logger -s "Required configuration keys are empty, check /etc/config/openwisp" \
-	       -t "openwisp" \
-	       -p 3
-	return 1
-fi
-
-mkdir -p $WORKING_DIR
+register() {
+	logger -s "Registering new device" \
+		   -t "openwisp" \
+		   -p 6
+	# gets the mac address of the first interface that shows in ifconfig
+	local name=$(ifconfig | grep -v lo | grep HWaddr | awk '/HWaddr/ { print $5 }' | head -n 1)
+	local backend="netjsonconfig.OpenWrt"
+	local params="secret=$SHARED_SECRET&name=$name&backend=$backend"
+	$($FETCH_COMMAND --data $params $REGISTRATION_URL > $REGISTRATION_PARAMETERS)
+	# abort if anything goes wrong
+	local errors=$(grep -c "wrong" $REGISTRATION_PARAMETERS)
+	if [ $errors -gt 0 ]; then
+		local message=$(cat $REGISTRATION_PARAMETERS)
+		logger -s "Error during registration: $message" \
+			   -t "openwisp" \
+			   -p 3
+		/etc/init.d/openwisp_config stop
+	fi
+	# set configuration option and reload
+	UUID=$(sed "1q;d" $REGISTRATION_PARAMETERS)
+	KEY=$(sed "2q;d" $REGISTRATION_PARAMETERS)
+	uci set openwisp.http.uuid=$UUID
+	uci set openwisp.http.key=$KEY
+	uci set openwisp.http.shared_secret=""
+	uci commit
+	rm $REGISTRATION_PARAMETERS
+	logger -s "Device registered successfully as $name, id: $UUID" \
+		   -t "openwisp" \
+		   -p 6
+	sleep 1
+	/etc/init.d/openwisp_config reload
+}
 
 configuration_changed() {
 	local LOCAL_CHECKSUM=$(cat $CONFIGURATION_CHECKSUM)
@@ -49,7 +106,7 @@ configuration_changed() {
 
 update_configuration() {
 	# download configuration
-	$($FETCH_COMMAND $CONFIGURATION_URL -o $CONFIGURATION_FILE)
+	$($FETCH_COMMAND $CONFIGURATION_URL -o $CONFIGURATION_ARCHIVE)
 
 	if [ "$?" != "0" ]; then
 		logger -s "Could not retrieve configuration from controller" \
@@ -59,10 +116,10 @@ update_configuration() {
 	fi
 
 	# restore configuration
-	sysupgrade -r $CONFIGURATION_FILE
+	sysupgrade -r $CONFIGURATION_ARCHIVE
 
 	if [ "$?" != "0" ]; then
-		logger -s "Could not restore configuration successfully" \
+		logger -s "Could not restore configuration" \
 		       -t "openwisp" \
 		       -p 2
 		return 4
@@ -74,6 +131,12 @@ update_configuration() {
 	       -t "openwisp" \
 	       -p 6
 }
+
+# ensure both UUID and KEY are defined
+# otherwise perform registration
+if [ -z "$UUID" ] || [ -z "$KEY" ]; then
+	register
+fi
 
 while true
 do
