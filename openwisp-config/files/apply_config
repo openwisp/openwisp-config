@@ -12,12 +12,12 @@ MD5FILE=/var/run/config.md5
 	for c in `md5sum -c $MD5FILE 2>/dev/null| grep FAILED | cut -d: -f1`; do
 		local service="$(basename $c)"
 		local initd="/etc/init.d/$service"
-		local service_triggers=$(grep -s -q "service_triggers()" "$initd")
+		local service_triggers=$(grep -c "service_triggers()" "$initd")
 		# try reloading service via ubus
 		ubus call service event "{ \"type\": \"config.change\", \"data\": { \"package\": \"$service\" }}"
 		# if init.d file exists and service_triggers have not been defined
 		# do explicit reload
-		if [ -f $initd ] && [ "$service_triggers" != "0" ]; then
+		if [ -f $initd ] && [ $service_triggers -lt 1 ]; then
 			$($initd reload)
 		fi
 	done
