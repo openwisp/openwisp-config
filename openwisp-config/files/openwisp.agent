@@ -19,34 +19,43 @@ while [ -n "$1" ]; do
 done
 
 if [ -z "$URL" ]; then
-        logger -s "missing required --url option" \
-               -t "openwisp" \
-               -p 3
-        exit 1
+		logger -s "missing required --url option" \
+			   -t "openwisp" \
+			   -p 3
+		exit 1
 fi
 
 if ([ -z "$UUID" ] || [ -z "$KEY" ]) && [ -z "$SHARED_SECRET" ]; then
-        logger -s "you must either specify --uuid and --key, or --shared-secret" \
-               -t "openwisp" \
-               -p 3
-        exit 1
+		logger -s "you must either specify --uuid and --key, or --shared-secret" \
+			   -t "openwisp" \
+			   -p 3
+		exit 1
 fi
 
 INTERVAL=${INTERVAL:-120}
 VERIFY_SSL=${VERIFY_SSL:-1}
 WORKING_DIR="/tmp/openwisp"
-mkdir -p $WORKING_DIR
 CONFIGURATION_ARCHIVE="$WORKING_DIR/configuration.tar.gz"
+CHECKSUM_RESPONSE="$WORKING_DIR/checksum_response"
 CONFIGURATION_CHECKSUM="$WORKING_DIR/configuration_checksum"
 REGISTRATION_PARAMETERS="$WORKING_DIR/registration_parameters"
-CONFIGURATION_URL="$URL/controller/download-config/$UUID/?key=$KEY"
-CHECKSUM_URL="$URL/controller/checksum/$UUID/?key=$KEY"
 REGISTRATION_URL="$URL/controller/register/"
 FETCH_COMMAND="curl -s"
+mkdir -p $WORKING_DIR
 
 if [ "$VERIFY_SSL" != "1" ]; then
 	FETCH_COMMAND="$FETCH_COMMAND -k"
 fi
+
+check_header(){
+	local is_controller=$(grep -c "X-Openwisp-Controller: true" $1)
+	if [ $is_controller -lt 1 ]; then
+		logger -s "URL not recognized as valid: missing X-Openwisp-Controller header" \
+			   -t "openwisp" \
+			   -p 3
+		exit 1
+	fi
+}
 
 register() {
 	logger -s "Registering new device" \
@@ -56,19 +65,19 @@ register() {
 	local name=$(ifconfig | grep -v lo | grep HWaddr | awk '/HWaddr/ { print $5 }' | head -n 1)
 	local backend="netjsonconfig.OpenWrt"
 	local params="secret=$SHARED_SECRET&name=$name&backend=$backend"
-	$($FETCH_COMMAND --data $params $REGISTRATION_URL > $REGISTRATION_PARAMETERS)
+	$($FETCH_COMMAND -i --data $params $REGISTRATION_URL > $REGISTRATION_PARAMETERS)
 	# abort if anything goes wrong
-	local errors=$(grep -c "wrong" $REGISTRATION_PARAMETERS)
-	if [ $errors -gt 0 ]; then
-		local message=$(cat $REGISTRATION_PARAMETERS)
-		logger -s "Error during registration: $message" \
+	check_header $REGISTRATION_PARAMETERS
+	if [ $(grep -c "HTTP/1.0 201 Created" $REGISTRATION_PARAMETERS) -lt 1 ]; then
+		local message=$(cat $REGISTRATION_PARAMETERS | grep "error:")
+		logger -s "Registration failed! $message" \
 			   -t "openwisp" \
 			   -p 3
-		/etc/init.d/openwisp_config stop
+		exit 1
 	fi
 	# set configuration option and reload
-	UUID=$(sed "1q;d" $REGISTRATION_PARAMETERS)
-	KEY=$(sed "2q;d" $REGISTRATION_PARAMETERS)
+	UUID=$(cat $REGISTRATION_PARAMETERS | grep uuid | awk '/uuid: / { print $2 }')
+	KEY=$(cat $REGISTRATION_PARAMETERS | grep key | awk '/key: / { print $2 }')
 	uci set openwisp.http.uuid=$UUID
 	uci set openwisp.http.key=$KEY
 	uci set openwisp.http.shared_secret=""
@@ -77,20 +86,29 @@ register() {
 	logger -s "Device registered successfully as $name, id: $UUID" \
 		   -t "openwisp" \
 		   -p 6
-	sleep 1
-	/etc/init.d/openwisp_config reload
 }
 
 configuration_changed() {
-	local LOCAL_CHECKSUM=$(cat $CONFIGURATION_CHECKSUM)
-	REMOTE_CHECKSUM=$($FETCH_COMMAND $CHECKSUM_URL)
+	$($FETCH_COMMAND -i $CHECKSUM_URL > $CHECKSUM_RESPONSE)
 
-	if [ -z "$REMOTE_CHECKSUM" ]; then
+	if [ "$?" != "0" ]; then
 		logger -s "Could not retrieve checksum from controller" \
 		       -t "openwisp" \
 		       -p 3
 		return 2
 	fi
+
+	if [ $(grep -c "HTTP/1.0 200 OK" $CHECKSUM_RESPONSE) -lt 1 ]; then
+		local status=$(head -n 1 $CHECKSUM_RESPONSE)
+		logger -s "Failed to retrieve checksum, got: $status" \
+			   -t "openwisp" \
+			   -p 3
+		exit 1
+	fi
+	check_header $CHECKSUM_RESPONSE
+
+	local REMOTE_CHECKSUM=$(tail -n 1 $CHECKSUM_RESPONSE)
+	local LOCAL_CHECKSUM=$(cat $CONFIGURATION_CHECKSUM)
 
 	if [ "$LOCAL_CHECKSUM" != "$REMOTE_CHECKSUM" ]; then
 		# store checksum
@@ -137,6 +155,10 @@ update_configuration() {
 if [ -z "$UUID" ] || [ -z "$KEY" ]; then
 	register
 fi
+
+# these variables are evaluated here because "register()" might set UUID and KEY
+CONFIGURATION_URL="$URL/controller/download-config/$UUID/?key=$KEY"
+CHECKSUM_URL="$URL/controller/checksum/$UUID/?key=$KEY"
 
 while true
 do
