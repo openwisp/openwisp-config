@@ -26,7 +26,7 @@ define Package/openwisp-config/description
 endef
 
 define Package/openwisp-config/config
-  source "$(SOURCE)/Config.in"
+	source "$(SOURCE)/Config.in"
 endef
 
 define Build/Compile
