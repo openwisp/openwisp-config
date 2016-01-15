@@ -2,7 +2,8 @@
 openwisp-config
 ===============
 
-Configuration agent for the new OpenWISP Controller (currently under development).
+Configuration agent for the new OpenWISP Controller (currently under development, will
+be based on `django-netjsonconfig <https://github.com/openwisp/django-netjsonconfig>`_).
 
 Configuration options
 ---------------------
