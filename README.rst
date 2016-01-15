@@ -11,8 +11,7 @@ Configuration options
 UCI configuration options must go in ``/etc/config/openwisp``.
 
 - ``url``: url of controller, eg: ``https://controller.openwisp.org``
-- ``interval``: time in seconds between checks for changes to the configuration,
-   defaults to ``120``
+- ``interval``: time in seconds between checks for changes to the configuration, defaults to ``120``
 - ``verify_ssl``: whether SSL verification must be performed or not, defaults to ``1``
 - ``uuid``: unique identifier of the router configuration in the controller application
 - ``key``: key required to download the configuration
