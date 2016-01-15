@@ -50,7 +50,7 @@ fi
 check_header(){
 	local is_controller=$(grep -c "X-Openwisp-Controller: true" $1)
 	if [ $is_controller -lt 1 ]; then
-		logger -s "URL not recognized as valid: missing X-Openwisp-Controller header" \
+		logger -s "Invalid url: missing X-Openwisp-Controller header" \
 			   -t "openwisp" \
 			   -p 3
 		exit 1
