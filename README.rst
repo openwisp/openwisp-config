@@ -56,5 +56,7 @@ Follow this procedure to compile *openwisp-config* and its dependencies.
     make package/polarssl/install
     make package/curl/compile
     make package/curl/install
+    make package/ca-certificates/compile
+    make package/ca-certificates/install
     make package/openwisp-config/compile
     make package/openwisp-config/install
