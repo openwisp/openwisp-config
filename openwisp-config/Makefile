@@ -6,7 +6,7 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=openwisp
-PKG_VERSION:=$(shell cat VERSION)
+PKG_VERSION:=$(shell cat ../VERSION)
 PKG_RELEASE:=1
 PKG_LICENSE:=GPL-3.0
 
