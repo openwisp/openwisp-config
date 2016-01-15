@@ -2,12 +2,22 @@
 openwisp-config
 ===============
 
-.. image:: http://img.shields.io/github/release/openwisp/openwisp-config.svg
-
 .. image:: https://ci.publicwifi.it/buildStatus/icon?job=openwisp-config
+
+.. image:: http://img.shields.io/github/release/openwisp/openwisp-config.svg
 
 OpenWRT configuration agent for the new OpenWISP Controller (currently under development, will
 be based on `django-netjsonconfig <https://github.com/openwisp/django-netjsonconfig>`_).
+
+Install latest release
+----------------------
+
+.. code-block:: shell
+
+    cd /tmp
+    wget http://downloads.openwisp.org/openwisp-config/0.1/ar71xx/openwisp-config_0.1-1_ar71xx.ipk
+    opkg update
+    opkg install ./openwisp-config_0.1-1_ar71xx.ipk
 
 Configuration options
 ---------------------
@@ -19,9 +29,9 @@ UCI configuration options must go in ``/etc/config/openwisp``.
 - ``verify_ssl``: whether SSL verification must be performed or not, defaults to ``1``
 - ``uuid``: unique identifier of the router configuration in the controller application
 - ``key``: key required to download the configuration
-- ``shared_secret``: shared secret, needed for `Automatic Registration`_
+- ``shared_secret``: shared secret, needed for `Automatic registration`_
 
-Automatic Registration
+Automatic registration
 ----------------------
 
 When the agent starts, if both ``uuid`` and ``key`` are not defined, it will consider
