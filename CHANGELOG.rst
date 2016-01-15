@@ -2,6 +2,7 @@ Change log
 ^^^^^^^^^^
 
 0.1 [unreleased]
+0.1 [2016-01-15]
 ================
 
 - configuration daemon

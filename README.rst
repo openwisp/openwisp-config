@@ -2,7 +2,11 @@
 openwisp-config
 ===============
 
-Configuration agent for the new OpenWISP Controller (currently under development, will
+.. image:: http://img.shields.io/github/release/openwisp/openwisp-config.svg
+
+.. image:: https://ci.publicwifi.it/buildStatus/icon?job=openwisp-config
+
+OpenWRT configuration agent for the new OpenWISP Controller (currently under development, will
 be based on `django-netjsonconfig <https://github.com/openwisp/django-netjsonconfig>`_).
 
 Configuration options
