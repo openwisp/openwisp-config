@@ -36,8 +36,7 @@ INTERVAL=${INTERVAL:-120}
 VERIFY_SSL=${VERIFY_SSL:-1}
 WORKING_DIR="/tmp/openwisp"
 CONFIGURATION_ARCHIVE="$WORKING_DIR/configuration.tar.gz"
-CHECKSUM_RESPONSE="$WORKING_DIR/checksum_response"
-CONFIGURATION_CHECKSUM="$WORKING_DIR/configuration_checksum"
+CONFIGURATION_CHECKSUM="$WORKING_DIR/checksum"
 REGISTRATION_PARAMETERS="$WORKING_DIR/registration_parameters"
 REGISTRATION_URL="$URL/controller/register/"
 FETCH_COMMAND="curl -s"
@@ -89,7 +88,8 @@ register() {
 }
 
 configuration_changed() {
-	$($FETCH_COMMAND -i $CHECKSUM_URL > $CHECKSUM_RESPONSE)
+	local CURRENT_CHECKSUM=$(tail -n 1 $CONFIGURATION_CHECKSUM)
+	$($FETCH_COMMAND -i $CHECKSUM_URL > $CONFIGURATION_CHECKSUM)
 
 	if [ "$?" != "0" ]; then
 		logger -s "Could not retrieve checksum from controller" \
@@ -98,21 +98,18 @@ configuration_changed() {
 		return 2
 	fi
 
-	if [ $(grep -c "HTTP/1.0 200 OK" $CHECKSUM_RESPONSE) -lt 1 ]; then
-		local status=$(head -n 1 $CHECKSUM_RESPONSE)
+	if [ $(grep -c "HTTP/1.0 200 OK" $CONFIGURATION_CHECKSUM) -lt 1 ]; then
+		local status=$(head -n 1 $CONFIGURATION_CHECKSUM)
 		logger -s "Failed to retrieve checksum, got: $status" \
 			   -t "openwisp" \
 			   -p 3
 		exit 1
 	fi
-	check_header $CHECKSUM_RESPONSE
+	check_header $CONFIGURATION_CHECKSUM
 
-	local REMOTE_CHECKSUM=$(tail -n 1 $CHECKSUM_RESPONSE)
-	local LOCAL_CHECKSUM=$(cat $CONFIGURATION_CHECKSUM)
+	local REMOTE_CHECKSUM=$(tail -n 1 $CONFIGURATION_CHECKSUM)
 
-	if [ "$LOCAL_CHECKSUM" != "$REMOTE_CHECKSUM" ]; then
-		# store checksum
-		printf $REMOTE_CHECKSUM > $CONFIGURATION_CHECKSUM
+	if [ "$CURRENT_CHECKSUM" != "$REMOTE_CHECKSUM" ]; then
 		logger -s "Configuration in controller has changed" \
 		       -t "openwisp" \
 		       -p 6
