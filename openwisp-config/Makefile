@@ -32,6 +32,10 @@ endef
 define Build/Compile
 endef
 
+define Package/openwisp-config/conffiles
+/etc/config/openwisp
+endef
+
 define Package/openwisp-config/install
 	$(INSTALL_DIR) \
 		$(1)/usr/sbin \
