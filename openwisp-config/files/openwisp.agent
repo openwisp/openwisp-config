@@ -9,6 +9,8 @@ while [ -n "$1" ]; do
 		--uuid) export UUID="$2"; shift;;
 		--key) export KEY="$2"; shift;;
 		--shared-secret) export SHARED_SECRET="$2"; shift;;
+		--test-config) export TEST_CONFIG="$2"; shift;;
+		--test-script) export TEST_SCRIPT="$2"; shift;;
 		-*)
 			echo "Invalid option: $1"
 			exit 1
@@ -34,9 +36,12 @@ fi
 
 INTERVAL=${INTERVAL:-120}
 VERIFY_SSL=${VERIFY_SSL:-1}
+TEST_CONFIG=${TEST_CONFIG:-1}
 WORKING_DIR="/tmp/openwisp"
 CONFIGURATION_ARCHIVE="$WORKING_DIR/configuration.tar.gz"
 CONFIGURATION_CHECKSUM="$WORKING_DIR/checksum"
+CONFIGURATION_BACKUP="$WORKING_DIR/backup.tar.gz"
+TEST_CHECKSUM="$WORKING_DIR/test_checksum"
 REGISTRATION_PARAMETERS="$WORKING_DIR/registration_parameters"
 REGISTRATION_URL="$URL/controller/register/"
 FETCH_COMMAND="curl -s"
@@ -87,26 +92,35 @@ register() {
 		   -p 6
 }
 
-configuration_changed() {
-	local CURRENT_CHECKSUM=$(tail -n 1 $CONFIGURATION_CHECKSUM)
-	$($FETCH_COMMAND -i $CHECKSUM_URL > $CONFIGURATION_CHECKSUM)
+get_checksum() {
+	$($FETCH_COMMAND -i $CHECKSUM_URL > $1)
 	local exit_code=$?
 
 	if [ "$exit_code" != "0" ]; then
 		logger -s "Failed to connect to controller (checksum): curl exit code $exit_code" \
 		       -t "openwisp" \
 		       -p 3
-		return 3
+		return 2
 	fi
 
-	if [ $(grep -c "HTTP/1.0 200 OK" $CONFIGURATION_CHECKSUM) -lt 1 ]; then
-		local status=$(head -n 1 $CONFIGURATION_CHECKSUM)
+	if [ $(grep -c "HTTP/1.0 200 OK" $1) -lt 1 ]; then
+		local status=$(head -n 1 $1)
 		logger -s "Failed to retrieve checksum: $status" \
 			   -t "openwisp" \
 			   -p 3
-		return 2
+		return 3
 	fi
-	check_header $CONFIGURATION_CHECKSUM
+	check_header $1
+}
+
+configuration_changed() {
+	local CURRENT_CHECKSUM=$(tail -n 1 $CONFIGURATION_CHECKSUM)
+	get_checksum $CONFIGURATION_CHECKSUM
+	local exit_code=$?
+
+	if [ "$exit_code" != "0" ]; then
+		return $exit_code
+	fi
 
 	local REMOTE_CHECKSUM=$(tail -n 1 $CONFIGURATION_CHECKSUM)
 
@@ -118,6 +132,49 @@ configuration_changed() {
 	fi
 
 	return 0
+}
+
+apply_configuration() {
+	# restore configuration
+	sysupgrade -r $1
+	local exit_code=$?
+
+	if [ "$exit_code" != "0" ]; then
+		logger -s "Could not restore configuration: sysupgrade exit code $exit_code" \
+		       -t "openwisp" \
+		       -p 2
+		return 1
+	fi
+
+	/usr/sbin/apply_config
+	sleep 2
+}
+
+test_configuration() {
+	local ret=0
+	sysupgrade -b $CONFIGURATION_BACKUP
+
+	apply_configuration $1
+
+	if [ -z "$TEST_SCRIPT" ]; then
+		get_checksum $TEST_CHECKSUM
+		local test_ret=$?
+		rm $TEST_CHECKSUM
+	else
+		$TEST_SCRIPT
+		local test_ret=$?
+	fi
+
+	if [ $test_ret -gt 0 ]; then
+		logger -s "Configuration test failed! Restoring previous backup" \
+		       -t "openwisp" \
+		       -p 3
+		apply_configuration $CONFIGURATION_BACKUP
+		local ret=1
+	fi
+
+	rm $CONFIGURATION_BACKUP
+	return $ret
 }
 
 update_configuration() {
@@ -132,22 +189,17 @@ update_configuration() {
 		return 3
 	fi
 
-	# restore configuration
-	sysupgrade -r $CONFIGURATION_ARCHIVE
-	local exit_code=$?
-
-	if [ "$exit_code" != "0" ]; then
-		logger -s "Could not restore configuration: sysupgrade exit code $exit_code" \
-		       -t "openwisp" \
-		       -p 2
-		return 4
+	if [ "$TEST_CONFIG" == "1" ]; then
+		test_configuration $CONFIGURATION_ARCHIVE
+	else
+		apply_configuration $CONFIGURATION_ARCHIVE
 	fi
 
-	/usr/sbin/apply_config
-
-	logger -s "Configuration applied" \
-	       -t "openwisp" \
-	       -p 6
+	if [ "$?" == "0" ]; then
+		logger -s "Configuration applied" \
+		       -t "openwisp" \
+		       -p 6
+	fi
 }
 
 # ensure both UUID and KEY are defined

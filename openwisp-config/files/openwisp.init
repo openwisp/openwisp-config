@@ -14,12 +14,16 @@ start_service() {
 	uuid=$(config_get http uuid)
 	key=$(config_get http key)
 	shared_secret=$(config_get http shared_secret)
+	test_config=$(config_get http test_config)
+	test_script=$(config_get http test_script)
 	if [ $url ]; then url="--url $url"; fi
 	if [ $interval ]; then interval="--interval $interval"; fi
 	if [ $verify_ssl ]; then verify_ssl="--verify-ssl $verify_ssl"; fi
 	if [ $uuid ]; then uuid="--uuid $uuid"; fi
 	if [ $key ]; then key="--key $key"; fi
 	if [ $shared_secret ]; then shared_secret="--shared-secret $shared_secret"; fi
+	if [ $test_config ]; then test_config="--test-config $test_config"; fi
+	if [ $test_script ]; then test_script="--test-script $test_script"; fi
 
 	if [ -z "$url" ]; then
 		logger -s "url is not set, please add it in /etc/config/openwisp" \
@@ -36,7 +40,7 @@ start_service() {
 	fi
 
 	procd_open_instance
-	procd_set_param command $PROG $url $interval $verify_ssl $uuid $key $shared_secret
+	procd_set_param command $PROG $url $interval $verify_ssl $uuid $key $shared_secret $test_config $test_script
 	procd_set_param respawn
 	procd_close_instance
 	logger -s "$PROG_NAME started" \

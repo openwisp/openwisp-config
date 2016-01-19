@@ -30,6 +30,8 @@ UCI configuration options must go in ``/etc/config/openwisp``.
 - ``uuid``: unique identifier of the router configuration in the controller application
 - ``key``: key required to download the configuration
 - ``shared_secret``: shared secret, needed for `Automatic registration`_
+- ``test_config``: whether a new configuration must be tested before being considered applied, defaults to ``1``
+- ``test_script``: custom test script, read more about this feature in `Configuration test`_
 
 Automatic registration
 ----------------------
@@ -43,6 +45,30 @@ When the registration is completed, the agent will automatically set ``uuid`` an
 in ``/etc/config/openwisp``.
 
 In the controller you will find a new (empty) configuration named as the mac address of the router.
+
+Configuration test
+------------------
+
+When a new configuration is downloaded, the agent will first backup the current running
+configuration, then it will try to apply the new one and perform a basic test, which consists
+in trying to contact the controller again;
+
+If the test succeeds, the configuration is considered applied and the backup is deleted.
+
+If the test fails, the backup is restored and the agent will log the failure via syslog.
+
+Disable testing
+^^^^^^^^^^^^^^^
+
+To disable this feature, set the ``test_config`` option to ``0``, then reload/restart *openwisp_config*.
+
+Define custom tests
+^^^^^^^^^^^^^^^^^^^
+
+If the default test does not satisfy your needs, you can define your own tests in an
+**executable** script and indicate the path to this script in the ``test_script`` config option.
+
+If the exit code of the executable script is higher than ``0`` the test will be considered failed.
 
 How to compile
 --------------
