@@ -22,14 +22,14 @@ if [ -z "$URL" ]; then
 		logger -s "missing required --url option" \
 			   -t "openwisp" \
 			   -p 3
-		exit 1
+		exit 2
 fi
 
 if ([ -z "$UUID" ] || [ -z "$KEY" ]) && [ -z "$SHARED_SECRET" ]; then
 		logger -s "you must either specify --uuid and --key, or --shared-secret" \
 			   -t "openwisp" \
 			   -p 3
-		exit 1
+		exit 3
 fi
 
 INTERVAL=${INTERVAL:-120}
@@ -52,7 +52,7 @@ check_header(){
 		logger -s "Invalid url: missing X-Openwisp-Controller header" \
 			   -t "openwisp" \
 			   -p 3
-		exit 1
+		exit 4
 	fi
 }
 
@@ -72,7 +72,7 @@ register() {
 		logger -s "Registration failed! $message" \
 			   -t "openwisp" \
 			   -p 3
-		exit 1
+		exit 5
 	fi
 	# set configuration option and reload
 	UUID=$(cat $REGISTRATION_PARAMETERS | grep uuid | awk '/uuid: / { print $2 }')
@@ -90,20 +90,21 @@ register() {
 configuration_changed() {
 	local CURRENT_CHECKSUM=$(tail -n 1 $CONFIGURATION_CHECKSUM)
 	$($FETCH_COMMAND -i $CHECKSUM_URL > $CONFIGURATION_CHECKSUM)
+	local exit_code=$?
 
-	if [ "$?" != "0" ]; then
-		logger -s "Could not retrieve checksum from controller" \
+	if [ "$exit_code" != "0" ]; then
+		logger -s "Failed to connect to controller (checksum): curl exit code $exit_code" \
 		       -t "openwisp" \
 		       -p 3
-		return 2
+		return 3
 	fi
 
 	if [ $(grep -c "HTTP/1.0 200 OK" $CONFIGURATION_CHECKSUM) -lt 1 ]; then
 		local status=$(head -n 1 $CONFIGURATION_CHECKSUM)
-		logger -s "Failed to retrieve checksum, got: $status" \
+		logger -s "Failed to retrieve checksum: $status" \
 			   -t "openwisp" \
 			   -p 3
-		exit 1
+		return 2
 	fi
 	check_header $CONFIGURATION_CHECKSUM
 
@@ -122,9 +123,10 @@ configuration_changed() {
 update_configuration() {
 	# download configuration
 	$($FETCH_COMMAND $CONFIGURATION_URL -o $CONFIGURATION_ARCHIVE)
+	local exit_code=$?
 
-	if [ "$?" != "0" ]; then
-		logger -s "Could not retrieve configuration from controller" \
+	if [ "$exit_code" != "0" ]; then
+		logger -s "Failed to connect to controller (download configuration): curl exit code $exit_code" \
 		       -t "openwisp" \
 		       -p 3
 		return 3
@@ -132,9 +134,10 @@ update_configuration() {
 
 	# restore configuration
 	sysupgrade -r $CONFIGURATION_ARCHIVE
+	local exit_code=$?
 
-	if [ "$?" != "0" ]; then
-		logger -s "Could not restore configuration" \
+	if [ "$exit_code" != "0" ]; then
+		logger -s "Could not restore configuration: sysupgrade exit code $exit_code" \
 		       -t "openwisp" \
 		       -p 2
 		return 4
@@ -142,7 +145,7 @@ update_configuration() {
 
 	/usr/sbin/apply_config
 
-	logger -s "Configuration restored and applied" \
+	logger -s "Configuration applied" \
 	       -t "openwisp" \
 	       -p 6
 }
