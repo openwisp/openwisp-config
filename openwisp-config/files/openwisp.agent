@@ -38,11 +38,13 @@ INTERVAL=${INTERVAL:-120}
 VERIFY_SSL=${VERIFY_SSL:-1}
 TEST_CONFIG=${TEST_CONFIG:-1}
 WORKING_DIR="/tmp/openwisp"
+BASEURL="$URL/controller"
 CONFIGURATION_ARCHIVE="$WORKING_DIR/configuration.tar.gz"
 CONFIGURATION_CHECKSUM="$WORKING_DIR/checksum"
 CONFIGURATION_BACKUP="$WORKING_DIR/backup.tar.gz"
-TEST_CHECKSUM="$WORKING_DIR/test_checksum"
 REGISTRATION_PARAMETERS="$WORKING_DIR/registration_parameters"
+TEST_CHECKSUM="$WORKING_DIR/test_checksum"
+STATUS_REPORT="$WORKING_DIR/status_report"
 REGISTRATION_URL="$URL/controller/register/"
 FETCH_COMMAND="curl -s"
 mkdir -p $WORKING_DIR
@@ -82,8 +84,8 @@ register() {
 		exit 5
 	fi
 	# set configuration options and reload
-	UUID=$(cat $REGISTRATION_PARAMETERS | grep uuid | awk '/uuid: / { print $2 }')
-	KEY=$(cat $REGISTRATION_PARAMETERS | grep key | awk '/key: / { print $2 }')
+	export UUID=$(cat $REGISTRATION_PARAMETERS | grep uuid | awk '/uuid: / { print $2 }')
+	export KEY=$(cat $REGISTRATION_PARAMETERS | grep key | awk '/key: / { print $2 }')
 	uci set openwisp.http.uuid=$UUID
 	uci set openwisp.http.key=$KEY
 	# remove shared secret to avoid accidental re-registration
@@ -156,9 +158,31 @@ apply_configuration() {
 	sleep 2
 }
 
-# performs configuration test
+# report configuration status: "running" or "error"
+report_status() {
+	$($FETCH_COMMAND -i --data "key=$KEY&status=$1" $REPORT_URL > $STATUS_REPORT)
+	local exit_code=$?
+
+	if [ "$exit_code" != "0" ]; then
+		logger -s "Failed to connect to controller (report-status): curl exit code $exit_code" \
+		       -t "openwisp" \
+		       -p 3
+		return 2
+	fi
+
+	if [ $(grep -c "HTTP/1.0 200 OK" $1) -lt 1 ]; then
+		local status=$(head -n 1 $1)
+		logger -s "Failed to report status: $status" \
+			   -t "openwisp" \
+			   -p 3
+		return 3
+	fi
+	check_header $STATUS_REPORT
+	rm $STATUS_REPORT
+}
+
+# performs configuration test and reports result
 test_configuration() {
-	local ret=0
 	sysupgrade -b $CONFIGURATION_BACKUP
 
 	apply_configuration $1
@@ -177,7 +201,11 @@ test_configuration() {
 		       -t "openwisp" \
 		       -p 3
 		apply_configuration $CONFIGURATION_BACKUP
+		report_status "error"
 		local ret=1
+	else
+		report_status "running"
+		local ret=0
 	fi
 
 	rm $CONFIGURATION_BACKUP
@@ -219,8 +247,9 @@ if [ -z "$UUID" ] || [ -z "$KEY" ]; then
 fi
 
 # these variables are evaluated here because "register()" might set UUID and KEY
-CONFIGURATION_URL="$URL/controller/download-config/$UUID/?key=$KEY"
-CHECKSUM_URL="$URL/controller/checksum/$UUID/?key=$KEY"
+CONFIGURATION_URL="$BASEURL/download-config/$UUID/?key=$KEY"
+CHECKSUM_URL="$BASEURL/checksum/$UUID/?key=$KEY"
+REPORT_URL="$BASEURL/report-status/$UUID/"
 
 while true
 do
