@@ -51,6 +51,7 @@ if [ "$VERIFY_SSL" != "1" ]; then
 	FETCH_COMMAND="$FETCH_COMMAND -k"
 fi
 
+# ensures we are dealing with the right web server
 check_header(){
 	local is_controller=$(grep -c "X-Openwisp-Controller: true" $1)
 	if [ $is_controller -lt 1 ]; then
@@ -61,6 +62,7 @@ check_header(){
 	fi
 }
 
+# performs automatic registration
 register() {
 	logger -s "Registering new device" \
 		   -t "openwisp" \
@@ -79,11 +81,12 @@ register() {
 			   -p 3
 		exit 5
 	fi
-	# set configuration option and reload
+	# set configuration options and reload
 	UUID=$(cat $REGISTRATION_PARAMETERS | grep uuid | awk '/uuid: / { print $2 }')
 	KEY=$(cat $REGISTRATION_PARAMETERS | grep key | awk '/key: / { print $2 }')
 	uci set openwisp.http.uuid=$UUID
 	uci set openwisp.http.key=$KEY
+	# remove shared secret to avoid accidental re-registration
 	uci set openwisp.http.shared_secret=""
 	uci commit
 	rm $REGISTRATION_PARAMETERS
@@ -92,6 +95,7 @@ register() {
 		   -p 6
 }
 
+# gets checksum from controller
 get_checksum() {
 	$($FETCH_COMMAND -i $CHECKSUM_URL > $1)
 	local exit_code=$?
@@ -113,6 +117,7 @@ get_checksum() {
 	check_header $1
 }
 
+# returns 1 if configuration in controller has changed
 configuration_changed() {
 	local CURRENT_CHECKSUM=$(tail -n 1 $CONFIGURATION_CHECKSUM)
 	get_checksum $CONFIGURATION_CHECKSUM
@@ -134,8 +139,9 @@ configuration_changed() {
 	return 0
 }
 
+# applies a specified configuration archive
 apply_configuration() {
-	# restore configuration
+	# -r restores a configuration archive
 	sysupgrade -r $1
 	local exit_code=$?
 
@@ -145,11 +151,12 @@ apply_configuration() {
 		       -p 2
 		return 1
 	fi
-
+	# apply changes and wait 2 seconds
 	/usr/sbin/apply_config
 	sleep 2
 }
 
+# performs configuration test
 test_configuration() {
 	local ret=0
 	sysupgrade -b $CONFIGURATION_BACKUP
@@ -177,6 +184,9 @@ test_configuration() {
 	return $ret
 }
 
+# downloads configuration from controller
+# performs test (if testing enabled)
+# and applies it
 update_configuration() {
 	# download configuration
 	$($FETCH_COMMAND $CONFIGURATION_URL -o $CONFIGURATION_ARCHIVE)
