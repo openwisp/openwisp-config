@@ -76,7 +76,7 @@ register() {
 	$($FETCH_COMMAND -i --data $params $REGISTRATION_URL > $REGISTRATION_PARAMETERS)
 	# abort if anything goes wrong
 	check_header $REGISTRATION_PARAMETERS
-	if [ $(grep -c "HTTP/1.0 201 Created" $REGISTRATION_PARAMETERS) -lt 1 ]; then
+	if [ $(head -n 1 $REGISTRATION_PARAMETERS | grep -c "201 Created") -lt 1 ]; then
 		local message=$(cat $REGISTRATION_PARAMETERS | grep "error:")
 		logger -s "Registration failed! $message" \
 			   -t "openwisp" \
@@ -109,7 +109,7 @@ get_checksum() {
 		return 2
 	fi
 
-	if [ $(grep -c "HTTP/1.0 200 OK" $1) -lt 1 ]; then
+	if [ $(head -n 1 $1 | grep -c "200 OK") -lt 1 ]; then
 		local status=$(head -n 1 $1)
 		logger -s "Failed to retrieve checksum: $status" \
 			   -t "openwisp" \
@@ -170,7 +170,7 @@ report_status() {
 		return 2
 	fi
 
-	if [ $(grep -c "HTTP/1.0 200 OK" $1) -lt 1 ]; then
+	if [ $(head -n 1 $1 | grep -c "200 OK") -lt 1 ]; then
 		local status=$(head -n 1 $1)
 		logger -s "Failed to report status: $status" \
 			   -t "openwisp" \
