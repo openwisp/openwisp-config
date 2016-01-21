@@ -170,13 +170,13 @@ report_status() {
 		return 2
 	fi
 
-	if [ $(head -n 1 $1 | grep -c "200 OK") -lt 1 ]; then
-		local status=$(head -n 1 $1)
-		logger -s "Failed to report status: $status" \
-			   -t "openwisp" \
-			   -p 3
-		return 3
-	fi
+        if [ $(head -n 1 $STATUS_REPORT | grep -c "200 OK") -lt 1 ]; then
+                local status=$(head -n 1 $STATUS_REPORT)
+                logger -s "Failed to report status: $status" \
+                           -t "openwisp" \
+                           -p 3
+                return 3
+        fi
 	check_header $STATUS_REPORT
 	rm $STATUS_REPORT
 }
