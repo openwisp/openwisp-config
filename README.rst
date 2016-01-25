@@ -111,3 +111,13 @@ The following procedure illustrates how to compile *openwisp-config* and its dep
     make package/ca-certificates/install
     make package/openwisp-config/compile
     make package/openwisp-config/install
+
+Changelog
+---------
+
+See `CHANGELOG <https://github.com/openwisp/openwisp-config/blob/master/CHANGELOG.rst>`_.
+
+License
+-------
+
+See `LICENSE <https://github.com/openwisp/openwisp-config/blob/master/LICENSE>`_.
