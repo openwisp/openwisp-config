@@ -1,7 +1,7 @@
 Change log
 ^^^^^^^^^^
 
-0.2 [unreleased]
+0.2 [2016-01-25]
 ================
 
 - `#9 <https://github.com/openwisp/openwisp-config/issues/9>`_:
