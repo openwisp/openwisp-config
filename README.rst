@@ -22,7 +22,7 @@ For `rampis <https://wiki.openwrt.org/doc/hardware/soc/soc.mediatek>`_:
 
 .. code-block:: shell
 
-    opkg install http://downloads.openwisp.org/openwisp-config/0.2/ramips/openwisp-config_0.2-1_ramips.ipk
+    opkg install http://downloads.openwisp.org/openwisp-config/latest/ramips/openwisp-config_0.2-1_ramips_24kec.ipk
 
 For a list of the latest builds, take a look at `downloads.openwisp.org
 <http://downloads.openwisp.org/openwisp-config/>`_.
