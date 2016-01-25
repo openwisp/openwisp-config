@@ -28,7 +28,7 @@ For a list of the latest builds, take a look at `downloads.openwisp.org
 <http://downloads.openwisp.org/openwisp-config/>`_.
 
 If you need a package for other SoCs you will need to compile the package, see
-`How to compile`_.
+`Compiling openwisp-config`_.
 
 Configuration options
 ---------------------
@@ -81,10 +81,10 @@ If the default test does not satisfy your needs, you can define your own tests i
 
 If the exit code of the executable script is higher than ``0`` the test will be considered failed.
 
-How to compile
---------------
+Compiling openwisp-config
+-------------------------
 
-Follow this procedure to compile *openwisp-config* and its dependencies.
+The following procedure illustrates how to compile *openwisp-config* and its dependencies:
 
 .. code-block:: shell
 
