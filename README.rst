@@ -12,12 +12,23 @@ be based on `django-netjsonconfig <https://github.com/openwisp/django-netjsoncon
 Install latest release
 ----------------------
 
+For `ar71xx <https://wiki.openwrt.org/doc/hardware/soc/soc.qualcomm.ar71xx>`_:
+
 .. code-block:: shell
 
-    cd /tmp
-    wget http://downloads.openwisp.org/openwisp-config/0.1/ar71xx/openwisp-config_0.1-1_ar71xx.ipk
-    opkg update
-    opkg install ./openwisp-config_0.1-1_ar71xx.ipk
+    opkg install http://downloads.openwisp.org/openwisp-config/0.2/ar71xx/openwisp-config_0.2-1_ar71xx.ipk
+
+For `rampis <https://wiki.openwrt.org/doc/hardware/soc/soc.mediatek>`_:
+
+.. code-block:: shell
+
+    opkg install http://downloads.openwisp.org/openwisp-config/0.2/ramips/openwisp-config_0.2-1_ramips.ipk
+
+For a list of the latest builds, take a look at `downloads.openwisp.org
+<http://downloads.openwisp.org/openwisp-config/>`_.
+
+If you need a package for other SoCs you will need to compile the package, see
+`How to compile`_.
 
 Configuration options
 ---------------------
