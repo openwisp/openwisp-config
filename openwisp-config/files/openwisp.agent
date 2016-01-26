@@ -3,7 +3,7 @@
 # parse options
 while [ -n "$1" ]; do
 	case "$1" in
-		--url) export URL="$2"; shift;;
+		--url) export URL=${2%/}; shift;;  # strip trailing slash
 		--interval) export INTERVAL=$2; shift;;
 		--verify-ssl) export VERIFY_SSL=$2; shift;;
 		--uuid) export UUID="$2"; shift;;
