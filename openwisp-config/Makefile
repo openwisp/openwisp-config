@@ -58,4 +58,22 @@ define Package/openwisp-config/install
 		$(1)/etc/config/openwisp
 endef
 
+define Package/openwisp-config/postinst
+#!/bin/sh
+DEFAULTS="/etc/openwisp-config-defaults/"
+SYSUPGRADE_CONF="/etc/sysupgrade.conf"
+if [ $(grep -c "^$DEFAULTS" "$SYSUPGRADE_CONF") -lt 1 ]; then
+	echo $DEFAULTS >> $SYSUPGRADE_CONF
+fi
+endef
+
+define Package/openwisp-config/postrm
+#!/bin/sh
+DEFAULTS="/etc/openwisp-config-defaults/"
+SYSUPGRADE_CONF="/etc/sysupgrade.conf"
+if [ $(grep -c "^$DEFAULTS" $SYSUPGRADE_CONF) -gt 0 ]; then
+	sed -i '/\/etc\/openwisp-config-defaults\//d' $SYSUPGRADE_CONF
+fi
+endef
+
 $(eval $(call BuildPackage,openwisp-config))
