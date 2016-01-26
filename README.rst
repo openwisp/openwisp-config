@@ -72,7 +72,8 @@ in trying to contact the controller again;
 
 If the test succeeds, the configuration is considered applied and the backup is deleted.
 
-If the test fails, the backup is restored and the agent will log the failure via syslog.
+If the test fails, the backup is restored and the agent will log the failure via syslog
+(see `Debugging`_ for more information on auditing logs).
 
 Disable testing
 ^^^^^^^^^^^^^^^
@@ -117,6 +118,21 @@ The following procedure illustrates how to compile *openwisp-config* and its dep
     make package/ca-certificates/install
     make package/openwisp-config/compile
     make package/openwisp-config/install
+
+Debugging
+---------
+
+Debugging *openwisp-config* can be easily done by using the ``logread`` command:
+
+.. code-block:: shell
+
+    logread
+
+Use grep to filter out any other log message:
+
+.. code-block:: shell
+
+    logread | grep openwisp
 
 Changelog
 ---------
