@@ -12,6 +12,12 @@ be based on `django-netjsonconfig <https://github.com/openwisp/django-netjsoncon
 Install latest release
 ----------------------
 
+First run:
+
+.. code-block:: shell
+
+    opkg update
+
 For `ar71xx <https://wiki.openwrt.org/doc/hardware/soc/soc.qualcomm.ar71xx>`_:
 
 .. code-block:: shell
