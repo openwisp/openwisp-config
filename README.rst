@@ -6,8 +6,19 @@ openwisp-config
 
 .. image:: http://img.shields.io/github/release/openwisp/openwisp-config.svg
 
-OpenWRT configuration agent for the new OpenWISP Controller (currently under development, will
-be based on `django-netjsonconfig <https://github.com/openwisp/django-netjsonconfig>`_).
+------------
+
+OpenWRT configuration agent for the new `OpenWISP <http://openwrt.org>`_ Controller
+(currently under development, will be based on `django-netjsonconfig <https://github.com/openwisp/django-netjsonconfig>`_).
+
+.. image:: http://netjsonconfig.openwisp.org/en/latest/_images/openwisp.org.svg
+  :target: http://openwisp.org
+
+.. contents:: **Table of Contents**:
+ :backlinks: none
+ :depth: 3
+
+------------
 
 Install latest release
 ----------------------
