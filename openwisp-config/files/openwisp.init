@@ -23,7 +23,12 @@ start_service() {
 	if [ $uuid ]; then uuid="--uuid $uuid"; fi
 	if [ $key ]; then key="--key $key"; fi
 	if [ $shared_secret ]; then shared_secret="--shared-secret $shared_secret"; fi
-	if [ $merge_default ]; then merge_default="--merge_default $merge_default"; fi
+	if [ -n "$merge_default" ]; then
+		# replace spaces with commas to avoid problems when
+		# passing this arg to procd_set_param command
+		merge_default=$(echo $merge_default | tr ' ' ',')
+		merge_default="--merge-default $merge_default";
+	fi
 	if [ $test_config ]; then test_config="--test-config $test_config"; fi
 	if [ $test_script ]; then test_script="--test-script $test_script"; fi
 

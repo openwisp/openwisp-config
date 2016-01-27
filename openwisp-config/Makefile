@@ -67,7 +67,7 @@ if [ $(grep -c "^$DEFAULTS" "$SYSUPGRADE_CONF") -lt 1 ]; then
 fi
 endef
 
-define Package/openwisp-config/postrm
+define Package/openwisp-config/prerm
 #!/bin/sh
 DEFAULTS="/etc/openwisp-config-defaults/"
 SYSUPGRADE_CONF="/etc/sysupgrade.conf"
