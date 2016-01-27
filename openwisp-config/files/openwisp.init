@@ -40,10 +40,10 @@ start_service() {
 	fi
 
 	if ([ -z "$uuid" ] || [ -z "$key" ]) && [ -z "$shared_secret" ]; then
-	        logger -s "you must either set uuid and key, or shared_secret in /etc/config/openwisp" \
-	               -t "openwisp" \
-	               -p 3
-	        exit 1
+		logger -s "you must either set uuid and key, or shared_secret in /etc/config/openwisp" \
+		       -t "openwisp" \
+		       -p 3
+		exit 1
 	fi
 
 	procd_open_instance

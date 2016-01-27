@@ -35,10 +35,6 @@ if ([ -z "$UUID" ] || [ -z "$KEY" ]) && [ -z "$SHARED_SECRET" ]; then
 	exit 3
 fi
 
-if [ -n "$MERGE_DEFAULT" ]; then
-	MERGE_DEFAULT=$(echo $MERGE_DEFAULT | tr ',' ' ')
-fi
-
 INTERVAL=${INTERVAL:-120}
 VERIFY_SSL=${VERIFY_SSL:-1}
 TEST_CONFIG=${TEST_CONFIG:-1}
@@ -58,6 +54,11 @@ mkdir -p $DEFAULT_DIR
 
 if [ "$VERIFY_SSL" != "1" ]; then
 	FETCH_COMMAND="$FETCH_COMMAND -k"
+fi
+
+if [ -n "$MERGE_DEFAULT" ]; then
+	# replace commas with spaces
+	MERGE_DEFAULT=$(echo $MERGE_DEFAULT | tr ',' ' ')
 fi
 
 # ensures we are dealing with the right web server
@@ -182,11 +183,11 @@ report_status() {
 	fi
 
 	if [ $(head -n 1 $STATUS_REPORT | grep -c "200 OK") -lt 1 ]; then
-			local status=$(head -n 1 $STATUS_REPORT)
-			logger -s "Failed to report status: $status" \
-			       -t "openwisp" \
-			       -p 3
-			return 3
+		local status=$(head -n 1 $STATUS_REPORT)
+		logger -s "Failed to report status: $status" \
+		       -t "openwisp" \
+		       -p 3
+		return 3
 	fi
 	check_header $STATUS_REPORT
 	rm $STATUS_REPORT
