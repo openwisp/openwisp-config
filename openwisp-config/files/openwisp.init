@@ -34,15 +34,15 @@ start_service() {
 
 	if [ -z "$url" ]; then
 		logger -s "url is not set, please add it in /etc/config/openwisp" \
-		       -t "openwisp" \
-		       -p 3
+		       -t openwisp \
+		       -p daemon.err
 		exit 1
 	fi
 
 	if ([ -z "$uuid" ] || [ -z "$key" ]) && [ -z "$shared_secret" ]; then
 		logger -s "you must either set uuid and key, or shared_secret in /etc/config/openwisp" \
-		       -t "openwisp" \
-		       -p 3
+		       -t openwisp \
+		       -p daemon.err
 		exit 1
 	fi
 
@@ -52,8 +52,8 @@ start_service() {
 	procd_set_param respawn
 	procd_close_instance
 	logger -s "$PROG_NAME started" \
-	       -t "openwisp" \
-	       -p 6
+	       -t openwisp \
+	       -p daemon.info
 }
 
 service_triggers() {
@@ -62,6 +62,6 @@ service_triggers() {
 
 stop_service() {
 	logger -s "$PROG_NAME stopping" \
-	       -t "openwisp" \
-	       -p 6
+	       -t openwisp \
+	       -p daemon.info
 }

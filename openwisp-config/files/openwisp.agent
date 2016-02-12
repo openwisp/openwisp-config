@@ -23,15 +23,15 @@ done
 
 if [ -z "$URL" ]; then
 	logger -s "missing required --url option" \
-		   -t "openwisp" \
-		   -p 3
+		   -t openwisp \
+		   -p daemon.err
 	exit 2
 fi
 
 if ([ -z "$UUID" ] || [ -z "$KEY" ]) && [ -z "$SHARED_SECRET" ]; then
 	logger -s "you must either specify --uuid and --key, or --shared-secret" \
-		   -t "openwisp" \
-		   -p 3
+		   -t openwisp \
+		   -p daemon.err
 	exit 3
 fi
 
@@ -66,8 +66,8 @@ check_header(){
 	local is_controller=$(grep -c "X-Openwisp-Controller: true" $1)
 	if [ $is_controller -lt 1 ]; then
 		logger -s "Invalid url: missing X-Openwisp-Controller header" \
-			   -t "openwisp" \
-			   -p 3
+			   -t openwisp \
+			   -p daemon.err
 		exit 4
 	fi
 }
@@ -75,8 +75,8 @@ check_header(){
 # performs automatic registration
 register() {
 	logger -s "Registering new device" \
-		   -t "openwisp" \
-		   -p 6
+		   -t openwisp \
+		   -p daemon.info
 	# gets the mac address of the first interface that shows in ifconfig
 	local name=$(ifconfig | grep -v lo | grep HWaddr | awk '/HWaddr/ { print $5 }' | head -n 1)
 	local backend="netjsonconfig.OpenWrt"
@@ -87,8 +87,8 @@ register() {
 	if [ $(head -n 1 $REGISTRATION_PARAMETERS | grep -c "201 Created") -lt 1 ]; then
 		local message=$(cat $REGISTRATION_PARAMETERS | grep "error:")
 		logger -s "Registration failed! $message" \
-			   -t "openwisp" \
-			   -p 3
+			   -t openwisp \
+			   -p daemon.err
 		exit 5
 	fi
 	# set configuration options and reload
@@ -101,8 +101,8 @@ register() {
 	uci commit openwisp
 	rm $REGISTRATION_PARAMETERS
 	logger -s "Device registered successfully as $name, id: $UUID" \
-		   -t "openwisp" \
-		   -p 6
+		   -t openwisp \
+		   -p daemon.info
 }
 
 # gets checksum from controller
@@ -112,16 +112,16 @@ get_checksum() {
 
 	if [ "$exit_code" != "0" ]; then
 		logger -s "Failed to connect to controller (checksum): curl exit code $exit_code" \
-		       -t "openwisp" \
-		       -p 3
+		       -t openwisp \
+		       -p daemon.err
 		return 2
 	fi
 
 	if [ $(head -n 1 $1 | grep -c "200 OK") -lt 1 ]; then
 		local status=$(head -n 1 $1)
 		logger -s "Failed to retrieve checksum: $status" \
-			   -t "openwisp" \
-			   -p 3
+			   -t openwisp \
+			   -p daemon.err
 		return 3
 	fi
 	check_header $1
@@ -141,8 +141,8 @@ configuration_changed() {
 
 	if [ "$CURRENT_CHECKSUM" != "$REMOTE_CHECKSUM" ]; then
 		logger -s "Configuration in controller has changed" \
-		       -t "openwisp" \
-		       -p 6
+		       -t openwisp \
+		       -p daemon.info
 		return 1
 	fi
 
@@ -159,8 +159,8 @@ apply_configuration() {
 
 	if [ "$exit_code" != "0" ]; then
 		logger -s "Could not restore configuration: sysupgrade exit code $exit_code" \
-		       -t "openwisp" \
-		       -p 2
+		       -t openwisp \
+		       -p daemon.crit
 		return 1
 	fi
 	# merge default config (if enabled)
@@ -177,16 +177,16 @@ report_status() {
 
 	if [ "$exit_code" != "0" ]; then
 		logger -s "Failed to connect to controller (report-status): curl exit code $exit_code" \
-		       -t "openwisp" \
-		       -p 3
+		       -t openwisp \
+		       -p daemon.err
 		return 2
 	fi
 
 	if [ $(head -n 1 $STATUS_REPORT | grep -c "200 OK") -lt 1 ]; then
 		local status=$(head -n 1 $STATUS_REPORT)
 		logger -s "Failed to report status: $status" \
-		       -t "openwisp" \
-		       -p 3
+		       -t openwisp \
+		       -p daemon.err
 		return 3
 	fi
 	check_header $STATUS_REPORT
@@ -210,8 +210,8 @@ test_configuration() {
 
 	if [ $test_ret -gt 0 ]; then
 		logger -s "Configuration test failed! Restoring previous backup" \
-		       -t "openwisp" \
-		       -p 3
+		       -t openwisp \
+		       -p daemon.err
 		apply_configuration $CONFIGURATION_BACKUP
 		report_status "error"
 		local ret=1
@@ -243,8 +243,8 @@ store_default() {
 			fi
 			cp "/etc/config/$config" "$DEFAULT_DIR/$config"
 			logger -s "Stored $DEFAULT_DIR/$config" \
-				   -t "openwisp" \
-				   -p 6
+				   -t openwisp \
+				   -p daemon.info
 		fi
 	done
 }
@@ -273,8 +273,8 @@ update_configuration() {
 
 	if [ "$exit_code" != "0" ]; then
 		logger -s "Failed to connect to controller (download configuration): curl exit code $exit_code" \
-		       -t "openwisp" \
-		       -p 3
+		       -t openwisp \
+		       -p daemon.err
 		return 3
 	fi
 
@@ -286,8 +286,8 @@ update_configuration() {
 
 	if [ "$?" == "0" ]; then
 		logger -s "Configuration applied" \
-		       -t "openwisp" \
-		       -p 6
+		       -t openwisp \
+		       -p daemon.info
 	fi
 }
 
