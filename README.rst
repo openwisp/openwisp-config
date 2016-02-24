@@ -180,6 +180,14 @@ Use grep to filter out any other log message:
 
     logread | grep openwisp
 
+Custom firmware gotchas
+-----------------------
+
+When compiling custom OpenWRT images with *openwisp-config*, do not forget to add this line into
+your ``/etc/sysupgrade.conf``::
+
+    /etc/openwisp-config-defaults/
+
 Changelog
 ---------
 
