@@ -82,7 +82,16 @@ register() {
 	local backend="netjsonconfig.OpenWrt"
 	local params="secret=$SHARED_SECRET&name=$name&backend=$backend"
 	$($FETCH_COMMAND -i --data $params $REGISTRATION_URL > $REGISTRATION_PARAMETERS)
-	# abort if anything goes wrong
+
+	local exit_code=$?
+	if [ "$exit_code" != "0" ]; then
+		logger -s "Failed to connect to controller (register): curl exit code $exit_code" \
+		       -t openwisp \
+		       -p daemon.err
+		exit 5
+	fi
+
+	# abort if controller return errors
 	check_header $REGISTRATION_PARAMETERS
 	if [ $(head -n 1 $REGISTRATION_PARAMETERS | grep -c "201 Created") -lt 1 ]; then
 		local message=$(cat $REGISTRATION_PARAMETERS | grep "error:")
@@ -91,11 +100,13 @@ register() {
 			   -p daemon.err
 		exit 5
 	fi
+
 	# set configuration options and reload
 	export UUID=$(cat $REGISTRATION_PARAMETERS | grep uuid | awk '/uuid: / { print $2 }')
 	export KEY=$(cat $REGISTRATION_PARAMETERS | grep key | awk '/key: / { print $2 }')
 	uci set openwisp.http.uuid=$UUID
 	uci set openwisp.http.key=$KEY
+
 	# remove shared secret to avoid accidental re-registration
 	uci set openwisp.http.shared_secret=""
 	uci commit openwisp
@@ -272,7 +283,7 @@ update_configuration() {
 	local exit_code=$?
 
 	if [ "$exit_code" != "0" ]; then
-		logger -s "Failed to connect to controller (download configuration): curl exit code $exit_code" \
+		logger -s "Failed to connect to controller (download-config): curl exit code $exit_code" \
 		       -t openwisp \
 		       -p daemon.err
 		return 3
