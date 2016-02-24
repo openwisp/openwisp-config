@@ -82,17 +82,20 @@ register() {
 	local backend="netjsonconfig.OpenWrt"
 	local params="secret=$SHARED_SECRET&name=$name&backend=$backend"
 	$($FETCH_COMMAND -i --data $params $REGISTRATION_URL > $REGISTRATION_PARAMETERS)
-
 	local exit_code=$?
+
+	# report eventual failures and return
 	if [ "$exit_code" != "0" ]; then
 		logger -s "Failed to connect to controller (register): curl exit code $exit_code" \
 		       -t openwisp \
 		       -p daemon.err
-		exit 5
+		return 1
 	fi
 
-	# abort if controller return errors
+	# exit if not openwisp
 	check_header $REGISTRATION_PARAMETERS
+
+	# exit if controller returns errors
 	if [ $(head -n 1 $REGISTRATION_PARAMETERS | grep -c "201 Created") -lt 1 ]; then
 		local message=$(cat $REGISTRATION_PARAMETERS | grep "error:")
 		logger -s "Registration failed! $message" \
@@ -305,7 +308,19 @@ update_configuration() {
 # ensure both UUID and KEY are defined
 # otherwise perform registration
 if [ -z "$UUID" ] || [ -z "$KEY" ]; then
-	register
+	# do not crash if controller can't be reached
+	# but retry every ($INTERVAL / 4) seconds
+	# (device might be unplugged, unconfigured or connecting)
+	while true
+	do
+		register
+
+		if [ "$?" == "0" ]; then
+			break
+		fi
+
+		sleep $(expr $INTERVAL / 4)
+	done
 fi
 
 # these variables are evaluated here because "register()" might set UUID and KEY
