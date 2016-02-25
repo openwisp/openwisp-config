@@ -46,6 +46,7 @@ CONFIGURATION_BACKUP="$WORKING_DIR/backup.tar.gz"
 REGISTRATION_PARAMETERS="$WORKING_DIR/registration_parameters"
 TEST_CHECKSUM="$WORKING_DIR/test_checksum"
 STATUS_REPORT="$WORKING_DIR/status_report"
+APPLYING_CONF="$WORKING_DIR/applying_conf"
 REGISTRATION_URL="$URL/controller/register/"
 DEFAULT_DIR="/etc/openwisp-config-defaults"
 FETCH_COMMAND="curl -s"
@@ -292,11 +293,17 @@ update_configuration() {
 		return 3
 	fi
 
+	# control file to avoid reloading the agent while
+	# configuration is still being applied
+	touch $APPLYING_CONF
+
 	if [ "$TEST_CONFIG" == "1" ]; then
 		test_configuration $CONFIGURATION_ARCHIVE
 	else
 		apply_configuration $CONFIGURATION_ARCHIVE
 	fi
+
+	rm $APPLYING_CONF
 
 	if [ "$?" == "0" ]; then
 		logger -s "Configuration applied" \

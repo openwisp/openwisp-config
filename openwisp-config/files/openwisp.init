@@ -65,3 +65,20 @@ stop_service() {
 	       -t openwisp \
 	       -p daemon.info
 }
+
+reload_service() {
+	logger -s "$PROG_NAME received reload trigger" \
+		   -t openwisp \
+		   -p daemon.info
+	# avoid reloading while configuration is being applied
+	# will wait for a maximum of 30 seconds
+	for i in $(seq 1 30); do
+		if [ -f "/tmp/openwisp/applying_conf" ]; then
+			sleep 1
+		else
+			break
+		fi
+	done
+	# reload
+    start
+}
