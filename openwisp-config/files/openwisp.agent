@@ -166,9 +166,10 @@ configuration_changed() {
 
 # applies a specified configuration archive
 apply_configuration() {
+	local sleep_time=${2-2}
 	# store default config (if enabled)
 	store_default
-	# -r restores a configuration archive
+	# -r restores the specified configuration archive
 	sysupgrade -r $1
 	local exit_code=$?
 
@@ -182,13 +183,21 @@ apply_configuration() {
 	merge_default
 	# apply changes and wait 2 seconds
 	/usr/sbin/apply_config
-	sleep 2
+	sleep $sleep_time
 }
 
 # report configuration status: "running" or "error"
 report_status() {
-	$($FETCH_COMMAND -i --data "key=$KEY&status=$1" $REPORT_URL > $STATUS_REPORT)
-	local exit_code=$?
+	# retry several times
+	for i in $(seq 1 10); do
+		$($FETCH_COMMAND -i --data "key=$KEY&status=$1" $REPORT_URL > $STATUS_REPORT)
+		local exit_code=$?
+		if [ "$exit_code" == "0" ]; then
+			break
+		else
+			sleep 2
+		fi
+	done
 
 	if [ "$exit_code" != "0" ]; then
 		logger -s "Failed to connect to controller (report-status): curl exit code $exit_code" \
@@ -212,7 +221,10 @@ report_status() {
 test_configuration() {
 	sysupgrade -b $CONFIGURATION_BACKUP
 
-	apply_configuration $1
+	logger -s "Testing configuration" \
+	       -t openwisp \
+	       -p daemon.info
+	apply_configuration $1 6  # wait 6 seconds instead of 2
 
 	if [ -z "$TEST_SCRIPT" ]; then
 		get_checksum $TEST_CHECKSUM
