@@ -1,7 +1,7 @@
 Change log
 ^^^^^^^^^^
 
-0.3 [unreleased]
+0.3 [2016-01-26]
 ================
 
 - `09c672c <https://github.com/openwisp/openwisp-config/commit/09c672c>`_:
