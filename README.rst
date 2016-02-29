@@ -70,10 +70,11 @@ the router to be unregistered and it will attempt to perform an automatic regist
 
 The automatic registration is performed only if ``shared_secret`` is correctly set.
 
+The device will choose as name one of its mac addresses, unless its hostname is not "OpenWrt",
+in the latter case it will simply register itself with the current hostname.
+
 When the registration is completed, the agent will automatically set ``uuid`` and ``key``
 in ``/etc/config/openwisp``.
-
-In the controller you will find a new (empty) configuration named as the mac address of the router.
 
 Configuration test
 ------------------

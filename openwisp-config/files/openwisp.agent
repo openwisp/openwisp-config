@@ -78,10 +78,13 @@ register() {
 	logger -s "Registering new device" \
 		   -t openwisp \
 		   -p daemon.info
-	# gets the mac address of the first interface that shows in ifconfig
-	local name=$(ifconfig | grep -v lo | grep HWaddr | awk '/HWaddr/ { print $5 }' | head -n 1)
+	local hostname=$(uci get system.@system[0].hostname)
+	if [ $hostname = "OpenWrt" ]; then
+		# gets the mac address of the first interface that shows in ifconfig
+		hostname=$(ifconfig | grep -v lo | grep HWaddr | awk '/HWaddr/ { print $5 }' | head -n 1)
+	fi
 	local backend="netjsonconfig.OpenWrt"
-	local params="secret=$SHARED_SECRET&name=$name&backend=$backend"
+	local params="secret=$SHARED_SECRET&name=$hostname&backend=$backend"
 	$($FETCH_COMMAND -i --data $params $REGISTRATION_URL > $REGISTRATION_PARAMETERS)
 	local exit_code=$?
 
@@ -115,7 +118,7 @@ register() {
 	uci set openwisp.http.shared_secret=""
 	uci commit openwisp
 	rm $REGISTRATION_PARAMETERS
-	logger -s "Device registered successfully as $name, id: $UUID" \
+	logger -s "Device registered successfully as $hostname, id: $UUID" \
 		   -t openwisp \
 		   -p daemon.info
 }
