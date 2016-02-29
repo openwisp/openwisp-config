@@ -330,14 +330,8 @@ if [ -z "$UUID" ] || [ -z "$KEY" ]; then
 	# do not crash if controller can't be reached
 	# but retry every ($INTERVAL / 4) seconds
 	# (device might be unplugged, unconfigured or connecting)
-	while true
+	until register
 	do
-		register
-
-		if [ "$?" == "0" ]; then
-			break
-		fi
-
 		sleep $(expr $INTERVAL / 4)
 	done
 fi
