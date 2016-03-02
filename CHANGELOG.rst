@@ -4,9 +4,13 @@ Change log
 0.3.1 [unreleased]
 ==================
 
-WIP
+- `bd64be8 <https://github.com/openwisp/openwisp-config/commit/bd64be8>`_:
+  fixed infinite registration bug introduced in
+  `#14 <https://github.com/openwisp/openwisp-config/issues/14>`_
+- `e8ae900 <https://github.com/openwisp/openwisp-config/commit/e8ae900>`_:
+  ue current hostname in registration unless hostname is ``OpenWrt``
 
-0.3 [2016-01-26]
+0.3 [2016-02-26]
 ================
 
 - `09c672c <https://github.com/openwisp/openwisp-config/commit/09c672c>`_:
