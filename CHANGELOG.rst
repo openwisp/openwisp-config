@@ -1,7 +1,7 @@
 Change log
 ^^^^^^^^^^
 
-0.3.1 [unreleased]
+0.3.1 [2016-03-02]
 ==================
 
 - `bd64be8 <https://github.com/openwisp/openwisp-config/commit/bd64be8>`_:

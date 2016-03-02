@@ -33,13 +33,13 @@ For `ar71xx <https://wiki.openwrt.org/doc/hardware/soc/soc.qualcomm.ar71xx>`_:
 
 .. code-block:: shell
 
-    opkg install http://downloads.openwisp.org/openwisp-config/0.3/ar71xx/openwisp-config_0.3-1_ar71xx.ipk
+    opkg install http://downloads.openwisp.org/openwisp-config/0.3.1/ar71xx/openwisp-config_0.3.1-1_ar71xx.ipk
 
 For `rampis <https://wiki.openwrt.org/doc/hardware/soc/soc.mediatek>`_:
 
 .. code-block:: shell
 
-    opkg install http://downloads.openwisp.org/openwisp-config/0.3/ramips/openwisp-config_0.3-1_ramips_24kec.ipk
+    opkg install http://downloads.openwisp.org/openwisp-config/0.3.1/ramips/openwisp-config_0.3.1-1_ramips_24kec.ipk
 
 For a list of the latest builds, take a look at `downloads.openwisp.org
 <http://downloads.openwisp.org/openwisp-config/>`_.
