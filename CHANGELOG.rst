@@ -1,6 +1,11 @@
 Change log
 ^^^^^^^^^^
 
+0.4.0 [unreleased]
+==================
+
+WIP
+
 0.3.1 [2016-03-02]
 ==================
 
@@ -8,7 +13,7 @@ Change log
   fixed infinite registration bug introduced in
   `#14 <https://github.com/openwisp/openwisp-config/issues/14>`_
 - `e8ae900 <https://github.com/openwisp/openwisp-config/commit/e8ae900>`_:
-  ue current hostname in registration unless hostname is ``OpenWrt``
+  use current hostname in registration unless hostname is ``OpenWrt``
 
 0.3 [2016-02-26]
 ================
