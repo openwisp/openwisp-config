@@ -1,0 +1,29 @@
+language: c
+
+env:
+  - CFLAGS="-Wno-error"
+
+addons:
+  apt:
+    packages:
+      - gcc
+      - cmake
+      - make
+
+before_install:
+  - sudo apt-get install lua5.1 liblua5.1-0-dev libjson0 libjson0-dev
+  - git clone https://git.openwrt.org/project/libubox.git --depth=1 && cd libubox
+  - cmake . && sudo make install && cd ..
+  - git clone https://git.openwrt.org/project/uci.git --depth=1 && cd uci
+  - cmake . && sudo make install && cd ..
+
+install:
+  - git clone https://github.com/bluebird75/luaunit.git
+  - cd luaunit && python doit.py install && cd ..
+
+script:
+  - cd openwisp-config/tests/
+  - lua test_store_unmanaged.lua -v
+
+branches:
+  - master
