@@ -1,0 +1,105 @@
+require('os')
+require('io')
+local luaunit = require('luaunit')
+local store_unmanaged = assert(loadfile("../files/store_unmanaged.lua"))
+local default_blocks = "system.ntp " ..
+                       "system.@led " ..
+                       "network.loopback " ..
+                       "network.globals " ..
+                       "network.lan " ..
+                       "network.wan " ..
+                       "network.@switch " ..
+                       "network.@switch_vlan"
+local string = string
+local prefix = './unmanaged/'
+assertNotNil = luaunit.assertNotNil
+assertNil = luaunit.assertNil
+
+local function _clean()
+    os.remove(prefix .. 'network')
+    os.remove(prefix .. 'system')
+end
+
+TestStoreUnmanaged = {}
+
+TestStoreUnmanaged.setUp = _clean
+TestStoreUnmanaged.tearDown = _clean
+
+function TestStoreUnmanaged.test_empty()
+    store_unmanaged('--test=1')
+    assertNil(io.open(prefix .. 'network'))
+    assertNil(io.open(prefix .. 'system'))
+end
+
+function TestStoreUnmanaged.test_default()
+    store_unmanaged('--test=1', '-o=' .. default_blocks)
+    -- ensure network config file has been created correctly
+    local file = io.open(prefix .. 'network')
+    assertNotNil(file)
+    local contents = file:read('*all')
+    assertNotNil(string.find(contents, "config interface 'loopback'"))
+    assertNotNil(string.find(contents, "option ipaddr '127.0.0.1'"))
+    assertNotNil(string.find(contents, "option ula_prefix 'fd8e:f40a:6701::/48'"))
+    assertNotNil(string.find(contents, "config interface 'wan'"))
+    assertNotNil(string.find(contents, "config switch"))
+    assertNotNil(string.find(contents, "option vlan '2'"))
+    assertNotNil(string.find(contents, "option vlan '1'"))
+    assertNil(string.find(contents, "config interface 'wlan0'"))
+    assertNil(string.find(contents, "config interface 'wlan1'"))
+    -- ensure system config file exists
+    local file = io.open(prefix .. 'system')
+    assertNotNil(file)
+    local contents = file:read('*all')
+    assertNotNil(string.find(contents, "list server '1.openwrt.pool.ntp.org'"))
+    assertNotNil(string.find(contents, "config led 'led_usb1'"))
+    assertNotNil(string.find(contents, "config led 'led_usb2'"))
+    assertNotNil(string.find(contents, "config led 'led_wlan2g'"))
+    assertNil(string.find(contents, "option hostname 'OpenWrt'"))
+end
+
+function TestStoreUnmanaged.test_specific_name()
+    store_unmanaged('--test=1', '-o="system.ntp"')
+    local file = io.open(prefix .. 'system')
+    assertNotNil(file)
+    local contents = file:read('*all')
+    assertNotNil(file)
+    assertNil(string.find(contents, "config led 'led_usb1'"))
+    assertNil(string.find(contents, "option hostname 'OpenWrt'"))
+    assertNotNil(string.find(contents, "list server '1.openwrt.pool.ntp.org'"))
+end
+
+function TestStoreUnmanaged.test_specific_type()
+    store_unmanaged('--test=1', '-o="system.@led"')
+    local file = io.open(prefix .. 'system')
+    assertNotNil(file)
+    local contents = file:read('*all')
+    assertNotNil(file)
+    assertNotNil(string.find(contents, "config led 'led_usb1'"))
+    assertNotNil(string.find(contents, "config led 'led_usb2'"))
+    assertNotNil(string.find(contents, "config led 'led_wlan2g'"))
+    assertNil(string.find(contents, "option hostname 'OpenWrt'"))
+    assertNil(string.find(contents, "list server '1.openwrt.pool.ntp.org'"))
+end
+
+function TestStoreUnmanaged.test_unrecognized_config_option()
+    store_unmanaged('--test=1', '-o="network.vpn"')
+    local file = io.open(prefix .. 'network')
+    assertNotNil(file)
+    local contents = file:read('*all')
+    assertNil(string.find(contents, "vpn"))
+end
+
+function TestStoreUnmanaged.test_unrecognized_config_type()
+    store_unmanaged('--test=1', '-o="network.@vpn"')
+    local file = io.open(prefix .. 'network')
+    assertNotNil(file)
+    local contents = file:read('*all')
+    assertNil(string.find(contents, "vpn"))
+end
+
+function test_unrecognized_config()
+    store_unmanaged('--test=1', '-o="totally.@wrong"')
+    assertNil(io.open(prefix .. 'totally'))
+end
+
+os.exit(luaunit.LuaUnit.run())

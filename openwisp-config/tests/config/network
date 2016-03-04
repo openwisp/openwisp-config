@@ -1,0 +1,44 @@
+config interface 'loopback'
+	option ifname 'lo'
+	option proto 'static'
+	option ipaddr '127.0.0.1'
+	option netmask '255.0.0.0'
+
+config globals 'globals'
+	option ula_prefix 'fd8e:f40a:6701::/48'
+
+config interface 'lan'
+	option ifname 'eth0.1'
+	option type 'bridge'
+	option proto 'dhcp'
+	option ip6assign '60'
+	option force_link '0'
+
+config interface 'wan'
+	option ifname 'eth0.2'
+	option proto 'none'
+
+config interface 'wlan0'
+	option ifname 'wlan0'
+	option ipaddr '172.27.254.251/16'
+	option proto 'static'
+
+config interface 'wlan1'
+	option ifname 'wlan1'
+	option ipaddr '172.27.254.252/16'
+	option proto 'static'
+
+config switch
+	option name 'switch0'
+	option reset '1'
+	option enable_vlan '1'
+
+config switch_vlan
+	option device 'switch0'
+	option vlan '1'
+	option ports '0t 2 3 4 5'
+
+config switch_vlan
+	option device 'switch0'
+	option vlan '2'
+	option ports '0t 1'
