@@ -1,0 +1,3 @@
+#!/bin/bash
+cd openwisp-config/tests/
+lua test_store_unmanaged.lua -v
