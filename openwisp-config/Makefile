@@ -62,14 +62,4 @@ define Package/openwisp-config/install
 		$(1)/etc/config/openwisp
 endef
 
-define Package/openwisp-config/postinst
-#!/bin/sh
-echo "/etc/openwisp-config-defaults/" >> "/etc/sysupgrade.conf"
-endef
-
-define Package/openwisp-config/postrm
-#!/bin/sh
-sed -i '/\/etc\/openwisp-config-defaults\//d' "/etc/sysupgrade.conf"
-endef
-
 $(eval $(call BuildPackage,openwisp-config))

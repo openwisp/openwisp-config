@@ -48,7 +48,6 @@ TEST_CHECKSUM="$WORKING_DIR/test_checksum"
 STATUS_REPORT="$WORKING_DIR/status_report"
 APPLYING_CONF="$WORKING_DIR/applying_conf"
 REGISTRATION_URL="$URL/controller/register/"
-# DEFAULT_DIR="/etc/openwisp-config-defaults"
 UNMANAGED_DIR="$WORKING_DIR/unmanaged"
 FETCH_COMMAND="curl -s"
 mkdir -p $WORKING_DIR
