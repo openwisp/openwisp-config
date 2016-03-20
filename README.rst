@@ -192,3 +192,8 @@ License
 -------
 
 See `LICENSE <https://github.com/openwisp/openwisp-config/blob/master/LICENSE>`_.
+
+Support
+-------
+
+Send questions to the `OpenWISP Mailing List <https://groups.google.com/d/forum/openwisp>`_.
