@@ -17,6 +17,7 @@ start_service() {
 	unmanaged=$(config_get http unmanaged)
 	test_config=$(config_get http test_config)
 	test_script=$(config_get http test_script)
+	capath=$(config_get http capath)
 	if [ $url ]; then url="--url $url"; fi
 	if [ $interval ]; then interval="--interval $interval"; fi
 	if [ $verify_ssl ]; then verify_ssl="--verify-ssl $verify_ssl"; fi
@@ -31,6 +32,7 @@ start_service() {
 	fi
 	if [ $test_config ]; then test_config="--test-config $test_config"; fi
 	if [ $test_script ]; then test_script="--test-script $test_script"; fi
+	if [ $capath ]; then capath="--capath $capath"; fi
 
 	if [ -z "$url" ]; then
 		logger -s "url is not set, please add it in /etc/config/openwisp" \
@@ -47,7 +49,7 @@ start_service() {
 	fi
 
 	procd_open_instance
-	procd_set_param command $PROG $url $interval $verify_ssl $uuid $key \
+	procd_set_param command $PROG $url $interval $verify_ssl $uuid $key $capath \
 	                        $shared_secret $unmanaged $test_config $test_script
 	procd_set_param respawn
 	procd_close_instance

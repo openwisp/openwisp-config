@@ -12,6 +12,7 @@ while [ -n "$1" ]; do
 		--unmanaged) export UNMANAGED="$2"; shift;;
 		--test-config) export TEST_CONFIG="$2"; shift;;
 		--test-script) export TEST_SCRIPT="$2"; shift;;
+		--capath) export CAPATH="$2"; shift;;
 		-*)
 			echo "Invalid option: $1"
 			exit 1
@@ -38,6 +39,7 @@ fi
 INTERVAL=${INTERVAL:-120}
 VERIFY_SSL=${VERIFY_SSL:-1}
 TEST_CONFIG=${TEST_CONFIG:-1}
+CAPATH=${CAPATH:-/etc/ssl/certs}
 WORKING_DIR="/tmp/openwisp"
 BASEURL="$URL/controller"
 CONFIGURATION_ARCHIVE="$WORKING_DIR/configuration.tar.gz"
@@ -55,6 +57,10 @@ mkdir -p $UNMANAGED_DIR
 
 if [ "$VERIFY_SSL" != "1" ]; then
 	FETCH_COMMAND="$FETCH_COMMAND -k"
+fi
+
+if [ -n "$CAPATH" ]; then
+	FETCH_COMMAND="$FETCH_COMMAND --capath $CAPATH"
 fi
 
 if [ -n "$UNMANAGED" ]; then
