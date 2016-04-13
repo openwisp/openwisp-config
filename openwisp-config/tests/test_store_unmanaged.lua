@@ -14,6 +14,7 @@ local string = string
 local prefix = './unmanaged/'
 assertNotNil = luaunit.assertNotNil
 assertNil = luaunit.assertNil
+assertEquals = luaunit.assertEquals
 
 local function _clean()
     os.remove(prefix .. 'network')
@@ -100,6 +101,17 @@ end
 function TestStoreUnmanaged.test_unrecognized_config()
     store_unmanaged('--test=1', '-o="totally.@wrong"')
     assertNil(io.open(prefix .. 'totally'))
+end
+
+function TestStoreUnmanaged.test_duplicate_list()
+    store_unmanaged('--test=1', '-o=network.wlan0')
+    local file = io.open(prefix .. 'network')
+    assertNotNil(file)
+    local contents = file:read('*all')
+    assertNotNil(string.find(contents, "list ipaddr '172.27.254.251/16'"))
+    -- count occurrences of list setting and ensure is not repeated
+    local _, count = string.gsub(contents, "list ipaddr '172.27.254.251/16'", "")
+    assertEquals(count, 1)
 end
 
 os.exit(luaunit.LuaUnit.run())

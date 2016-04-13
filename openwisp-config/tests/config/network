@@ -20,7 +20,9 @@ config interface 'wan'
 
 config interface 'wlan0'
 	option ifname 'wlan0'
-	option ipaddr '172.27.254.251/16'
+	list ipaddr '172.27.254.251/16'
+	# purposely duplicated for testing purposes
+	list ipaddr '172.27.254.251/16'
 	option proto 'static'
 
 config interface 'wlan1'

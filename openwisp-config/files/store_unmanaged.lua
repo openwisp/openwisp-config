@@ -60,13 +60,32 @@ function write_uci_block(cursor, config, block)
     else
         name = cursor:add(config, block['.type'])
     end
-    -- add options for block
+    -- write options for block
     for key, value in pairs(block) do
-        -- ignore properties starting with .
-        if string.sub(key, 1, 1) ~= '.' then
-            cursor:set(config, name, key, value)
+        write_uci_option(cursor, config, name, key, value)
+    end
+end
+
+-- abstraction for "uci set" which handles corner cases
+function write_uci_option(cursor, config, name, key, value)
+    -- ignore properties starting with .
+    if string.sub(key, 1, 1) == '.' then
+        return
+    end
+    -- avoid duplicate list settings
+    if type(value) == 'table' then
+        -- create set with unique values
+        set = {}
+        for i, el in pairs(value) do
+            set[el] = true
+        end
+        -- reset value var with set contents
+        value = {}
+        for item_value, present in pairs(set) do
+            table.insert(value, item_value)
         end
     end
+    cursor:set(config, name, key, value)
 end
 
 -- convert list of blocks in a table with a structure like:
