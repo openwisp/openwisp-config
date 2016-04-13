@@ -272,7 +272,7 @@ merge_unmanaged() {
 	for path in $UNMANAGED_DIR/*
 	do
 		local config=$(basename $path)
-	    uci import -m -f $path $config
+		uci import -m -f $path $config
 		uci commit $config
 	done
 }
