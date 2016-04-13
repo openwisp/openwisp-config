@@ -97,7 +97,7 @@ function TestStoreUnmanaged.test_unrecognized_config_type()
     assertNil(string.find(contents, "vpn"))
 end
 
-function test_unrecognized_config()
+function TestStoreUnmanaged.test_unrecognized_config()
     store_unmanaged('--test=1', '-o="totally.@wrong"')
     assertNil(io.open(prefix .. 'totally'))
 end
