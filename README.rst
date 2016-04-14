@@ -61,7 +61,7 @@ UCI configuration options must go in ``/etc/config/openwisp``.
 - ``unmanaged``: list of config sections which won't be overwritten, see `Unmanaged Configurations`_
 - ``test_config``: whether a new configuration must be tested before being considered applied, defaults to ``1``
 - ``test_script``: custom test script, read more about this feature in `Configuration test`_
-- ``capath``: custom ``--capath`` argument for curl, see `curl capath argument <https://curl.haxx.se/docs/manpage.html#--capath>`_
+- ``capath``: value passed to curl ``--capath`` argument, defaults to ``/etc/ssl/certs``; see also `curl capath argument <https://curl.haxx.se/docs/manpage.html#--capath>`_
 
 Automatic registration
 ----------------------
