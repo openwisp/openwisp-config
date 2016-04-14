@@ -17,6 +17,8 @@ start_service() {
 	unmanaged=$(config_get http unmanaged)
 	test_config=$(config_get http test_config)
 	test_script=$(config_get http test_script)
+	connect_timeout=$(config_get http connect_timeout)
+	max_time=$(config_get http max_time)
 	capath=$(config_get http capath)
 	if [ $url ]; then url="--url $url"; fi
 	if [ $interval ]; then interval="--interval $interval"; fi
@@ -32,6 +34,8 @@ start_service() {
 	fi
 	if [ $test_config ]; then test_config="--test-config $test_config"; fi
 	if [ $test_script ]; then test_script="--test-script $test_script"; fi
+	if [ $connect_timeout ]; then connect_timeout="--connect-timeout $connect_timeout"; fi
+	if [ $max_time ]; then max_time="--max-time $max_time"; fi
 	if [ $capath ]; then capath="--capath $capath"; fi
 
 	if [ -z "$url" ]; then
@@ -49,8 +53,9 @@ start_service() {
 	fi
 
 	procd_open_instance
-	procd_set_param command $PROG $url $interval $verify_ssl $uuid $key $capath \
-	                        $shared_secret $unmanaged $test_config $test_script
+	procd_set_param command $PROG $url $interval $verify_ssl $uuid $key \
+	                        $shared_secret $unmanaged $test_config $test_script \
+	                        $connect_timeout $max_time $capath
 	procd_set_param respawn
 	procd_close_instance
 	logger -s "$PROG_NAME started" \
