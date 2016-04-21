@@ -47,6 +47,13 @@ For a list of the latest builds, take a look at `downloads.openwisp.org
 If you need a package for other SoCs you will need to compile the package, see
 `Compiling openwisp-config`_.
 
+Once installed, the package needs to be configured (see `Configuration options <#configuration-options>`_ section below)
+and started with::
+
+    /etc/init.d/openwisp_config start
+
+To ensure the agent is working correctly find out how to debug in the `Debugging <#debugging>`_ section.
+
 Configuration options
 ---------------------
 
