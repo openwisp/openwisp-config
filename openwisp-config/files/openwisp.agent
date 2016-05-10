@@ -85,7 +85,7 @@ register() {
 		   -t openwisp \
 		   -p daemon.info
 	local hostname=$(uci get system.@system[0].hostname)
-	if [ $hostname = "OpenWrt" ]; then
+	if [ "$hostname" == "OpenWrt" ] || [ "$hostname" == "lede" ]; then
 		# gets the mac address of the first interface that shows in ifconfig
 		hostname=$(ifconfig | grep -v lo | grep HWaddr | awk '/HWaddr/ { print $5 }' | head -n 1)
 	fi
