@@ -304,13 +304,15 @@ update_configuration() {
 
 	if [ "$TEST_CONFIG" == "1" ]; then
 		test_configuration $CONFIGURATION_ARCHIVE
+		result=$?
 	else
 		apply_configuration $CONFIGURATION_ARCHIVE
+		result=$?
 	fi
 
 	rm $APPLYING_CONF
 
-	if [ "$?" == "0" ]; then
+	if [ "$result" == "0" ]; then
 		logger -s "Configuration applied" \
 		       -t openwisp \
 		       -p daemon.info
