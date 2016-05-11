@@ -281,9 +281,9 @@ merge_unmanaged() {
 	for path in $UNMANAGED_DIR/*
 	do
 		local config=$(basename $path)
-		uci import -m -f $path $config
-		uci commit $config
+		uci -m -f $path import $config
 	done
+	uci commit
 }
 
 # downloads configuration from controller
