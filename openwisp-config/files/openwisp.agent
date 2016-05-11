@@ -177,7 +177,7 @@ configuration_changed() {
 apply_configuration() {
 	local sleep_time=${2-2}
 	# store unmanaged config (if enabled)
-	store_unmanaged
+	call_store_unmanaged
 	# -r restores the specified configuration archive
 	sysupgrade -r $1
 	local exit_code=$?
@@ -262,7 +262,7 @@ test_configuration() {
 
 # stores unmanaged configuration sections that will be merged
 # with the configuration downloaded from the controller
-store_unmanaged() {
+call_store_unmanaged() {
 	if [ -z "$UNMANAGED" ]; then
 		return 0
 	fi
