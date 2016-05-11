@@ -252,6 +252,9 @@ test_configuration() {
 		report_status "error"
 		local ret=1
 	else
+		logger -s "Configuration test succeded" \
+		       -t openwisp \
+		       -p daemon.info
 		report_status "running"
 		local ret=0
 	fi
@@ -302,11 +305,15 @@ update_configuration() {
 	# configuration is still being applied
 	touch $APPLYING_CONF
 
+	# testing enabled
 	if [ "$TEST_CONFIG" == "1" ]; then
 		test_configuration $CONFIGURATION_ARCHIVE
 		result=$?
+	# testing diabled
 	else
-		apply_configuration $CONFIGURATION_ARCHIVE
+		apply_configuration $CONFIGURATION_ARCHIVE 6  # wait 6 seconds
+		# only try to report success
+		report_status "running"
 		result=$?
 	fi
 
