@@ -129,8 +129,8 @@ end
 
 -- cleanup temporary files to avoid conflicts
 os.execute("mkdir -p " .. uci_tmp_path)
+os.execute("rm -rf " .. unmanaged_path)
 os.execute("mkdir -p " .. unmanaged_path)
-os.execute("rm " .. unmanaged_path .. "*")
 -- standard cursor
 local standard = uci.cursor(standard_path)
 -- unmanaged cursor
