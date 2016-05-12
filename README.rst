@@ -62,13 +62,13 @@ UCI configuration options must go in ``/etc/config/openwisp``.
 - ``url``: url of controller, eg: ``https://controller.openwisp.org``
 - ``interval``: time in seconds between checks for changes to the configuration, defaults to ``120``
 - ``verify_ssl``: whether SSL verification must be performed or not, defaults to ``1``
-- ``uuid``: unique identifier of the router configuration in the controller application
-- ``key``: key required to download the configuration
 - ``shared_secret``: shared secret, needed for `Automatic registration`_
-- ``unmanaged``: list of config sections which won't be overwritten, see `Unmanaged Configurations`_
 - ``consistent_key``: whether `Consistent key generation`_ is enabled or not, defaults to ``1``
 - ``test_config``: whether a new configuration must be tested before being considered applied, defaults to ``1``
 - ``test_script``: custom test script, read more about this feature in `Configuration test`_
+- ``uuid``: unique identifier of the router configuration in the controller application
+- ``key``: key required to download the configuration
+- ``unmanaged``: list of config sections which won't be overwritten, see `Unmanaged Configurations`_
 - ``capath``: value passed to curl ``--capath`` argument, defaults to ``/etc/ssl/certs``; see also `curl capath argument <https://curl.haxx.se/docs/manpage.html#--capath>`_
 - ``connect_timeout``: value passed to curl ``--connect-timeout`` argument, defaults to ``15``; see `curl connect-timeout argument <https://curl.haxx.se/docs/manpage.html#--connect-timeout>`_
 - ``max_time``: value passed to curl ``--max-time`` argument, defaults to ``30``; see `curl connect-timeout argument <https://curl.haxx.se/docs/manpage.html#-m>`_
