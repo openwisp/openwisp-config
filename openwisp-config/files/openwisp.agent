@@ -9,6 +9,7 @@ while [ -n "$1" ]; do
 		--uuid) export UUID="$2"; shift;;
 		--key) export KEY="$2"; shift;;
 		--shared-secret) export SHARED_SECRET="$2"; shift;;
+		--consistent-key) export CONSISTENT_KEY="$2"; shift;;
 		--unmanaged) export UNMANAGED="$2"; shift;;
 		--test-config) export TEST_CONFIG="$2"; shift;;
 		--test-script) export TEST_SCRIPT="$2"; shift;;
@@ -41,6 +42,7 @@ fi
 INTERVAL=${INTERVAL:-120}
 VERIFY_SSL=${VERIFY_SSL:-1}
 TEST_CONFIG=${TEST_CONFIG:-1}
+CONSISTENT_KEY=${CONSISTENT_KEY:-1}
 CONNECT_TIMEOUT=${CONNECT_TIMEOUT:-15}
 MAX_TIME=${MAX_TIME:-30}
 CAPATH=${CAPATH:-/etc/ssl/certs}
@@ -85,12 +87,18 @@ register() {
 		   -t openwisp \
 		   -p daemon.info
 	local hostname=$(uci get system.@system[0].hostname)
+	local macaddr=$(ifconfig | grep -v lo | grep HWaddr | awk '/HWaddr/ { print $5 }' | head -n 1)
+	# use macaddress if hostname has not been changed
 	if [ "$hostname" == "OpenWrt" ] || [ "$hostname" == "lede" ]; then
-		# gets the mac address of the first interface that shows in ifconfig
-		hostname=$(ifconfig | grep -v lo | grep HWaddr | awk '/HWaddr/ { print $5 }' | head -n 1)
+		hostname="$macaddr"
 	fi
 	local backend="netjsonconfig.OpenWrt"
 	local params="secret=$SHARED_SECRET&name=$hostname&backend=$backend"
+	# generate key from macaddress + shared secret
+	if [ "$CONSISTENT_KEY" == "1" ]; then
+		local key=$(echo -n "$macaddr+$SHARED_SECRET" | md5sum | awk '{print $1}')
+		params="$params&key=$key"
+	fi
 	$($FETCH_COMMAND -i --data $params $REGISTRATION_URL > $REGISTRATION_PARAMETERS)
 	local exit_code=$?
 

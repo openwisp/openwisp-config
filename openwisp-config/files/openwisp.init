@@ -14,6 +14,7 @@ start_service() {
 	uuid=$(config_get http uuid)
 	key=$(config_get http key)
 	shared_secret=$(config_get http shared_secret)
+	consistent_key=$(config_get http consistent_key)
 	unmanaged=$(config_get http unmanaged)
 	test_config=$(config_get http test_config)
 	test_script=$(config_get http test_script)
@@ -26,6 +27,7 @@ start_service() {
 	if [ $uuid ]; then uuid="--uuid $uuid"; fi
 	if [ $key ]; then key="--key $key"; fi
 	if [ $shared_secret ]; then shared_secret="--shared-secret $shared_secret"; fi
+	if [ $consistent_key ]; then consistent_key="--consistent-key $consistent_key"; fi
 	if [ -n "$unmanaged" ]; then
 		# replace spaces with commas to avoid problems when
 		# passing this arg to procd_set_param command
@@ -53,8 +55,8 @@ start_service() {
 	fi
 
 	procd_open_instance
-	procd_set_param command $PROG $url $interval $verify_ssl $uuid $key \
-	                        $shared_secret $unmanaged $test_config $test_script \
+	procd_set_param command $PROG $url $interval $verify_ssl $uuid $key $shared_secret \
+	                        $consistent_key $unmanaged $test_config $test_script \
 	                        $connect_timeout $max_time $capath
 	procd_set_param respawn
 	procd_close_instance
