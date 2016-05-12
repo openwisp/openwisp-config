@@ -175,7 +175,7 @@ configuration_changed() {
 
 # applies a specified configuration archive
 apply_configuration() {
-	local sleep_time=${2-2}
+	local sleep_time=${2-5}
 	# store unmanaged config (if enabled)
 	call_store_unmanaged
 	# -r restores the specified configuration archive
@@ -190,7 +190,7 @@ apply_configuration() {
 	fi
 	# merge default config (if enabled)
 	merge_unmanaged
-	# apply changes and wait 2 seconds
+	# apply changes and wait $sleep_time
 	/usr/sbin/apply_config
 	sleep $sleep_time
 }
@@ -233,7 +233,7 @@ test_configuration() {
 	logger -s "Testing configuration" \
 	       -t openwisp \
 	       -p daemon.info
-	apply_configuration $1 6  # wait 6 seconds instead of 2
+	apply_configuration $1
 
 	if [ -z "$TEST_SCRIPT" ]; then
 		get_checksum $TEST_CHECKSUM
@@ -311,7 +311,7 @@ update_configuration() {
 		result=$?
 	# testing diabled
 	else
-		apply_configuration $CONFIGURATION_ARCHIVE 6  # wait 6 seconds
+		apply_configuration $CONFIGURATION_ARCHIVE
 		# only try to report success
 		report_status "running"
 		result=$?
