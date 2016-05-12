@@ -83,7 +83,7 @@ check_header(){
 
 # performs automatic registration
 register() {
-	logger -s "Registering new device" \
+	logger -s "Registering device" \
 		   -t openwisp \
 		   -p daemon.info
 	local hostname=$(uci get system.@system[0].hostname)
@@ -96,12 +96,11 @@ register() {
 	local params="secret=$SHARED_SECRET&name=$hostname&backend=$backend"
 	# generate key from macaddress + shared secret
 	if [ "$CONSISTENT_KEY" == "1" ]; then
-		local key=$(echo -n "$macaddr+$SHARED_SECRET" | md5sum | awk '{print $1}')
-		params="$params&key=$key"
+		local consistent_key=$(echo -n "$macaddr+$SHARED_SECRET" | md5sum | awk '{print $1}')
+		params="$params&key=$consistent_key"
 	fi
 	$($FETCH_COMMAND -i --data $params $REGISTRATION_URL > $REGISTRATION_PARAMETERS)
 	local exit_code=$?
-
 	# report eventual failures and return
 	if [ "$exit_code" != "0" ]; then
 		logger -s "Failed to connect to controller (register): curl exit code $exit_code" \
@@ -109,10 +108,8 @@ register() {
 		       -p daemon.err
 		return 1
 	fi
-
-	# exit if not openwisp
+	# exit if response does not seem to come from openwisp controller
 	check_header $REGISTRATION_PARAMETERS
-
 	# exit if controller returns errors
 	if [ $(head -n 1 $REGISTRATION_PARAMETERS | grep -c "201 Created") -lt 1 ]; then
 		local message=$(cat $REGISTRATION_PARAMETERS | grep "error:")
@@ -121,18 +118,24 @@ register() {
 			   -p daemon.err
 		exit 5
 	fi
-
 	# set configuration options and reload
 	export UUID=$(cat $REGISTRATION_PARAMETERS | grep uuid | awk '/uuid: / { print $2 }')
 	export KEY=$(cat $REGISTRATION_PARAMETERS | grep key | awk '/key: / { print $2 }')
+	local name=$(cat $REGISTRATION_PARAMETERS | grep hostname | awk '/hostname: / { print $2 }')
+	local new=$(cat $REGISTRATION_PARAMETERS | grep 'is-new' | awk '/is-new: / { print $2 }')
+	# keep backward compatibility with older controller (TODO: remove this in 0.5)
+	[ -z "$name" ] && name="$hostname"
+	[ -z "$new" ] && new="1"
+	# persist uuid and key in conf
 	uci set openwisp.http.uuid=$UUID
 	uci set openwisp.http.key=$KEY
-
 	# remove shared secret to avoid accidental re-registration
 	uci set openwisp.http.shared_secret=""
 	uci commit openwisp
 	rm $REGISTRATION_PARAMETERS
-	logger -s "Device registered successfully as $hostname, id: $UUID" \
+	# log operation
+	local prefix=$([ "$new" == "1" ] && echo "New" || echo "Existing")
+	logger -s "$prefix device registered successfully as $name, id: $UUID" \
 		   -t openwisp \
 		   -p daemon.info
 }
