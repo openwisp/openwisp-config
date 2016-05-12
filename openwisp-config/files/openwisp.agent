@@ -236,15 +236,14 @@ test_configuration() {
 	apply_configuration $1
 
 	if [ -z "$TEST_SCRIPT" ]; then
-		get_checksum $TEST_CHECKSUM
-		local test_ret=$?
-		rm $TEST_CHECKSUM
+		perform_default_test
+		local test_result=$?
 	else
 		$TEST_SCRIPT
-		local test_ret=$?
+		local test_result=$?
 	fi
 
-	if [ $test_ret -gt 0 ]; then
+	if [ $test_result -gt 0 ]; then
 		logger -s "Configuration test failed! Restoring previous backup" \
 		       -t openwisp \
 		       -p daemon.err
@@ -261,6 +260,21 @@ test_configuration() {
 
 	rm $CONFIGURATION_BACKUP
 	return $ret
+}
+
+perform_default_test() {
+	# max 3 attempts to get checksum
+	for i in $(seq 1 3); do
+		$($FETCH_COMMAND -i --connect-timeout 5 --max-time 5 $CHECKSUM_URL > $TEST_CHECKSUM)
+		local result=$?
+		if [ $result -gt 0 ]; then
+			sleep 5
+		else
+			break
+		fi
+	done
+	rm $TEST_CHECKSUM
+	return $result
 }
 
 # stores unmanaged configuration sections that will be merged
