@@ -19,6 +19,7 @@ assertEquals = luaunit.assertEquals
 local function _clean()
     os.remove(prefix .. 'network')
     os.remove(prefix .. 'system')
+    os.remove(prefix)
 end
 
 TestStoreUnmanaged = {}
