@@ -1,4 +1,6 @@
 #!/usr/bin/env lua
+-- implements 'unmanaged configurations'
+-- see https://github.com/openwisp/openwisp-config#unmanaged-configurations
 
 require('os')
 require('io')
@@ -17,21 +19,21 @@ for key, value in pairs(arg) do
     end
 end
 
-local standard_prefix = test and "../tests/" or "/etc/"
-local unmanaged_prefix = test and "../tests/" or "/tmp/openwisp/"
-local standard_path = standard_prefix .. "config/"
-local unmanaged_path = unmanaged_prefix .. "unmanaged/"
-local uci_tmp_path = "/tmp/openwisp/.uci"
+local standard_prefix = test and '../tests/' or '/etc/'
+local unmanaged_prefix = test and '../tests/' or '/tmp/openwisp/'
+local standard_path = standard_prefix .. 'config/'
+local unmanaged_path = unmanaged_prefix .. 'unmanaged/'
+local uci_tmp_path = '/tmp/openwisp/.uci'
 
 function split(input, sep)
-    if input == "" or input == nil then
+    if input == '' or input == nil then
         return {}
     end
     if sep == nil then
-        sep = "%s"
+        sep = '%s'
     end
     local t={}; i=1
-    for str in string.gmatch(input, "([^" .. sep .. "]+)") do
+    for str in string.gmatch(input, '([^' .. sep .. ']+)') do
         t[i] = str
         i = i + 1
     end
@@ -91,14 +93,14 @@ end
 -- convert list of blocks in a table with a structure like:
 -- {
 --   network = {
---     {name = "loopback"},
---     {name = "globals"},
---     {type = "switch"},
---     {type = "switch_vlan"}
+--     {name = 'loopback'},
+--     {name = 'globals'},
+--     {type = 'switch'},
+--     {type = 'switch_vlan'}
 --   },
 --   system = {
---     {name = "ntp"},
---     {type = "led"}
+--     {name = 'ntp'},
+--     {type = 'led'}
 --   }
 -- }
 local unmanaged_map = {}
@@ -128,9 +130,9 @@ for i, block in pairs(block_list) do
 end
 
 -- cleanup temporary files to avoid conflicts
-os.execute("mkdir -p " .. uci_tmp_path)
-os.execute("rm -rf " .. unmanaged_path)
-os.execute("mkdir -p " .. unmanaged_path)
+os.execute('mkdir -p ' .. uci_tmp_path)
+os.execute('rm -rf ' .. unmanaged_path)
+os.execute('mkdir -p ' .. unmanaged_path)
 -- standard cursor
 local standard = uci.cursor(standard_path)
 -- unmanaged cursor
