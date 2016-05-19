@@ -83,7 +83,7 @@ check_header(){
 
 # performs automatic registration
 register() {
-	logger -s "Registering device" \
+	logger "Registering device" \
 		   -t openwisp \
 		   -p daemon.info
 	local hostname=$(uci get system.@system[0].hostname)
@@ -135,7 +135,7 @@ register() {
 	rm $REGISTRATION_PARAMETERS
 	# log operation
 	local prefix=$([ "$new" == "1" ] && echo "New" || echo "Existing")
-	logger -s "$prefix device registered successfully as $name, id: $UUID" \
+	logger "$prefix device registered successfully as $name, id: $UUID" \
 		   -t openwisp \
 		   -p daemon.info
 }
@@ -175,7 +175,7 @@ configuration_changed() {
 	local REMOTE_CHECKSUM=$(tail -n 1 $CONFIGURATION_CHECKSUM 2> /dev/null)
 
 	if [ "$CURRENT_CHECKSUM" != "$REMOTE_CHECKSUM" ]; then
-		logger -s "Configuration in controller has changed" \
+		logger "Configuration in controller has changed" \
 		       -t openwisp \
 		       -p daemon.info
 		return 1
@@ -241,7 +241,7 @@ report_status() {
 test_configuration() {
 	sysupgrade -b $CONFIGURATION_BACKUP
 
-	logger -s "Testing configuration" \
+	logger "Testing configuration" \
 	       -t openwisp \
 	       -p daemon.info
 	apply_configuration $1
@@ -262,7 +262,7 @@ test_configuration() {
 		report_status "error"
 		local ret=1
 	else
-		logger -s "Configuration test succeded" \
+		logger "Configuration test succeded" \
 		       -t openwisp \
 		       -p daemon.info
 		report_status "running"
@@ -345,7 +345,7 @@ update_configuration() {
 	rm $APPLYING_CONF
 
 	if [ "$result" == "0" ]; then
-		logger -s "Configuration applied" \
+		logger "Configuration applied" \
 		       -t openwisp \
 		       -p daemon.info
 	fi
