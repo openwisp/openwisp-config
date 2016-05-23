@@ -311,6 +311,16 @@ merge_unmanaged() {
 	uci commit
 }
 
+# ensures there are no anonymous UCI blocks
+call_name_anonymous_uci() {
+	output=$(/usr/sbin/name_anonymous_uci)
+	if [ -n "$output" ]; then
+		logger "The following uci configs have been renamed: $output" \
+		       -t openwisp \
+		       -p daemon.info
+	fi
+}
+
 # downloads configuration from controller
 # performs test (if testing enabled)
 # and applies it
@@ -325,6 +335,8 @@ update_configuration() {
 		       -p daemon.err
 		return 3
 	fi
+
+	call_name_anonymous_uci
 
 	# control file to avoid reloading the agent while
 	# configuration is still being applied

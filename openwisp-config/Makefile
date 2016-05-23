@@ -18,7 +18,8 @@ define Package/openwisp-config
 	TITLE:=OpenWISP Configuration Agent
 	MAINTAINER:=OpenWISP Project info@openwisp.org
 	PKG_ARCH:=all
-	DEPENDS:=+libpolarssl +curl +ca-certificates +lua +libuci-lua
+	DEPENDS:=+libpolarssl +curl +ca-certificates
+	         +lua +libuci-lua +luafilesystem
 endef
 
 define Package/openwisp-config/description
