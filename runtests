@@ -1,4 +1,4 @@
 #!/bin/bash
 cd openwisp-config/tests/
 lua test_store_unmanaged.lua -v
-rm -rf unmanaged/
+lua test_uci_autoname.lua -v

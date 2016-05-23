@@ -201,8 +201,8 @@ apply_configuration() {
 	fi
 	# merge default config (if enabled)
 	merge_unmanaged
-	# apply changes and wait $sleep_time
-	/usr/sbin/apply_config
+	# reload changes and wait $sleep_time
+	/usr/sbin/openwisp-reload-config
 	sleep $sleep_time
 }
 
@@ -294,10 +294,10 @@ call_store_unmanaged() {
 	if [ -z "$UNMANAGED" ]; then
 		return 0
 	fi
-	/usr/sbin/store_unmanaged -o="$UNMANAGED"
+	/usr/sbin/openwisp-store-unmanaged -o="$UNMANAGED"
 }
 
-# merges unmanaged configuration files stored by store_unmanaged()
+# merges unmanaged configuration files stored by call_store_unmanaged()
 merge_unmanaged() {
 	if [ -z "$UNMANAGED" ]; then
 		return 0
@@ -312,8 +312,8 @@ merge_unmanaged() {
 }
 
 # ensures there are no anonymous UCI blocks
-call_name_anonymous_uci() {
-	output=$(/usr/sbin/name_anonymous_uci)
+call_uci_autoname() {
+	output=$(/usr/sbin/openwisp-uci-autoname)
 	if [ -n "$output" ]; then
 		logger "The following uci configs have been renamed: $output" \
 		       -t openwisp \
@@ -336,7 +336,7 @@ update_configuration() {
 		return 3
 	fi
 
-	call_name_anonymous_uci
+	call_uci_autoname
 
 	# control file to avoid reloading the agent while
 	# configuration is still being applied

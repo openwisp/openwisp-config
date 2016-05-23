@@ -18,7 +18,7 @@ define Package/openwisp-config
 	TITLE:=OpenWISP Configuration Agent
 	MAINTAINER:=OpenWISP Project info@openwisp.org
 	PKG_ARCH:=all
-	DEPENDS:=+libpolarssl +curl +ca-certificates
+	DEPENDS:=+libpolarssl +curl +ca-certificates \
 	         +lua +libuci-lua +luafilesystem
 endef
 
@@ -42,18 +42,11 @@ define Package/openwisp-config/install
 		$(1)/usr/sbin \
 		$(1)/etc/init.d \
 		$(1)/etc/config \
+		$(1)/usr/lib/lua/openwisp
 
 	$(INSTALL_BIN) \
 		files/openwisp.agent \
 		$(1)/usr/sbin/openwisp_config
-
-	$(INSTALL_BIN) \
-		files/apply_config \
-		$(1)/usr/sbin/apply_config
-
-	$(INSTALL_BIN) \
-		files/store_unmanaged.lua \
-		$(1)/usr/sbin/store_unmanaged
 
 	$(INSTALL_BIN) \
 		files/openwisp.init \
@@ -61,6 +54,22 @@ define Package/openwisp-config/install
 
 	$(INSTALL_CONF) files/openwisp.config \
 		$(1)/etc/config/openwisp
+
+	$(INSTALL_BIN) \
+		files/sbin/openwisp-reload-config \
+		$(1)/usr/sbin/openwisp-reload-config
+
+	$(INSTALL_BIN) \
+		files/lib/openwisp/utils.lua \
+		$(1)/usr/lib/lua/openwisp/utils.lua
+
+	$(INSTALL_BIN) \
+		files/sbin/openwisp-store-unmanaged.lua \
+		$(1)/usr/sbin/openwisp-store-unmanaged
+
+	$(INSTALL_BIN) \
+		files/sbin/openwisp-uci-autoname.lua \
+		$(1)/usr/sbin/openwisp-uci-autoname
 endef
 
 $(eval $(call BuildPackage,openwisp-config))

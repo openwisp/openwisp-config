@@ -3,7 +3,7 @@ require('io')
 -- manually add lib dir to lua package path
 package.path = package.path .. ';../files/lib/?.lua'
 local luaunit = require('luaunit')
-local store_unmanaged = assert(loadfile("../files/store_unmanaged.lua"))
+local store_unmanaged = assert(loadfile("../files/sbin/openwisp-store-unmanaged.lua"))
 local default_blocks = "system.ntp " ..
                        "system.@led " ..
                        "network.loopback " ..

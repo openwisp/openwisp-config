@@ -3,7 +3,7 @@ require('io')
 -- manually add lib dir to lua package path
 package.path = package.path .. ';../files/lib/?.lua'
 local luaunit = require('luaunit')
-local name_anonymous_uci = assert(loadfile("../files/name_anonymous_uci.lua"))
+local name_anonymous_uci = assert(loadfile("../files/sbin/openwisp-uci-autoname.lua"))
 local string = string
 local prefix = './anonymous/'
 assertNotNil = luaunit.assertNotNil
