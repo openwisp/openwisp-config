@@ -8,19 +8,18 @@ for config in /etc/config/*; do
 	uci show "${file##*/}" > /var/run/config.check/$file
 done
 MD5FILE=/var/run/config.md5
-[ -f $MD5FILE ] && {
-	for c in `md5sum -c $MD5FILE 2>/dev/null| grep FAILED | cut -d: -f1`; do
+if [ -f $MD5FILE ]; then
+	for c in $(md5sum -c $MD5FILE 2>/dev/null| grep FAILED | cut -d: -f1); do
 		local service="$(basename $c)"
 		local initd="/etc/init.d/$service"
-		local service_triggers=$(grep -c "service_triggers()" "$initd")
+		local is_registered=$(ubus call service list "{\"name\": \"$service\"}" | grep -c $service)
 		# try reloading service via ubus
 		ubus call service event "{ \"type\": \"config.change\", \"data\": { \"package\": \"$service\" }}"
-		# if init.d file exists and service_triggers have not been defined
-		# do explicit reload
-		if [ -f $initd ] && [ $service_triggers -lt 1 ]; then
-			$($initd reload)
+		# if init.d file exists and service is not registerd in procd do explicit reload
+		if [ -f $initd ] && [ $is_registered -lt 1 ]; then
+			$initd reload
 		fi
 	done
-}
+fi
 md5sum /var/run/config.check/* > $MD5FILE
 rm -rf /var/run/config.check
