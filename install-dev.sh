@@ -6,7 +6,7 @@ apt-get update
 # install cmake and git
 apt-get install -y cmake git-core
 # install lua
-apt-get install -y lua5.1 liblua5.1-0-dev
+apt-get install -y lua5.1 liblua5.1-0-dev luarocks
 # install json-c
 apt-get install -y dh-autoreconf
 git clone https://github.com/json-c/json-c.git --depth=1 && cd json-c
@@ -18,6 +18,8 @@ git clone https://git.openwrt.org/project/uci.git --depth=1 && cd uci
 cmake . && make install && cd ..
 # update links to shared libraries
 ldconfig -v
+# install luafilesystem
+luarocks install luafilesystem
 # install luaunit
 git clone https://github.com/bluebird75/luaunit.git --depth=1
 mkdir -p /usr/share/lua/5.1/
