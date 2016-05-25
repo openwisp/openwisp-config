@@ -22,12 +22,12 @@ local function _clean()
     os.remove(prefix)
 end
 
-TestStoreUnmanaged = {}
+TestUciAutoname = {}
 
-TestStoreUnmanaged.setUp = _setup
-TestStoreUnmanaged.tearDown = _clean
+TestUciAutoname.setUp = _setup
+TestUciAutoname.tearDown = _clean
 
-function TestStoreUnmanaged.test_default_behaviour()
+function TestUciAutoname.test_default_behaviour()
     name_anonymous_uci('--test=1')
     -- check network
     local file = io.open(prefix .. 'network')
