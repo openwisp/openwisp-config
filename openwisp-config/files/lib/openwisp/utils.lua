@@ -38,7 +38,7 @@ function write_uci_option(cursor, config, name, key, value)
     -- avoid duplicate list settings
     if type(value) == 'table' then
         -- create set with unique values
-        set = {}
+        local set = {}
         for i, el in pairs(value) do
             set[el] = true
         end
