@@ -5,15 +5,15 @@ require('io')
 require('uci')
 require('openwisp.utils')
 luaunit = require('luaunit')
-uci_write_dir = './tmp'
+write_dir = './utils'
 
 TestUtils = {
     setUp = function()
-        os.execute('mkdir '..uci_write_dir)
-        os.execute('touch '..uci_write_dir..'/network')
+        os.execute('mkdir '..write_dir)
+        os.execute('touch '..write_dir..'/network')
     end,
     tearDown = function()
-        os.execute('rm -rf '..uci_write_dir)
+        os.execute('rm -rf '..write_dir)
     end
 }
 
@@ -24,7 +24,7 @@ function TestUtils.test_starts_with_dot()
 end
 
 function TestUtils.test_write_uci_block_named()
-    u = uci.cursor('./tmp')
+    u = uci.cursor(write_dir)
     write_uci_block(u, 'network', {
         [".name"] = "globals",
         [".type"] = "globals",
@@ -32,7 +32,7 @@ function TestUtils.test_write_uci_block_named()
         ula_prefix = "fd8e:f40a:fede::/48"
     })
     u:commit('network')
-    local file = io.open(uci_write_dir .. '/network')
+    local file = io.open(write_dir .. '/network')
     luaunit.assertNotNil(file)
     local contents = file:read('*all')
     luaunit.assertNotNil(string.find(contents, "config globals 'globals'"))
@@ -40,7 +40,7 @@ function TestUtils.test_write_uci_block_named()
 end
 
 function TestUtils.test_write_uci_block_anon()
-    u = uci.cursor('./tmp')
+    u = uci.cursor(write_dir)
     write_uci_block(u, 'network', {
         [".anonymous"] = true,
         [".name"] = "cfg0c1ec7",
@@ -51,7 +51,7 @@ function TestUtils.test_write_uci_block_anon()
         vlan = "2"
     })
     u:commit('network')
-    local file = io.open(uci_write_dir .. '/network')
+    local file = io.open(write_dir .. '/network')
     luaunit.assertNotNil(file)
     local contents = file:read('*all')
     luaunit.assertNotNil(string.find(contents, "config switch_vlan"))
