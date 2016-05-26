@@ -7,6 +7,13 @@ function starts_with_dot(str)
     return false
 end
 
+function add_values_to_set(set, values)
+    for i, el in pairs(values) do
+        set[el] = true
+    end
+    return set
+end
+
 -- writes uci section, eg:
 --
 -- write_uci_section(cursor, 'network', {
@@ -49,9 +56,12 @@ function write_uci_option(cursor, config, name, key, value)
     if type(value) == 'table' then
         -- create set with unique values
         local set = {}
-        for i, el in pairs(value) do
-            set[el] = true
+        -- read existing value
+        current = cursor:get(config, name, key)
+        if type(current) == 'table' then
+            set = add_values_to_set(set, current)
         end
+        set = add_values_to_set(set, value)
         -- reset value var with set contents
         value = {}
         for item_value, present in pairs(set) do
