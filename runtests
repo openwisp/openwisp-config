@@ -2,3 +2,4 @@
 cd openwisp-config/tests/
 lua test_store_unmanaged.lua -v
 lua test_uci_autoname.lua -v
+lua test_utils.lua -v
