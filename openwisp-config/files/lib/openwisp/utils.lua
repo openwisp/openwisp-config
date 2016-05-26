@@ -43,3 +43,11 @@ function write_uci_option(cursor, config, name, key, value)
     end
     cursor:set(config, name, key, value)
 end
+
+-- returns true if uci block is empty
+function is_uci_empty(table)
+    for key, value in pairs(table) do
+        if not starts_with_dot(key) then return false end
+    end
+    return true
+end

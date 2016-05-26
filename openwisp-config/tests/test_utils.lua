@@ -54,4 +54,32 @@ function TestUtils.test_write_uci_block_anon()
     luaunit.assertNotNil(string.find(contents, "option ports '0t 1'"))
 end
 
+function TestUtils.test_is_uci_empty_false()
+    luaunit.assertEquals(is_uci_empty({
+        [".name"] = "lan",
+        [".type"] = "interface",
+        [".anonymous"] = false,
+        proto = "dhcp",
+        ip6assign = "60",
+        type = "bridge",
+        force_link = "0",
+        ifname = "eth0.1"
+    }), false)
+    luaunit.assertEquals(is_uci_empty({
+        [".name"] = "globals",
+        [".type"] = "globals",
+        [".anonymous"] = false,
+        ula_prefix = "fd8e:f40a:6701::/48"
+    }), false)
+end
+
+function TestUtils.test_is_uci_empty_true()
+    luaunit.assertEquals(is_uci_empty({
+        [".name"] = "lan",
+        [".type"] = "interface",
+        [".anonymous"] = false,
+        [".index"] = 2
+    }), true)
+end
+
 os.exit(luaunit.LuaUnit.run())
