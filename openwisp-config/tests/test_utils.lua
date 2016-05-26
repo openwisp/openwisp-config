@@ -60,6 +60,26 @@ function TestUtils.test_write_uci_section_anon()
     luaunit.assertNotNil(string.find(contents, "option ports '0t 1'"))
 end
 
+function TestUtils.test_write_uci_section_duplicate_list()
+    u = uci.cursor(write_dir)
+    write_uci_section(u, 'network', {
+        [".name"] = "lan",
+        [".type"] = "interface",
+        [".anonymous"] = false,
+        ifname = "eth0",
+        proto = "static",
+        ipaddr = {"10.0.0.1/24", "10.0.0.1/24"}
+    })
+    u:commit('network')
+    local file = io.open(write_dir .. '/network')
+    luaunit.assertNotNil(file)
+    local contents = file:read('*all')
+    luaunit.assertNotNil(string.find(contents, "list ipaddr '10.0.0.1/24'"))
+    -- count occurrences of list setting and ensure is not repeated
+    local _, count = string.gsub(contents, "list ipaddr '10.0.0.1/24", "")
+    luaunit.assertEquals(count, 1)
+end
+
 function TestUtils.test_is_uci_empty_false()
     luaunit.assertEquals(is_uci_empty({
         [".name"] = "lan",
