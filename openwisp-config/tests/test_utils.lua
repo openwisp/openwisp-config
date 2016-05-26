@@ -129,4 +129,13 @@ function TestUtils.test_remove_uci_options()
     luaunit.assertNil(string.find(contents, "option ipaddr '172.27.254.252/16'"))
 end
 
+function TestUtils.test_is_table_empty_true()
+    luaunit.assertEquals(is_table_empty({}), true)
+end
+
+function TestUtils.test_is_table_empty_false()
+    luaunit.assertEquals(is_table_empty({
+        el = "value"
+    }), false)
+end
 os.exit(luaunit.LuaUnit.run())

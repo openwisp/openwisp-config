@@ -86,3 +86,11 @@ function remove_uci_options(cursor, config, section)
         cursor:delete(config, name)
     end
 end
+
+-- returns true if a table is empty
+function is_table_empty(t)
+    for k, v in pairs(t) do
+        return false
+    end
+    return true
+end
