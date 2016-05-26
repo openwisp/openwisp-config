@@ -17,6 +17,12 @@ TestUtils = {
     end
 }
 
+function TestUtils.test_starts_with_dot()
+    luaunit.assertEquals(starts_with_dot('.name'), true)
+    luaunit.assertEquals(starts_with_dot('.type'), true)
+    luaunit.assertEquals(starts_with_dot('ifname'), false)
+end
+
 function TestUtils.test_write_uci_block_named()
     u = uci.cursor('./tmp')
     write_uci_block(u, 'network', {

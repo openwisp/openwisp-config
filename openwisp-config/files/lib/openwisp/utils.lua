@@ -1,5 +1,12 @@
 -- openwisp uci utils
 
+function starts_with_dot(str)
+    if string.sub(str, 1, 1) == '.' then
+        return true
+    end
+    return false
+end
+
 -- writes uci block, eg:
 --
 --     config interface 'wan'
@@ -25,7 +32,7 @@ end
 -- abstraction for "uci set" which handles corner cases
 function write_uci_option(cursor, config, name, key, value)
     -- ignore properties starting with .
-    if string.sub(key, 1, 1) == '.' then
+    if starts_with_dot(key) then
         return
     end
     -- avoid duplicate list settings
