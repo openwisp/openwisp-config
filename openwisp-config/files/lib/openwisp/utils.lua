@@ -58,3 +58,19 @@ function is_uci_empty(table)
     end
     return true
 end
+
+-- removes uci options in block (table) from a section
+-- and removes section if empty
+function remove_uci_options_from_block(cursor, config, block)
+    local name = block['.name']
+    -- loop over keys in block and remove each one
+    for key, value in pairs(block) do
+        if not starts_with_dot(key) then
+            cursor:delete(config, name, key)
+        end
+    end
+    -- remove entire section if empty
+    if is_uci_empty(cursor:get_all(config, name)) then
+        cursor:delete(config, name)
+    end
+end
