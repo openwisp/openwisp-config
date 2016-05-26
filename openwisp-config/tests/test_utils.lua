@@ -23,9 +23,9 @@ function TestUtils.test_starts_with_dot()
     luaunit.assertEquals(starts_with_dot('ifname'), false)
 end
 
-function TestUtils.test_write_uci_block_named()
+function TestUtils.test_write_uci_section_named()
     u = uci.cursor(write_dir)
-    write_uci_block(u, 'network', {
+    write_uci_section(u, 'network', {
         [".name"] = "globals",
         [".type"] = "globals",
         [".anonymous"] = false,
@@ -39,9 +39,9 @@ function TestUtils.test_write_uci_block_named()
     luaunit.assertNotNil(string.find(contents, "option ula_prefix 'fd8e:f40a:fede::/48'"))
 end
 
-function TestUtils.test_write_uci_block_anon()
+function TestUtils.test_write_uci_section_anon()
     u = uci.cursor(write_dir)
-    write_uci_block(u, 'network', {
+    write_uci_section(u, 'network', {
         [".anonymous"] = true,
         [".name"] = "cfg0c1ec7",
         [".type"] = "switch_vlan",
@@ -88,10 +88,10 @@ function TestUtils.test_is_uci_empty_true()
     }), true)
 end
 
-function TestUtils.test_remove_uci_options_from_block()
+function TestUtils.test_remove_uci_options()
     os.execute('cp ./config/network '..write_dir..'/network')
     u = uci.cursor(write_dir)
-    remove_uci_options_from_block(u, 'network', {
+    remove_uci_options(u, 'network', {
         [".name"] = "wlan1",
         [".type"] = "interface",
         [".anonymous"] = false,

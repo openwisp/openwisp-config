@@ -105,11 +105,11 @@ for config_name, config_values in pairs(unmanaged_map) do
             if element.name then
                 local block = uci_table[element.name]
                 if block then
-                    write_uci_block(unmanaged, config_name, block)
+                    write_uci_section(unmanaged, config_name, block)
                 end
             else
                 standard:foreach(config_name, element.type, function(block)
-                    write_uci_block(unmanaged, config_name, block)
+                    write_uci_section(unmanaged, config_name, block)
                 end)
             end
         end
