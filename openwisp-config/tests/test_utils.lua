@@ -247,4 +247,25 @@ function TestUtils.test_file_exists()
     luaunit.assertEquals(file_exists('./WRONG'), false)
 end
 
+function TestUtils.test_file_to_set()
+    os.execute('echo "line1" > '..write_dir..'/read.list')
+    os.execute('echo "line2" >> '..write_dir..'/read.list')
+    os.execute('echo "line3" >> '..write_dir..'/read.list')
+    set = file_to_set(write_dir..'/read.list')
+    luaunit.assertEquals(set.line1, true)
+    luaunit.assertEquals(set.line2, true)
+    luaunit.assertEquals(set.line3, true)
+    luaunit.assertEquals(set.line4, nil)
+end
+
+function TestUtils.test_set_to_file()
+    write = {line1=true, line2=true}
+    result = set_to_file(write, write_dir..'/write.list')
+    luaunit.assertEquals(result, true)
+    read = file_to_set(write_dir..'/write.list')
+    luaunit.assertEquals(read.line1, true)
+    luaunit.assertEquals(read.line2, true)
+    luaunit.assertEquals(read.line3, nil)
+end
+
 os.exit(luaunit.LuaUnit.run())

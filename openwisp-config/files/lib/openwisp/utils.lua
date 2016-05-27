@@ -134,3 +134,21 @@ function file_exists(path)
     if f ~= nil then io.close(f) return true end
     return false
 end
+
+function file_to_set(path)
+    local f = io.open(path, 'r')
+    local set = {}
+    for line in f:lines() do
+        set[line] = true
+    end
+    return set
+end
+
+function set_to_file(set, path)
+    local f = io.open(path, 'w')
+    for file, bool in pairs(set) do
+        f:write(file, '\n')
+    end
+    io.close(f)
+    return true
+end
