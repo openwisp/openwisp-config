@@ -9,6 +9,21 @@ function starts_with_dot(str)
     return false
 end
 
+function split(input, sep)
+    if input == '' or input == nil then
+        return {}
+    end
+    if sep == nil then
+        sep = '%s'
+    end
+    local t={}; i=1
+    for str in string.gmatch(input, '([^' .. sep .. ']+)') do
+        t[i] = str
+        i = i + 1
+    end
+    return t
+end
+
 function add_values_to_set(set, values)
     for i, el in pairs(values) do
         set[el] = true

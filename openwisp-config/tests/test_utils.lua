@@ -268,4 +268,11 @@ function TestUtils.test_set_to_file()
     luaunit.assertEquals(read.line3, nil)
 end
 
+function TestUtils.test_split()
+    t = {'a', 'b', 'c'}
+    luaunit.assertEquals(split('a b c'), t)
+    luaunit.assertEquals(split('a,b,c', ','), t)
+    luaunit.assertEquals(split('a/b/c', '/'), t)
+end
+
 os.exit(luaunit.LuaUnit.run())

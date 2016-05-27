@@ -26,21 +26,6 @@ local standard_path = standard_prefix .. 'config/'
 local unmanaged_path = unmanaged_prefix .. 'unmanaged/'
 local uci_tmp_path = '/tmp/openwisp/.uci'
 
-function split(input, sep)
-    if input == '' or input == nil then
-        return {}
-    end
-    if sep == nil then
-        sep = '%s'
-    end
-    local t={}; i=1
-    for str in string.gmatch(input, '([^' .. sep .. ']+)') do
-        t[i] = str
-        i = i + 1
-    end
-    return t
-end
-
 function empty_file(path)
     local file = io.open(path, 'w')
     file:write('')
