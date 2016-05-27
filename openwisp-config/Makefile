@@ -70,6 +70,10 @@ define Package/openwisp-config/install
 	$(INSTALL_BIN) \
 		files/sbin/openwisp-uci-autoname.lua \
 		$(1)/usr/sbin/openwisp-uci-autoname
+
+	$(INSTALL_BIN) \
+		files/sbin/openwisp-update-config.lua \
+		$(1)/usr/sbin/openwisp-update-config
 endef
 
 $(eval $(call BuildPackage,openwisp-config))
