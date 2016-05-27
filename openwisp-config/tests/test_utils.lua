@@ -229,4 +229,17 @@ function TestUtils.test_merge_uci_list_duplicate()
     luaunit.assertEquals(count, 1)
 end
 
+function TestUtils.test_dirtree()
+    os.execute('rm '..write_dir..'/*')
+    os.execute('touch '..write_dir..'/f1')
+    os.execute('touch '..write_dir..'/f2')
+    os.execute('mkdir '..write_dir..'/inner')
+    os.execute('touch '..write_dir..'/f3')
+    count = 0
+    for filename, attr in dirtree(write_dir) do
+        count = count + 1
+    end
+    luaunit.assertEquals(count, 4)
+end
+
 os.exit(luaunit.LuaUnit.run())
