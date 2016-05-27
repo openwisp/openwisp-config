@@ -24,6 +24,23 @@ function split(input, sep)
     return t
 end
 
+function basename(path)
+    local parts = split(path, '/')
+    return parts[table.getn(parts)]
+end
+
+function dirname(path)
+    local parts = split(path, '/')
+    local path = '/'
+    local length = table.getn(parts)
+    for i, part in ipairs(parts) do
+        if i < length then
+            path = path..part..'/'
+        end
+    end
+    return path
+end
+
 function add_values_to_set(set, values)
     for i, el in pairs(values) do
         set[el] = true

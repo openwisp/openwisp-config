@@ -275,4 +275,13 @@ function TestUtils.test_split()
     luaunit.assertEquals(split('a/b/c', '/'), t)
 end
 
+function TestUtils.test_basename()
+    luaunit.assertEquals(basename('/etc/config/network'), 'network')
+    luaunit.assertEquals(basename('./profile'), 'profile')
+end
+
+function TestUtils.test_dirname()
+    luaunit.assertEquals(dirname('/etc/config/network'), '/etc/config/')
+end
+
 os.exit(luaunit.LuaUnit.run())
