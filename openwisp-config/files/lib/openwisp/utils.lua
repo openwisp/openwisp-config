@@ -1,4 +1,5 @@
 -- openwisp uci utils
+require('io')
 require('lfs')
 
 function starts_with_dot(str)
@@ -126,4 +127,10 @@ function dirtree(dir)
         end
     end
     return coroutine.wrap(function() yieldtree(dir) end)
+end
+
+function file_exists(path)
+    local f = io.open(path, 'r')
+    if f ~= nil then io.close(f) return true end
+    return false
 end

@@ -242,4 +242,9 @@ function TestUtils.test_dirtree()
     luaunit.assertEquals(count, 4)
 end
 
+function TestUtils.test_file_exists()
+    luaunit.assertEquals(file_exists('./test_utils.lua'), true)
+    luaunit.assertEquals(file_exists('./WRONG'), false)
+end
+
 os.exit(luaunit.LuaUnit.run())
