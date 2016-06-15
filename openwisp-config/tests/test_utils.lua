@@ -129,6 +129,37 @@ function TestUtils.test_remove_uci_options()
     luaunit.assertNil(string.find(contents, "option ipaddr '172.27.254.252/16'"))
 end
 
+function TestUtils.test_remove_uci_options_twice()
+    os.execute('cp ./config/network '..write_dir..'/network')
+    u = uci.cursor(write_dir)
+    remove_uci_options(u, 'network', {
+        [".name"] = "wlan1",
+        [".type"] = "interface",
+        [".anonymous"] = false,
+        [".index"] = 5,
+        ipaddr = "172.27.254.252/16",
+        proto = "static",
+        ifname = "wlan1"
+    })
+    u:commit('network')
+    remove_uci_options(u, 'network', {
+        [".name"] = "wlan1",
+        [".type"] = "interface",
+        [".anonymous"] = false,
+        [".index"] = 5,
+        ipaddr = "172.27.254.252/16",
+        proto = "static",
+        ifname = "wlan1"
+    })
+    u:commit('network')
+    local file = io.open(write_dir .. '/network')
+    luaunit.assertNotNil(file)
+    local contents = file:read('*all')
+    luaunit.assertNil(string.find(contents, "config interface 'wlan1'"))
+    luaunit.assertNil(string.find(contents, "option ifname 'wlan1'"))
+    luaunit.assertNil(string.find(contents, "option ipaddr '172.27.254.252/16'"))
+end
+
 function TestUtils.test_is_table_empty_true()
     luaunit.assertEquals(is_table_empty({}), true)
 end

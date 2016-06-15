@@ -126,7 +126,8 @@ function remove_uci_options(cursor, config, section)
         end
     end
     -- remove entire section if empty
-    if is_uci_empty(cursor:get_all(config, name)) then
+    local uci = cursor:get_all(config, name)
+    if uci and is_uci_empty(uci) then
         cursor:delete(config, name)
     end
 end
