@@ -141,30 +141,23 @@ Unmanaged Configurations
 In some cases it is necessary to ensure that some configuration sections won't be
 overwritten by the controller.
 
-This brings two main advantages:
+These settings are called "unmanaged", in the sense that are not managed remotely.
 
-- it frees you from defining a lot of boilerplate configuration in the controller,
-  think about LED settings, switch directives, NTP configuration and so on
-- it allows you to define settings that can be managed manually via luci/SSH when needed,
-  think about a user wanting to change its LAN ip settings from dhcp to a precise static address
-
-These are the default unmanaged settings::
+The default unmanaged settings are the following ones::
 
     config controller 'http'
             ...
-            list unmanaged 'system.ntp'
             list unmanaged 'system.@led'
             list unmanaged 'network.loopback'
-            list unmanaged 'network.globals'
-            list unmanaged 'network.lan'
-            list unmanaged 'network.wan'
             list unmanaged 'network.@switch'
             list unmanaged 'network.@switch_vlan'
             ...
 
-Note the lines with the `@` sign; that syntax means that any UCI section of that type will be unmanaged.
+Note the lines with the `@` sign; this syntax means any UCI section of the specified type will be unmanaged.
 
-All the other lines refer to precise named UCI settings, eg: ``network.lan`` refers to the LAN interface.
+In the previous example, the loopback interface, all ``led settings``, all ``switch`` and ``switch_vlan``
+directives will never be overwritten by the remote configuration and will only be editable via SSH
+or via the web interface.
 
 Disable Unmanaged Configurations
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

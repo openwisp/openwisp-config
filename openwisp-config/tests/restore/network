@@ -1,0 +1,9 @@
+config interface 'lan'
+	option ifname 'eth0'
+	option proto 'dhcp'
+	option unmanaged_test '1'
+
+config interface 'wan'
+	option ifname 'eth1'
+	option proto 'static'
+	list ipaddr '10.0.0.1/24'

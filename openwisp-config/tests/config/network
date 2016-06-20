@@ -17,6 +17,7 @@ config interface 'lan'
 config interface 'wan'
 	option ifname 'eth0.2'
 	option proto 'none'
+	option test_restore '1'
 
 config interface 'wlan0'
 	option ifname 'wlan0'

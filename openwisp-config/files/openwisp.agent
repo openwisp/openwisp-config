@@ -194,15 +194,14 @@ apply_configuration() {
 	# update local configuration
 	/usr/sbin/openwisp-update-config --merge=$MERGE_CONFIG
 	local exit_code=$?
-
 	if [ "$exit_code" != "0" ]; then
 		logger -s "Could not update configuration, openwisp-update-config exit code was $exit_code" \
 		       -t openwisp \
 		       -p daemon.crit
 		return 1
 	fi
-	# merge default config (if enabled)
-	merge_unmanaged
+	# restore unmanaged configurations
+	/usr/sbin/openwisp-restore-unmanaged
 	# reload changes and wait $sleep_time
 	/usr/sbin/openwisp-reload-config
 	sleep $sleep_time
@@ -297,20 +296,6 @@ call_store_unmanaged() {
 		return 0
 	fi
 	/usr/sbin/openwisp-store-unmanaged -o="$UNMANAGED"
-}
-
-# merges unmanaged configuration files stored by call_store_unmanaged()
-merge_unmanaged() {
-	if [ -z "$UNMANAGED" ]; then
-		return 0
-	fi
-
-	for path in $UNMANAGED_DIR/*
-	do
-		local config=$(basename $path)
-		uci -m -f $path import $config
-	done
-	uci commit
 }
 
 # ensures there are no anonymous UCI blocks
