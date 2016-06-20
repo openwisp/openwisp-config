@@ -16,6 +16,7 @@ start_service() {
 	shared_secret=$(config_get http shared_secret)
 	consistent_key=$(config_get http consistent_key)
 	unmanaged=$(config_get http unmanaged)
+	merge_config=$(config_get http merge_config)
 	test_config=$(config_get http test_config)
 	test_script=$(config_get http test_script)
 	connect_timeout=$(config_get http connect_timeout)
@@ -34,6 +35,7 @@ start_service() {
 		unmanaged=$(echo $unmanaged | tr ' ' ',')
 		unmanaged="--unmanaged $unmanaged";
 	fi
+	if [ $merge_config ]; then merge_config="--merge-config $merge_config"; fi
 	if [ $test_config ]; then test_config="--test-config $test_config"; fi
 	if [ $test_script ]; then test_script="--test-script $test_script"; fi
 	if [ $connect_timeout ]; then connect_timeout="--connect-timeout $connect_timeout"; fi
@@ -56,8 +58,8 @@ start_service() {
 
 	procd_open_instance
 	procd_set_param command $PROG $url $interval $verify_ssl $uuid $key $shared_secret \
-	                        $consistent_key $unmanaged $test_config $test_script \
-	                        $connect_timeout $max_time $capath
+	                        $consistent_key $unmanaged $merge_config $test_config \
+	                        $test_script $connect_timeout $max_time $capath
 	procd_set_param respawn
 	procd_close_instance
 	logger -s "$PROG_NAME started" \

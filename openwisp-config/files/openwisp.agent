@@ -10,6 +10,7 @@ while [ -n "$1" ]; do
 		--key) export KEY="$2"; shift;;
 		--shared-secret) export SHARED_SECRET="$2"; shift;;
 		--consistent-key) export CONSISTENT_KEY="$2"; shift;;
+		--merge-config) export MERGE_CONFIG="$2"; shift;;
 		--unmanaged) export UNMANAGED="$2"; shift;;
 		--test-config) export TEST_CONFIG="$2"; shift;;
 		--test-script) export TEST_SCRIPT="$2"; shift;;
@@ -41,6 +42,7 @@ fi
 
 INTERVAL=${INTERVAL:-120}
 VERIFY_SSL=${VERIFY_SSL:-1}
+MERGE_CONFIG=${MERGE_CONFIG:-1}
 TEST_CONFIG=${TEST_CONFIG:-1}
 CONSISTENT_KEY=${CONSISTENT_KEY:-1}
 CONNECT_TIMEOUT=${CONNECT_TIMEOUT:-15}
@@ -189,12 +191,12 @@ apply_configuration() {
 	local sleep_time=${2-5}
 	# store unmanaged config (if enabled)
 	call_store_unmanaged
-	# -r restores the specified configuration archive
-	sysupgrade -r $1
+	# update local configuration
+	/usr/sbin/openwisp-update-config --merge=$MERGE_CONFIG
 	local exit_code=$?
 
 	if [ "$exit_code" != "0" ]; then
-		logger -s "Could not restore configuration: sysupgrade exit code $exit_code" \
+		logger -s "Could not update configuration, openwisp-update-config exit code was $exit_code" \
 		       -t openwisp \
 		       -p daemon.crit
 		return 1

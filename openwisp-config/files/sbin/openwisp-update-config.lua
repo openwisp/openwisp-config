@@ -6,7 +6,12 @@ require('lfs')
 require('uci')
 require('openwisp.utils')
 
-MERGE = true
+-- parse arguments
+MERGE = true -- default value
+for key, value in pairs(arg) do
+    -- test argument
+    if value == '--merge=0' then MERGE = false; end
+end
 
 downloaded_conf = '/tmp/openwisp/configuration.tar.gz'
 openwisp_dir = '/etc/openwisp'
