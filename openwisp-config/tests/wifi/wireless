@@ -1,0 +1,47 @@
+config wifi-device 'radio0'
+	option path 'platform/ar934x_wmac'
+	option disabled '1'
+	option country 'IT'
+	option phy 'phy0'
+	option hwmode '11g'
+	option channel '9'
+	option type 'mac80211'
+	option htmode 'HT20'
+
+config wifi-device 'radio1'
+	option path 'pci0000:00/0000:00:00.0'
+	option disabled '1'
+	option country 'IT'
+	option phy 'phy1'
+	option hwmode '11a'
+	option channel '48'
+	option type 'mac80211'
+	option htmode 'HT20'
+
+config wifi-iface
+	option ssid 'LEDE'
+	option encryption 'none'
+	option device 'radio0'
+	option mode 'ap'
+	option network 'lan'
+
+config wifi-iface
+	option ssid 'LEDE'
+	option encryption 'none'
+	option device 'radio1'
+	option mode 'ap'
+	option network 'lan'
+
+config wifi-iface
+	option ssid 'OpenWrt'
+	option encryption 'none'
+	option device 'radio0'
+	option mode 'ap'
+	option network 'lan'
+
+config wifi-iface
+	option ssid 'OpenWrt'
+	option encryption 'none'
+	option device 'radio1'
+	option mode 'ap'
+	option network 'lan'

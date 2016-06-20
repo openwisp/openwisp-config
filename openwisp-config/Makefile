@@ -72,6 +72,10 @@ define Package/openwisp-config/install
 		$(1)/usr/sbin/openwisp-restore-unmanaged
 
 	$(INSTALL_BIN) \
+		files/sbin/openwisp-remove-default-wifi.lua \
+		$(1)/usr/sbin/openwisp-remove-default-wifi
+
+	$(INSTALL_BIN) \
 		files/sbin/openwisp-uci-autoname.lua \
 		$(1)/usr/sbin/openwisp-uci-autoname
 

@@ -298,8 +298,10 @@ call_store_unmanaged() {
 	/usr/sbin/openwisp-store-unmanaged -o="$UNMANAGED"
 }
 
-# ensures there are no anonymous UCI blocks
-call_uci_autoname() {
+# 1. removes default wifi-ifaces directive (LEDE or OpenWrt SSID)
+# 2. ensures there are no anonymous UCI blocks
+fix_uci_config() {
+	/usr/sbin/openwisp-remove-default-wifi
 	output=$(/usr/sbin/openwisp-uci-autoname)
 	if [ -n "$output" ]; then
 		logger "The following uci configs have been renamed: $output" \
@@ -323,7 +325,9 @@ update_configuration() {
 		return 3
 	fi
 
-	call_uci_autoname
+	# makes fixes to the default uci config so
+	# it's more suited for remote control
+	fix_uci_config
 
 	# control file to avoid reloading the agent while
 	# configuration is still being applied
