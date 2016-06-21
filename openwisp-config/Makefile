@@ -42,6 +42,7 @@ define Package/openwisp-config/install
 		$(1)/usr/sbin \
 		$(1)/etc/init.d \
 		$(1)/etc/config \
+		$(1)/etc/openwisp \
 		$(1)/usr/lib/lua/openwisp
 
 	$(INSTALL_BIN) \
@@ -82,6 +83,8 @@ define Package/openwisp-config/install
 	$(INSTALL_BIN) \
 		files/sbin/openwisp-update-config.lua \
 		$(1)/usr/sbin/openwisp-update-config
+
+	$(CP) ../VERSION $(1)/etc/openwisp/
 endef
 
 $(eval $(call BuildPackage,openwisp-config))

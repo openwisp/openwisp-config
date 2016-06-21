@@ -3,6 +3,7 @@
 # parse options
 while [ -n "$1" ]; do
 	case "$1" in
+		--version|-v) export VERSION=1; break;;
 		--url) export URL=${2%/}; shift;;  # strip trailing slash
 		--interval) export INTERVAL=$2; shift;;
 		--verify-ssl) export VERIFY_SSL=$2; shift;;
@@ -25,6 +26,12 @@ while [ -n "$1" ]; do
 	esac
 	shift;
 done
+
+if [ "$VERSION" -eq "1" ]; then
+	VERSION=$(cat /etc/openwisp/VERSION)
+	echo "openwisp-config $VERSION"
+	exit 0
+fi
 
 if [ -z "$URL" ]; then
 	logger -s "missing required --url option" \
