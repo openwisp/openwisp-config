@@ -38,6 +38,7 @@ for file in lfs.dir(input_path) do
                 end
                 block['.anonymous'] = false
                 write_uci_section(output, file, block)
+                output:reorder(file, 'system', 0)
                 changed = true
                 -- append new named block to stdout var
                 stdout = stdout .. file .. '.' .. block['.name'] .. ', '
