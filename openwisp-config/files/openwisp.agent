@@ -98,7 +98,7 @@ register() {
 	local hostname=$(uci get system.@system[0].hostname)
 	local macaddr=$(ifconfig | grep -v lo | grep HWaddr | awk '/HWaddr/ { print $5 }' | head -n 1)
 	# use macaddress if hostname has not been changed
-	if [ "$hostname" == "OpenWrt" ] || [ "$hostname" == "lede" ]; then
+	if [ "$hostname" == "OpenWrt" ] || [ "$hostname" == "lede" ] || [ -z "$hostname" ]; then
 		hostname="$macaddr"
 	fi
 	local backend="netjsonconfig.OpenWrt"
