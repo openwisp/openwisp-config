@@ -223,6 +223,22 @@ Changelog
 
 See `CHANGELOG <https://github.com/openwisp/openwisp-config/blob/master/CHANGELOG.rst>`_.
 
+Run tests
+---------
+
+To run the unit tests, you must install the required dependencies first; to do this, you can take
+a look at the `install-dev.sh <https://github.com/openwisp/openwisp-config/blob/master/install-dev.sh>`_
+script.
+
+You can run all the unit tests by launching the dedicated script::
+
+    ./runtests
+
+Alternatively, you can run specifc tests, eg::
+
+    cd openwisp-config/tests/
+    lua test_utils.lua -v
+
 License
 -------
 
