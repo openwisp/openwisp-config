@@ -1,5 +1,3 @@
--- manually add lib dir to lua package path
-package.path = package.path .. ';../files/lib/?.lua'
 require('os')
 require('io')
 luaunit = require('luaunit')

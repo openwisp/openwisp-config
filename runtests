@@ -5,4 +5,4 @@ lua test_store_unmanaged.lua -v
 lua test_restore_unmanaged.lua -v
 lua test_uci_autoname.lua -v
 lua test_utils.lua -v
-lua test_remove_deafult_wifi.lua -v
+lua test_remove_default_wifi.lua -v
