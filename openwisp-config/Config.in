@@ -1,4 +1,0 @@
-menu "Configuration"
-	depends on PACKAGE_openwisp-config
-
-endmenu

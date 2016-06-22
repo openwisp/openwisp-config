@@ -5,39 +5,51 @@
 
 include $(TOPDIR)/rules.mk
 
-PKG_NAME:=openwisp
+PKG_NAME:=openwisp-config
 PKG_VERSION:=$(shell cat ../VERSION)
 PKG_RELEASE:=1
+PKG_BUILD_DIR:=$(BUILD_DIR)/$(PKG_NAME)-$(BUILD_VARIANT)/$(PKG_SOURCE_SUBDIR)
 PKG_LICENSE:=GPL-3.0
 
 include $(INCLUDE_DIR)/package.mk
 
-define Package/openwisp-config
-	SECTION:=openwisp
-	CATEGORY:=OpenWISP
-	TITLE:=OpenWISP Configuration Agent
-	MAINTAINER:=OpenWISP Project info@openwisp.org
-	PKG_ARCH:=all
-	DEPENDS:=+libpolarssl +curl +ca-certificates \
-	         +lua +libuci-lua +luafilesystem
+define Package/openwisp-config/default
+	TITLE:=Remote configuration management agent ($(2) variant)
+	CATEGORY:=Administration
+	SECTION:=admin
+	SUBMENU:=openwisp
+	DEPENDS:=+curl +lua +libuci-lua +luafilesystem $(3)
+	VARIANT:=$(1)
+	MAINTAINER:=Federico Capoano <f.capoano@cineca.it>
+	URL:=http://openwisp.org
 endef
 
-define Package/openwisp-config/description
-	OpenWISP controller agent, updates configuration via HTTP
-endef
-
-define Package/openwisp-config/config
-	source "$(SOURCE)/Config.in"
-endef
+Package/openwisp-config-openssl=$(call Package/openwisp-config/default,openssl,OpenSSL,+ca-certificates +libopenssl)
+Package/openwisp-config-polarssl=$(call Package/openwisp-config/default,polarssl,PolarSSL,+ca-certificates +libpolarssl)
+Package/openwisp-config-cyassl=$(call Package/openwisp-config/default,cyassl,CyaSSL,+ca-certificates +libcyassl)
+Package/openwisp-config-nossl=$(call Package/openwisp-config/default,nossl,No SSL)
 
 define Build/Compile
 endef
 
-define Package/openwisp-config/conffiles
+define Package/openwisp-config-$(BUILD_VARIANT)/conffiles
 /etc/config/openwisp
 endef
 
-define Package/openwisp-config/install
+ifeq ($(BUILD_VARIANT),openssl)
+CONFIG_OPENWISP_UCI:=ssl
+endif
+ifeq ($(BUILD_VARIANT),polarssl)
+CONFIG_OPENWISP_UCI:=ssl
+endif
+ifeq ($(BUILD_VARIANT),cyassl)
+CONFIG_OPENWISP_UCI:=ssl
+endif
+ifeq ($(BUILD_VARIANT),nossl)
+CONFIG_OPENWISP_UCI:=nossl
+endif
+
+define Package/openwisp-config-$(BUILD_VARIANT)/install
 	$(INSTALL_DIR) \
 		$(1)/usr/sbin \
 		$(1)/etc/init.d \
@@ -53,7 +65,7 @@ define Package/openwisp-config/install
 		files/openwisp.init \
 		$(1)/etc/init.d/openwisp_config
 
-	$(INSTALL_CONF) files/openwisp.config \
+	$(INSTALL_CONF) files/openwisp-$(CONFIG_OPENWISP_UCI).config \
 		$(1)/etc/config/openwisp
 
 	$(INSTALL_BIN) \
@@ -87,4 +99,7 @@ define Package/openwisp-config/install
 	$(CP) ../VERSION $(1)/etc/openwisp/
 endef
 
-$(eval $(call BuildPackage,openwisp-config))
+$(eval $(call BuildPackage,openwisp-config-openssl))
+$(eval $(call BuildPackage,openwisp-config-polarssl))
+$(eval $(call BuildPackage,openwisp-config-cyassl))
+$(eval $(call BuildPackage,openwisp-config-nossl))
