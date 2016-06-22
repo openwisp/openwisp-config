@@ -218,11 +218,6 @@ You should see something like::
 
     3800 root      1200 S    {openwisp_config} /bin/sh /usr/sbin/openwisp_config --url https://openwisp2.mydomain.com --verify-ssl 1 --consistent-key 1 ...
 
-Changelog
----------
-
-See `CHANGELOG <https://github.com/openwisp/openwisp-config/blob/master/CHANGELOG.rst>`_.
-
 Run tests
 ---------
 
@@ -238,6 +233,11 @@ Alternatively, you can run specifc tests, eg::
 
     cd openwisp-config/tests/
     lua test_utils.lua -v
+
+Changelog
+---------
+
+See `CHANGELOG <https://github.com/openwisp/openwisp-config/blob/master/CHANGELOG.rst>`_.
 
 License
 -------
