@@ -167,7 +167,14 @@ To disable unmanaged configurations simply remove all the ``unmanaged`` options.
 Compiling openwisp-config
 -------------------------
 
-The following procedure illustrates how to compile *openwisp-config* and its dependencies:
+There are 4 variants of *openwisp-config*:
+
+- **openwisp-config-openssl**: depends on *ca-certificates* and *libopenssl*
+- **openwisp-config-polarssl**: depends on *ca-certificates* and *libpolarssl*
+- **openwisp-config-cyassl**: depends on *ca-certificates* and *libcyassl*
+- **openwisp-config-nossl**: doesn't depend on any SSL library and doesn't install trusted CA certificates
+
+The following procedure illustrates how to compile *openwisp-config-polarssl* and its dependencies:
 
 .. code-block:: shell
 
@@ -182,7 +189,7 @@ The following procedure illustrates how to compile *openwisp-config* and its dep
     # replace with your desired arch target
     arch="ar71xx"
     echo "CONFIG_TARGET_$arch=y" > .config;
-    echo "CONFIG_PACKAGE_openwisp-config=y" >> .config
+    echo "CONFIG_PACKAGE_openwisp-config-polarssl=y" >> .config
     make defconfig
     make tools/install
     make toolchain/install
@@ -194,6 +201,22 @@ The following procedure illustrates how to compile *openwisp-config* and its dep
     make package/ca-certificates/install
     make package/openwisp-config/compile
     make package/openwisp-config/install
+
+Alternatively, you can configure your build interactively with ``make menuconfig``, in this case
+you will need to select the *openwisp-config* variant by going to ``Administration > openwisp``:
+
+.. code-block:: shell
+
+    git clone git://git.openwrt.org/openwrt.git --depth 1
+    cd openwrt
+
+    # configure feeds
+    cp feeds.conf.default feeds.conf
+    echo "src-git openwisp https://github.com/openwisp/openwisp-config.git" >> feeds.conf
+    ./scripts/feeds update -a
+    ./scripts/feeds install -a
+    make menuconfig
+    # go to Administration > openwisp and select the variant you need interactively
 
 Debugging
 ---------
