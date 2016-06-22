@@ -256,6 +256,13 @@ test_configuration() {
 	       -t openwisp \
 	       -p daemon.info
 	apply_configuration $1
+	if [ $? -gt 0 ]; then
+		logger -s "Configuration update aborted" \
+		       -t openwisp \
+		       -p daemon.err
+		report_status "error"
+		return 1
+	fi
 
 	if [ -z "$TEST_SCRIPT" ]; then
 		perform_default_test
