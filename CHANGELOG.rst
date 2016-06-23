@@ -1,12 +1,12 @@
 Change log
 ^^^^^^^^^^
 
-0.4.0 [unreleased]
+0.4.0 [2016-06-23]
 ==================
 
 - `#16 <https://github.com/openwisp/openwisp-config/issues/16>`_: added "Unmanaged Configurations" feature (replaced ``merge_default``)
 - `#19 <https://github.com/openwisp/openwisp-config/issues/19>`_: added smarter configuration merge mechanism
-- `#20 <https://github.com/openwisp/openwisp-config/issues/20>`_: introduced less naive default test
+- `#20 <https://github.com/openwisp/openwisp-config/issues/20>`_: improved default test
 - `#21 <https://github.com/openwisp/openwisp-config/issues/21>`_: introduced automatic naming of anonymous uci sections
 - `daff21f <https://github.com/openwisp/openwisp-config/commit/daff21f>`_: added "Consistent key generation" feature
 - `d6294ce <https://github.com/openwisp/openwisp-config/commit/d6294ce>`_: added ``capath`` argument and configuration option
