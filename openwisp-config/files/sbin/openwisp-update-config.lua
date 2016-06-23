@@ -36,9 +36,9 @@ if lfs.attributes(remote_config_dir, 'mode') == 'directory' then
     for file in lfs.dir(remote_config_dir) do
         local standard_path = standard_config_dir .. '/' .. file
         if lfs.attributes(standard_path, 'mode') == 'file' then
-            remote:foreach(file, nil, function(section)
+            for key, section in pairs(remote:get_all(file)) do
                 remove_uci_options(standard, file, section)
-            end)
+            end
             standard:commit(file)
             -- remove uci file if empty
             local uci = standard:get_all(file)
@@ -68,9 +68,9 @@ if lfs.attributes(remote_config_dir, 'mode') == 'directory' then
             if MERGE then
                 -- avoid "file does not exist" error
                 os.execute('touch ' .. standard_path)
-                remote:foreach(file, nil, function(section)
+                for key, section in pairs(remote:get_all(file)) do
                     write_uci_section(standard, file, section)
-                end)
+                end
                 standard:commit(file)
             -- OVERWRITE mode
             else

@@ -28,9 +28,9 @@ if test then
 end
 
 for file in lfs.dir(input_path) do
-    if lfs.attributes(file, 'mode') ~= 'directory' then
+    if file ~= '.' and file ~= '..' then
         local changed = false
-        input:foreach(file, nil, function(block)
+        for key, block in pairs(input:get_all(file)) do
             if block['.anonymous'] then
                 output:delete(file, block['.name'])
                 if file == 'system' and block['.type'] == 'system' then
@@ -43,7 +43,7 @@ for file in lfs.dir(input_path) do
                 -- append new named block to stdout var
                 stdout = stdout .. file .. '.' .. block['.name'] .. ', '
             end
-        end)
+        end
         if changed then
             output:commit(file)
         end

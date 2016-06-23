@@ -21,9 +21,11 @@ local standard = uci.cursor(standard_path)
 local unmanaged = uci.cursor(unmanaged_path, uci_tmp_path)
 
 for file in lfs.dir(unmanaged_path) do
-    unmanaged:foreach(file, nil, function(section)
-        standard:delete(file, section['.name'])
-        write_uci_section(standard, file, section)
-    end)
-    standard:commit(file)
+    if file ~= '.' and file ~= '..' then
+        for key, section in pairs(unmanaged:get_all(file)) do
+            standard:delete(file, key)
+            write_uci_section(standard, file, section)
+        end
+        standard:commit(file)
+    end
 end
