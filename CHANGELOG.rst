@@ -4,7 +4,16 @@ Change log
 0.4.0 [unreleased]
 ==================
 
-WIP
+- `#16 <https://github.com/openwisp/openwisp-config/issues/16>`_: added "Unmanaged Configurations" feature (replaced ``merge_default``)
+- `#19 <https://github.com/openwisp/openwisp-config/issues/19>`_: added smarter configuration merge mechanism
+- `#20 <https://github.com/openwisp/openwisp-config/issues/20>`_: introduced less naive default test
+- `#21 <https://github.com/openwisp/openwisp-config/issues/21>`_: introduced automatic naming of anonymous uci sections
+- `daff21f <https://github.com/openwisp/openwisp-config/commit/daff21f>`_: added "Consistent key generation" feature
+- `d6294ce <https://github.com/openwisp/openwisp-config/commit/d6294ce>`_: added ``capath`` argument and configuration option
+- `93639af <https://github.com/openwisp/openwisp-config/commit/93639af>`_: added ``connect_timeout`` and ``max_time`` options for curl
+- `9ef6f93 <https://github.com/openwisp/openwisp-config/commit/9ef6f93>`_: added support for LEDE
+- `e122e40 <https://github.com/openwisp/openwisp-config/commit/e122e40>`_: fixed bug in autoregistration when hostname is empty
+- `bd8ad3b <https://github.com/openwisp/openwisp-config/commit/bd8ad3b>`_: improved build options (ssl, category, maintainer)
 
 0.3.1 [2016-03-02]
 ==================
