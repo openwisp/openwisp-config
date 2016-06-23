@@ -13,10 +13,10 @@ for key, value in pairs(arg) do
     if value == '--test=1' then test = true; end
 end
 
-local input_prefix = test and '../tests/' or '/etc/'
-local input_path = input_prefix .. 'config'
-local input = uci.cursor(input_path) -- read operations
-local output = input  -- write operations
+local standard_prefix = test and '../tests/' or '/etc/'
+local standard_path = standard_prefix .. 'config'
+local standard = uci.cursor(standard_path) -- read operations
+local output = standard  -- write operations
 local stdout = ''  -- result
 
 -- if test mode
@@ -27,21 +27,21 @@ if test then
     output = uci.cursor('../tests/anonymous/', uci_tmp_path)
 end
 
-for file in lfs.dir(input_path) do
+for file in lfs.dir(standard_path) do
     if file ~= '.' and file ~= '..' then
         local changed = false
-        for key, block in pairs(input:get_all(file)) do
-            if block['.anonymous'] then
-                output:delete(file, block['.name'])
-                if file == 'system' and block['.type'] == 'system' then
-                    block['.name'] = 'system'
+        for key, section in pairs(standard:get_all(file)) do
+            if section['.anonymous'] then
+                output:delete(file, section['.name'])
+                if file == 'system' and section['.type'] == 'system' then
+                    section['.name'] = 'system'
                 end
-                block['.anonymous'] = false
-                write_uci_section(output, file, block)
+                section['.anonymous'] = false
+                write_uci_section(output, file, section)
                 output:reorder(file, 'system', 0)
                 changed = true
-                -- append new named block to stdout var
-                stdout = stdout .. file .. '.' .. block['.name'] .. ', '
+                -- append new named section to stdout var
+                stdout = stdout .. file .. '.' .. section['.name'] .. ', '
             end
         end
         if changed then

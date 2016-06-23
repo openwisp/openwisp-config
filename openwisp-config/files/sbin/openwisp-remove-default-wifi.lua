@@ -1,4 +1,5 @@
 #!/usr/bin/env lua
+-- removes OpenWrt/LEDE default wifi-iface settings, if present
 
 require('uci')
 
@@ -11,18 +12,18 @@ end
 
 local standard_prefix = test and '../tests/' or '/etc/'
 local standard_path = standard_prefix .. 'config/'
--- standard cursor
-local cursor = uci.cursor(standard_path)
+-- standard standard
+local standard = uci.cursor(standard_path)
 local changed = false
 
-cursor:foreach('wireless', 'wifi-iface', function(section)
+standard:foreach('wireless', 'wifi-iface', function(section)
     if section['.anonymous'] and
        section.encryption == 'none' and
        section.mode == 'ap' and
        (section.ssid == 'LEDE' or section.ssid == 'OpenWrt')
     then
-        cursor:delete('wireless', section['.name'])
+        standard:delete('wireless', section['.name'])
         changed = true
     end
 end)
-if changed then cursor:commit('wireless') end
+if changed then standard:commit('wireless') end

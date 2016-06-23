@@ -1,4 +1,5 @@
 #!/usr/bin/env lua
+-- restores unmanaged configurations
 
 require('uci')
 require('openwisp.utils')
