@@ -241,6 +241,10 @@ You should see something like::
 
     3800 root      1200 S    {openwisp_config} /bin/sh /usr/sbin/openwisp_config --url https://openwisp2.mydomain.com --verify-ssl 1 --consistent-key 1 ...
 
+You can inspect the version of openwisp-config currently installed with::
+
+    openwisp_config --version
+
 Run tests
 ---------
 
