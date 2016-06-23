@@ -8,7 +8,7 @@ openwisp-config
 
 ------------
 
-OpenWRT configuration agent for the new `OpenWISP <http://openwrt.org>`_ Controller
+OpenWRT/LEDE configuration agent for the new `OpenWISP <http://openwrt.org>`_ Controller
 (currently under development, will be based on `django-netjsonconfig <https://github.com/openwisp/django-netjsonconfig>`_).
 
 .. image:: http://netjsonconfig.openwisp.org/en/latest/_images/openwisp.org.svg
@@ -29,30 +29,27 @@ First run:
 
     opkg update
 
-For `ar71xx <https://wiki.openwrt.org/doc/hardware/soc/soc.qualcomm.ar71xx>`_:
+Then install one of the `latest builds <http://downloads.openwisp.org/openwisp-config/>`_:
 
 .. code-block:: shell
 
-    opkg install http://downloads.openwisp.org/openwisp-config/0.3.1/ar71xx/openwisp-config_0.3.1-1_ar71xx.ipk
+    opkg install <URL>
 
-For `rampis <https://wiki.openwrt.org/doc/hardware/soc/soc.mediatek>`_:
+Where ``<URL>`` is the URL of the image that is suitable for your case.
 
-.. code-block:: shell
-
-    opkg install http://downloads.openwisp.org/openwisp-config/0.3.1/ramips/openwisp-config_0.3.1-1_ramips_24kec.ipk
-
-For a list of the latest builds, take a look at `downloads.openwisp.org
+For a list of the latest built images, take a look at `downloads.openwisp.org
 <http://downloads.openwisp.org/openwisp-config/>`_.
 
-If you need a package for other SoCs you will need to compile the package, see
-`Compiling openwisp-config`_.
+If the SoC or OpenWRT version you are using is not available, you have to compile the package,
+(see `Compiling openwisp-config`_).
 
-Once installed, the package needs to be configured (see `Configuration options <#configuration-options>`_ section below)
-and started with::
+Once installed *openwisp-config* needs to be configured (see `Configuration options <#configuration-options>`_)
+and then started with::
 
     /etc/init.d/openwisp_config start
 
-To ensure the agent is working correctly find out how to debug in the `Debugging <#debugging>`_ section.
+To ensure the agent is working correctly find out how to perform debugging in
+the `Debugging <#debugging>`_ section.
 
 Configuration options
 ---------------------
@@ -240,6 +237,10 @@ If you are in doubt openwisp-config is running at all, you can check with::
 You should see something like::
 
     3800 root      1200 S    {openwisp_config} /bin/sh /usr/sbin/openwisp_config --url https://openwisp2.mydomain.com --verify-ssl 1 --consistent-key 1 ...
+
+You can inspect the version of openwisp-config currently installed with::
+
+    openwisp_config --version
 
 Run tests
 ---------

@@ -8,7 +8,7 @@ TestRemoveDefaultWifi = {
         os.execute('cp ./wifi/wireless ./config')
     end,
     tearDown = function()
-        -- os.execute('rm ./config/wireless')
+        os.execute('rm ./config/wireless')
     end
 }
 
