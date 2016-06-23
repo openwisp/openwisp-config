@@ -129,8 +129,6 @@ for file, bool in pairs(added) do
     if not file_exists(remote_path) then
         -- remove file
         os.remove(file)
-        -- remove dir if empty
-        lfs.rmdir(dirname(file))
         -- remove entry from added set
         added[file] = nil
         added_changed = true
