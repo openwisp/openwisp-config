@@ -61,6 +61,7 @@ UCI configuration options must go in ``/etc/config/openwisp``.
 - ``verify_ssl``: whether SSL verification must be performed or not, defaults to ``1``
 - ``shared_secret``: shared secret, needed for `Automatic registration`_
 - ``consistent_key``: whether `Consistent key generation`_ is enabled or not, defaults to ``1``
+- ``mac_interface``: which interface to use (if it exists) to catch the MAC address, defaults to ``eth0``
 - ``merge_config``: whether `Merge configuration`_ is enabled or not, defaults to ``1``
 - ``test_config``: whether a new configuration must be tested before being considered applied, defaults to ``1``
 - ``test_script``: custom test script, read more about this feature in `Configuration test`_
@@ -93,6 +94,9 @@ even if reset or reflashed.
 
 The ``key`` is generated consistently with an operation like ``md5sum(mac_address + shared_secret)``;
 this allows the controller application to recognize that an existing device is registering itself again.
+
+Verify that the interface of which you take the mac address is always the same with the mac_interface option.
+Pay attention on virtual interface like bridges and taps.
 
 This feature is enabled by default, but must be enabled also in the controller application
 in order to work.

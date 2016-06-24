@@ -11,6 +11,7 @@ while [ -n "$1" ]; do
 		--key) export KEY="$2"; shift;;
 		--shared-secret) export SHARED_SECRET="$2"; shift;;
 		--consistent-key) export CONSISTENT_KEY="$2"; shift;;
+		--mac-interface) export MAC_INTERFACE="$2"; shift;;
 		--merge-config) export MERGE_CONFIG="$2"; shift;;
 		--unmanaged) export UNMANAGED="$2"; shift;;
 		--test-config) export TEST_CONFIG="$2"; shift;;
@@ -52,6 +53,7 @@ VERIFY_SSL=${VERIFY_SSL:-1}
 MERGE_CONFIG=${MERGE_CONFIG:-1}
 TEST_CONFIG=${TEST_CONFIG:-1}
 CONSISTENT_KEY=${CONSISTENT_KEY:-1}
+MAC_INTERFACE=${MAC_INTERFACE:-eth0}
 CONNECT_TIMEOUT=${CONNECT_TIMEOUT:-15}
 MAX_TIME=${MAX_TIME:-30}
 CAPATH=${CAPATH:-/etc/ssl/certs}
@@ -97,10 +99,10 @@ register() {
 		   -p daemon.info
 	local hostname=$(uci get system.@system[0].hostname)
 	# use macaddr of eth0 or fallback to first non-loopback interface
-	local raw=$(ifconfig eth0 2&> /dev/null)
+	local raw=$(ifconfig $MAC_INTERFACE 2&> /dev/null)
 	if [ -z "$raw" ]; then raw=$(ifconfig); fi
-	local macaddr=$(echo "$raw " | grep -v lo | grep HWaddr | awk '/HWaddr/ { print $5 }' | head -n 1)
-	# use macaddress if hostname has not been changed
+	local macaddr=$(echo "$raw " | egrep -v "^(lo|br-|tap[0-9]+)" | awk '/HWaddr/ { print $5 }' | head -n 1)
+	# use macaddress if hostname is the default one or empty 
 	if [ "$hostname" == "OpenWrt" ] || [ "$hostname" == "lede" ] || [ -z "$hostname" ]; then
 		hostname="$macaddr"
 	fi
