@@ -30,22 +30,25 @@ end
 for file in lfs.dir(standard_path) do
     if file ~= '.' and file ~= '..' then
         local changed = false
-        for key, section in pairs(standard:get_all(file)) do
-            if section['.anonymous'] then
-                output:delete(file, section['.name'])
-                if file == 'system' and section['.type'] == 'system' then
-                    section['.name'] = 'system'
+        local config = standard:get_all(file)
+        if config then
+            for key, section in pairs(config) do
+                if section['.anonymous'] then
+                    output:delete(file, section['.name'])
+                    if file == 'system' and section['.type'] == 'system' then
+                        section['.name'] = 'system'
+                    end
+                    section['.anonymous'] = false
+                    write_uci_section(output, file, section)
+                    output:reorder(file, 'system', 0)
+                    changed = true
+                    -- append new named section to stdout var
+                    stdout = stdout .. file .. '.' .. section['.name'] .. ', '
                 end
-                section['.anonymous'] = false
-                write_uci_section(output, file, section)
-                output:reorder(file, 'system', 0)
-                changed = true
-                -- append new named section to stdout var
-                stdout = stdout .. file .. '.' .. section['.name'] .. ', '
             end
-        end
-        if changed then
-            output:commit(file)
+            if changed then
+                output:commit(file)
+            end
         end
     end
 end
