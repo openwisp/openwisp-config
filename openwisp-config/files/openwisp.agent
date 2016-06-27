@@ -11,7 +11,6 @@ while [ -n "$1" ]; do
 		--key) export KEY="$2"; shift;;
 		--shared-secret) export SHARED_SECRET="$2"; shift;;
 		--consistent-key) export CONSISTENT_KEY="$2"; shift;;
-		--mac-interface) export MAC_INTERFACE="$2"; shift;;
 		--merge-config) export MERGE_CONFIG="$2"; shift;;
 		--unmanaged) export UNMANAGED="$2"; shift;;
 		--test-config) export TEST_CONFIG="$2"; shift;;
@@ -19,6 +18,7 @@ while [ -n "$1" ]; do
 		--connect-timeout) export CONNECT_TIMEOUT="$2"; shift;;
 		--max-time) export MAX_TIME="$2"; shift;;
 		--capath) export CAPATH="$2"; shift;;
+		--mac-interface) export MAC_INTERFACE="$2"; shift;;
 		-*)
 			echo "Invalid option: $1"
 			exit 1
@@ -53,10 +53,10 @@ VERIFY_SSL=${VERIFY_SSL:-1}
 MERGE_CONFIG=${MERGE_CONFIG:-1}
 TEST_CONFIG=${TEST_CONFIG:-1}
 CONSISTENT_KEY=${CONSISTENT_KEY:-1}
-MAC_INTERFACE=${MAC_INTERFACE:-eth0}
 CONNECT_TIMEOUT=${CONNECT_TIMEOUT:-15}
 MAX_TIME=${MAX_TIME:-30}
 CAPATH=${CAPATH:-/etc/ssl/certs}
+MAC_INTERFACE=${MAC_INTERFACE:-eth0}
 WORKING_DIR="/tmp/openwisp"
 BASEURL="$URL/controller"
 CONFIGURATION_ARCHIVE="$WORKING_DIR/configuration.tar.gz"
@@ -102,7 +102,7 @@ register() {
 	local raw=$(ifconfig $MAC_INTERFACE 2&> /dev/null)
 	if [ -z "$raw" ]; then raw=$(ifconfig); fi
 	local macaddr=$(echo "$raw " | egrep -v "^(lo|br-|tap[0-9]+)" | awk '/HWaddr/ { print $5 }' | head -n 1)
-	# use macaddress if hostname is the default one or empty 
+	# use macaddress if hostname is the default one or empty
 	if [ "$hostname" == "OpenWrt" ] || [ "$hostname" == "lede" ] || [ -z "$hostname" ]; then
 		hostname="$macaddr"
 	fi
