@@ -70,7 +70,7 @@ UCI configuration options must go in ``/etc/config/openwisp``.
 - ``capath``: value passed to curl ``--capath`` argument, defaults to ``/etc/ssl/certs``; see also `curl capath argument <https://curl.haxx.se/docs/manpage.html#--capath>`_
 - ``connect_timeout``: value passed to curl ``--connect-timeout`` argument, defaults to ``15``; see `curl connect-timeout argument <https://curl.haxx.se/docs/manpage.html#--connect-timeout>`_
 - ``max_time``: value passed to curl ``--max-time`` argument, defaults to ``30``; see `curl connect-timeout argument <https://curl.haxx.se/docs/manpage.html#-m>`_
-- ``mac_interface``: the interface from which the MAC address is taken when performing automatic registration, defaults to ``eth0``;
+- ``mac_interface``: the interface from which the MAC address is taken when performing automatic registration, defaults to ``eth0``
 
 Automatic registration
 ----------------------
