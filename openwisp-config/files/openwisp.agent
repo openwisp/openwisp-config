@@ -107,7 +107,7 @@ register() {
 		hostname="$macaddr"
 	fi
 	local backend="netjsonconfig.OpenWrt"
-	local params="secret=$SHARED_SECRET&name=$hostname&backend=$backend"
+	local params="secret=$SHARED_SECRET&name=$hostname&backend=$backend&mac_address=$macaddr"
 	# generate key from macaddress + shared secret
 	if [ "$CONSISTENT_KEY" == "1" ]; then
 		local consistent_key=$(echo -n "$macaddr+$SHARED_SECRET" | md5sum | awk '{print $1}')
