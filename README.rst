@@ -8,7 +8,7 @@ openwisp-config
 
 ------------
 
-OpenWRT/LEDE configuration agent for the new `OpenWISP <http://openwrt.org>`_ Controller
+OpenWRT/LEDE configuration agent for the new `OpenWISP <http://openwisp.org>`_ Controller
 (currently under development, will be based on `django-netjsonconfig <https://github.com/openwisp/django-netjsonconfig>`_).
 
 .. image:: http://netjsonconfig.openwisp.org/en/latest/_images/openwisp.org.svg
@@ -20,8 +20,8 @@ OpenWRT/LEDE configuration agent for the new `OpenWISP <http://openwrt.org>`_ Co
 
 ------------
 
-Install latest release
-----------------------
+Install precompiled package
+---------------------------
 
 First run:
 
@@ -40,7 +40,7 @@ Where ``<URL>`` is the URL of the image that is suitable for your case.
 For a list of the latest built images, take a look at `downloads.openwisp.org
 <http://downloads.openwisp.org/openwisp-config/>`_.
 
-If the SoC or OpenWRT version you are using is not available, you have to compile the package,
+If the SoC or OpenWRT (or LEDE) version you are using is not available, you have to compile the package,
 (see `Compiling openwisp-config`_).
 
 Once installed *openwisp-config* needs to be configured (see `Configuration options <#configuration-options>`_)
@@ -80,7 +80,7 @@ the router to be unregistered and it will attempt to perform an automatic regist
 
 The automatic registration is performed only if ``shared_secret`` is correctly set.
 
-The device will choose as name one of its mac addresses, unless its hostname is not "OpenWrt",
+The device will choose as name one of its mac addresses, unless its hostname is not ``OpenWrt`` or ``LEDE``,
 in the latter case it will simply register itself with the current hostname.
 
 When the registration is completed, the agent will automatically set ``uuid`` and ``key``
