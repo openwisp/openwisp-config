@@ -15,10 +15,14 @@ if [ -f $MD5FILE ]; then
 		local is_registered=$(ubus call service list "{\"name\": \"$service\"}" | grep -c $service)
 		# try reloading service via ubus
 		ubus call service event "{ \"type\": \"config.change\", \"data\": { \"package\": \"$service\" }}"
+		local logger_msg="Service $service has been reloaded via procd/ubus"
 		# if init.d file exists and service is not registerd in procd do explicit reload
 		if [ -f $initd ] && [ $is_registered -lt 1 ]; then
 			$initd reload
+			local logger_msg="Service $service has been reloaded via init.d script"
 		fi
+		# log which service has been reloaded and how
+		logger $logger_msg -t openwisp -p daemon.info
 	done
 fi
 md5sum /var/run/config.check/* > $MD5FILE
