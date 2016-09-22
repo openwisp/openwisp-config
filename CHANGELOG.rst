@@ -1,10 +1,13 @@
 Change log
 ^^^^^^^^^^
 
-0.4.1 [unreleased]
+0.4.1 [2016-09-22]
 ==================
 
-WIP
+- `5cdb8fa <https://github.com/openwisp/openwisp-config/commit/5cdb8fa>`_: [autoname] avoid failure if UCI files are empty
+- `#24 <https://github.com/openwisp/openwisp-config/pull/24>`_: added ``mac_interface`` option, defaults to ``eth0`` (thanks to `@agabellini <https://github.com/agabellini>`_)
+- `b09a497 <https://github.com/openwisp/openwisp-config/commit/b09a497>`_: [registration] send ``mac_address`` parameter to openwisp2 controller
+- `e8f0b35 <https://github.com/openwisp/openwisp-config/commit/e8f0b35>`_: [reload-config] log which services have been reloaded
 
 0.4.0 [2016-06-23]
 ==================
