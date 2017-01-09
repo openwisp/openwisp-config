@@ -183,7 +183,7 @@ The following procedure illustrates how to compile *openwisp-config-openssl* and
 
 .. code-block:: shell
 
-    git clone git://git.openwrt.org/openwrt.git --depth 1
+    git clone https://github.com/openwrt/openwrt.git
     cd openwrt
 
     # configure feeds
@@ -212,7 +212,7 @@ you will need to select the *openwisp-config* variant by going to ``Administrati
 
 .. code-block:: shell
 
-    git clone git://git.openwrt.org/openwrt.git --depth 1
+    git clone git://git.openwrt.org/openwrt.git
     cd openwrt
 
     # configure feeds
