@@ -179,7 +179,7 @@ There are 4 variants of *openwisp-config*:
 - **openwisp-config-cyassl**: depends on *ca-certificates* and *libcyassl*
 - **openwisp-config-nossl**: doesn't depend on any SSL library and doesn't install trusted CA certificates
 
-The following procedure illustrates how to compile *openwisp-config-polarssl* and its dependencies:
+The following procedure illustrates how to compile *openwisp-config-openssl* and its dependencies:
 
 .. code-block:: shell
 
@@ -194,12 +194,12 @@ The following procedure illustrates how to compile *openwisp-config-polarssl* an
     # replace with your desired arch target
     arch="ar71xx"
     echo "CONFIG_TARGET_$arch=y" > .config;
-    echo "CONFIG_PACKAGE_openwisp-config-polarssl=y" >> .config
+    echo "CONFIG_PACKAGE_openwisp-config-openssl=y" >> .config
     make defconfig
     make tools/install
     make toolchain/install
-    make package/polarssl/compile
-    make package/polarssl/install
+    make package/openssl/compile
+    make package/openssl/install
     make package/curl/compile
     make package/curl/install
     make package/ca-certificates/compile
