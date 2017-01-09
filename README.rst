@@ -88,6 +88,9 @@ in the latter case it will simply register itself with the current hostname.
 When the registration is completed, the agent will automatically set ``uuid`` and ``key``
 in ``/etc/config/openwisp``.
 
+To enable this feature by default on your firmware images, follow the procedure described in
+`Compiling a custom OpenWRT/LEDE image <#compiling-a-custom-openwrtlede-image>`_.
+
 Consistent key generation
 -------------------------
 
@@ -222,6 +225,52 @@ you will need to select the *openwisp-config* variant by going to ``Administrati
     ./scripts/feeds install -a
     make menuconfig
     # go to Administration > openwisp and select the variant you need interactively
+
+Compiling a custom OpenWRT/LEDE image
+-------------------------------------
+
+If you are managing many devices and customizing your ``openwisp-config`` configuration by hand on
+each new device, you should switch to using a custom OpenWRT/LEDE firmware image that includes
+``openwisp-config`` and its precompiled configuration file, this strategy has a few important benefits:
+
+* you can save yourself the effort of installing and configuring ``openwisp-config`` con each device
+* you can enable `automatic registration <#automatic-registration>`_ by setting ``shared_secret``,
+  hence saving extra time and effort to register each device on the controller app
+* if you happen to reset the firmware to initial settings, these precompiled settings will be restored as well
+
+The following procedure illustrates how to compile a custom OpenWRT image with a precompiled minimal
+``/etc/config/openwisp`` file:
+
+.. code-block:: shell
+
+    git clone https://github.com/openwrt/openwrt.git
+    cd openwrt
+
+    # include precompiled file
+    mkdir -p files/etc/config
+    cat <<EOF > files/etc/config/openwisp
+    config controller 'http'
+    	# change the values of the following 2 options
+    	option url 'openwisp2.mydomain.com'
+    	option shared_secret 'mysharedsecret'
+    	list unmanaged 'system.@led'
+    	list unmanaged 'network.loopback'
+    	list unmanaged 'network.@switch'
+    	list unmanaged 'network.@switch_vlan'
+    EOF
+
+    # configure feeds
+    cp feeds.conf.default feeds.conf
+    echo "src-git openwisp https://github.com/openwisp/openwisp-config.git" >> feeds.conf
+    ./scripts/feeds update -a
+    ./scripts/feeds install -a
+    # replace with your desired arch target
+    arch="ar71xx"
+    echo "CONFIG_TARGET_$arch=y" > .config;
+    echo "CONFIG_PACKAGE_openwisp-config-openssl=y" >> .config
+    make defconfig
+    # compile with verbose output
+    make -j1 V=s
 
 Debugging
 ---------
