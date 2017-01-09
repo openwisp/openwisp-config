@@ -272,6 +272,17 @@ The following procedure illustrates how to compile a custom OpenWRT image with a
     # compile with verbose output
     make -j1 V=s
 
+Automate compilation for different organizations
+------------------------------------------------
+
+If you are working with OpenWISP, there are chances you may be compiling several images for different
+organizations (clients or non-profit communities) and use cases (full featured, mesh, 4G, etc).
+
+Doing this by hand without tracking your changes can lead you into a very disorganized and messy situation.
+
+To alleviate this pain you can use `ansible-openwisp2-imagegenerator
+<https://github.com/openwisp/ansible-openwisp2-imagegenerator>`_.
+
 Debugging
 ---------
 
