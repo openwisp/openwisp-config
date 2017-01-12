@@ -10,8 +10,7 @@ openwisp-config
 
 ------------
 
-OpenWRT/LEDE configuration agent for the new `OpenWISP <http://openwisp.org>`_ Controller
-(currently under development, will be based on `django-netjsonconfig <https://github.com/openwisp/django-netjsonconfig>`_).
+OpenWRT/LEDE configuration agent for the new `OpenWISP2 Controller <https://github.com/openwisp/ansible-openwisp2>`_.
 
 .. image:: http://netjsonconfig.openwisp.org/en/latest/_images/openwisp.org.svg
   :target: http://openwisp.org
