@@ -12,12 +12,12 @@ if [ -f $MD5FILE ]; then
 	for c in $(md5sum -c $MD5FILE 2>/dev/null| grep FAILED | cut -d: -f1); do
 		service="$(basename $c)"
 		initd="/etc/init.d/$service"
-		is_registered=$(ubus call service list "{\"name\": \"$service\"}" | grep -c $service)
+		service_triggers=$(grep -c "service_triggers()" "$initd")
 		# try reloading service via ubus
 		ubus call service event "{ \"type\": \"config.change\", \"data\": { \"package\": \"$service\" }}"
 		logger_msg="Service $service has been reloaded via procd/ubus"
-		# if init.d file exists and service is not registerd in procd do explicit reload
-		if [ -f $initd ] && [ $is_registered -lt 1 ]; then
+		# if service is not managed via procd, do explicit reload
+		if [ -f $initd ] && [ $service_triggers -lt 1 ]; then
 			$initd reload
 			logger_msg="Service $service has been reloaded via init.d script"
 		fi
