@@ -94,7 +94,7 @@ check_header(){
 
 # performs automatic registration
 register() {
-	logger "Registering device" \
+	logger "Registering device..." \
 		   -t openwisp \
 		   -p daemon.info
 	local hostname=$(uci get system.@system[0].hostname)
@@ -160,7 +160,7 @@ get_checksum() {
 	local exit_code=$?
 
 	if [ "$exit_code" != "0" ]; then
-		logger -s "Failed to connect to controller (checksum): curl exit code $exit_code" \
+		logger -s "Failed to connect to controller while getting checksum: curl exit code $exit_code" \
 		       -t openwisp \
 		       -p daemon.err
 		return 2
@@ -189,7 +189,7 @@ configuration_changed() {
 	local REMOTE_CHECKSUM=$(tail -n 1 $CONFIGURATION_CHECKSUM 2> /dev/null)
 
 	if [ "$CURRENT_CHECKSUM" != "$REMOTE_CHECKSUM" ]; then
-		logger "Configuration in controller has changed" \
+		logger "Local configuration outdated" \
 		       -t openwisp \
 		       -p daemon.info
 		return 1
@@ -254,12 +254,12 @@ report_status() {
 test_configuration() {
 	sysupgrade -b $CONFIGURATION_BACKUP
 
-	logger "Testing configuration" \
+	logger "Testing configuration..." \
 	       -t openwisp \
 	       -p daemon.info
 	apply_configuration $1
 	if [ $? -gt 0 ]; then
-		logger -s "Configuration update aborted" \
+		logger -s "Configuration could not be applied, update operation aborted" \
 		       -t openwisp \
 		       -p daemon.err
 		report_status "error"
@@ -333,16 +333,24 @@ fix_uci_config() {
 # performs test (if testing enabled)
 # and applies it
 update_configuration() {
+	logger "Downloading configuration from controller..." \
+		   -t openwisp \
+		   -p daemon.info
+
 	# download configuration
 	$($FETCH_COMMAND $CONFIGURATION_URL -o $CONFIGURATION_ARCHIVE)
 	local exit_code=$?
 
 	if [ "$exit_code" != "0" ]; then
-		logger -s "Failed to connect to controller (download-config): curl exit code $exit_code" \
+		logger -s "Failed to connect to controller while downloading new config: curl exit code $exit_code" \
 		       -t openwisp \
 		       -p daemon.err
 		return 3
 	fi
+
+	logger "Configuration downloaded, now applying it..." \
+		   -t openwisp \
+		   -p daemon.info
 
 	# makes fixes to the default uci config so
 	# it's more suited for remote control
@@ -367,7 +375,7 @@ update_configuration() {
 	rm $APPLYING_CONF
 
 	if [ "$result" == "0" ]; then
-		logger "Configuration applied" \
+		logger "Configuration applied succesfully" \
 		       -t openwisp \
 		       -p daemon.info
 	fi
