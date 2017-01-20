@@ -117,7 +117,7 @@ register() {
 	local exit_code=$?
 	# report eventual failures and return
 	if [ "$exit_code" != "0" ]; then
-		logger -s "Failed to connect to controller (register): curl exit code $exit_code" \
+		logger -s "Failed to connect to controller during registration: curl exit code $exit_code" \
 		       -t openwisp \
 		       -p daemon.err
 		return 1
@@ -233,7 +233,7 @@ report_status() {
 	done
 
 	if [ "$exit_code" != "0" ]; then
-		logger -s "Failed to connect to controller (report-status): curl exit code $exit_code" \
+		logger -s "Failed to connect to controller during report-status: curl exit code $exit_code" \
 		       -t openwisp \
 		       -p daemon.err
 		return 2
