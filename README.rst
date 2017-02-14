@@ -177,8 +177,10 @@ Compiling openwisp-config
 There are 4 variants of *openwisp-config*:
 
 - **openwisp-config-openssl**: depends on *ca-certificates* and *libopenssl*
-- **openwisp-config-polarssl**: depends on *ca-certificates* and *libpolarssl*
+- **openwisp-config-mbedtls**: depends on *ca-certificates* and *libmbedtls*
 - **openwisp-config-cyassl**: depends on *ca-certificates* and *libcyassl*
+- **openwisp-config-polarssl**: depends on *ca-certificates* and *libpolarssl* (**note**: polarssl
+  has been deprecated in favour of mbedtls on more recent OpenWRT and LEDE versions)
 - **openwisp-config-nossl**: doesn't depend on any SSL library and doesn't install trusted CA certificates
 
 The following procedure illustrates how to compile *openwisp-config-openssl* and its dependencies:
