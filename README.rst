@@ -183,7 +183,7 @@ There are 4 variants of *openwisp-config*:
   has been deprecated in favour of mbedtls on more recent OpenWRT and LEDE versions)
 - **openwisp-config-nossl**: doesn't depend on any SSL library and doesn't install trusted CA certificates
 
-The following procedure illustrates how to compile *openwisp-config-openssl* and its dependencies:
+The following procedure illustrates how to compile all the *openwisp-config* variants and their dependencies:
 
 .. code-block:: shell
 
@@ -199,15 +199,13 @@ The following procedure illustrates how to compile *openwisp-config-openssl* and
     arch="ar71xx"
     echo "CONFIG_TARGET_$arch=y" > .config;
     echo "CONFIG_PACKAGE_openwisp-config-openssl=y" >> .config
+    echo "CONFIG_PACKAGE_openwisp-config-mbedtls=y" >> .config
+    echo "CONFIG_PACKAGE_openwisp-config-cyassl=y" >> .config
+    echo "CONFIG_PACKAGE_openwisp-config-polarssl=y" >> .config
+    echo "CONFIG_PACKAGE_openwisp-config-nossl=y" >> .config
     make defconfig
     make tools/install
     make toolchain/install
-    make package/openssl/compile
-    make package/openssl/install
-    make package/curl/compile
-    make package/curl/install
-    make package/ca-certificates/compile
-    make package/ca-certificates/install
     make package/openwisp-config/compile
     make package/openwisp-config/install
 
