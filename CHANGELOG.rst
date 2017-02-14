@@ -1,6 +1,16 @@
 Change log
 ^^^^^^^^^^
 
+0.4.2 [2017-02-14]
+==================
+
+- `3e89fd6 <https://github.com/openwisp/openwisp-config/commit/3e89fd6>`_: [openwisp-reload-config] Removed ``local`` declarations
+- `13bc735 <https://github.com/openwisp/openwisp-config/commit/13bc735>`_: [agent] Improved log messages
+- `6955d5b <https://github.com/openwisp/openwisp-config/commit/6955d5b>`_: [reload-config] Reintroduced ``init.d`` check
+- `7c4cb8b <https://github.com/openwisp/openwisp-config/commit/7c4cb8b>`_: [agent] Improved 2 more connection failure messages
+- `#25 <https://github.com/openwisp/openwisp-config/issues/25>`_: [Makefile] Added openwisp-config-mbedtls
+- [docs]: several documentation improvements regarding compilation and relation with other openwisp2 modules
+
 0.4.1 [2016-09-22]
 ==================
 
