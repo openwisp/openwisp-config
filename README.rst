@@ -265,8 +265,9 @@ The following procedure illustrates how to compile a custom OpenWRT image with a
     ./scripts/feeds install -a
     # replace with your desired arch target
     arch="ar71xx"
-    echo "CONFIG_TARGET_$arch=y" > .config;
+    echo "CONFIG_TARGET_$arch=y" > .config
     echo "CONFIG_PACKAGE_openwisp-config-openssl=y" >> .config
+    echo "CONFIG_LIBCURL_OPENSSL=y" > .config
     make defconfig
     # compile with verbose output
     make -j1 V=s
