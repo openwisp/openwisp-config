@@ -16,12 +16,19 @@ local standard_path = standard_prefix .. 'config/'
 local standard = uci.cursor(standard_path)
 local changed = false
 
-standard:foreach('wireless', 'wifi-iface', function(section)
-    if section['.anonymous'] and
-       section.encryption == 'none' and
-       section.mode == 'ap' and
+function is_default_wifi(section)
+    if section.encryption == 'none' and
+       section.mode == 'ap'         and
+       section.network == 'lan'     and
        (section.ssid == 'LEDE' or section.ssid == 'OpenWrt')
     then
+       return true
+    end
+    return false
+end
+
+standard:foreach('wireless', 'wifi-iface', function(section)
+    if is_default_wifi(section) then
         standard:delete('wireless', section['.name'])
         changed = true
     end
