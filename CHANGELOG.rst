@@ -1,6 +1,12 @@
 Change log
 ^^^^^^^^^^
 
+0.4.3 [2017-03-01]
+==================
+
+- `6bbbc75 <https://github.com/openwisp/openwisp-config/commit/6bbbc75>`_:
+  Adapted ``openwisp-remove-default-wifi`` script to work on LEDE 17.01
+
 0.4.2 [2017-02-14]
 ==================
 
