@@ -10,7 +10,8 @@ openwisp-config
 
 ------------
 
-OpenWRT/LEDE configuration agent for the new `OpenWISP2 Controller <https://github.com/openwisp/ansible-openwisp2>`_.
+`LEDE <https://lede-project.org/>`_ / `OpenWRT <https://openwrt.org/>`_ configuration agent for the new
+`OpenWISP 2 Controller <https://github.com/openwisp/ansible-openwisp2>`_.
 
 .. image:: http://netjsonconfig.openwisp.org/en/latest/_images/openwisp.org.svg
   :target: http://openwisp.org
@@ -42,7 +43,7 @@ For a list of the latest built images, take a look at `downloads.openwisp.org
 <http://downloads.openwisp.org/openwisp-config/>`_.
 
 **If you need to compile the package yourself**, see `Compiling openwisp-config`_
-and `Compiling a custom OpenWRT / LEDE image`_.
+and `Compiling a custom LEDE / OpenWRT image`_.
 
 Once installed *openwisp-config* needs to be configured (see `Configuration options`_)
 and then started with::
@@ -88,7 +89,7 @@ When the registration is completed, the agent will automatically set ``uuid`` an
 in ``/etc/config/openwisp``.
 
 To enable this feature by default on your firmware images, follow the procedure described in
-`Compiling a custom OpenWRT / LEDE image`_.
+`Compiling a custom LEDE / OpenWRT image`_.
 
 Consistent key generation
 -------------------------
@@ -187,8 +188,8 @@ The following procedure illustrates how to compile all the *openwisp-config* var
 
 .. code-block:: shell
 
-    git clone https://github.com/openwrt/openwrt.git
-    cd openwrt
+    git clone git://git.lede-project.org/source.git lede
+    cd lede
 
     # configure feeds
     cp feeds.conf.default feeds.conf
@@ -214,8 +215,8 @@ you will need to select the *openwisp-config* variant by going to ``Administrati
 
 .. code-block:: shell
 
-    git clone git://git.openwrt.org/openwrt.git
-    cd openwrt
+    git clone git://git.lede-project.org/source.git lede
+    cd lede
 
     # configure feeds
     cp feeds.conf.default feeds.conf
@@ -224,12 +225,13 @@ you will need to select the *openwisp-config* variant by going to ``Administrati
     ./scripts/feeds install -a
     make menuconfig
     # go to Administration > openwisp and select the variant you need interactively
+    make -j1 V=s
 
-Compiling a custom OpenWRT / LEDE image
--------------------------------------
+Compiling a custom LEDE / OpenWRT image
+---------------------------------------
 
 If you are managing many devices and customizing your ``openwisp-config`` configuration by hand on
-each new device, you should switch to using a custom OpenWRT/LEDE firmware image that includes
+each new device, you should switch to using a custom LEDE / OpenWRT firmware image that includes
 ``openwisp-config`` and its precompiled configuration file, this strategy has a few important benefits:
 
 * you can save yourself the effort of installing and configuring ``openwisp-config`` con each device
@@ -237,25 +239,26 @@ each new device, you should switch to using a custom OpenWRT/LEDE firmware image
   hence saving extra time and effort to register each device on the controller app
 * if you happen to reset the firmware to initial settings, these precompiled settings will be restored as well
 
-The following procedure illustrates how to compile a custom OpenWRT image with a precompiled minimal
-``/etc/config/openwisp`` file:
+The following procedure illustrates how to compile a custom `LEDE 17.01 <https://lede-project.org>`_
+image with a precompiled minimal ``/etc/config/openwisp`` configuration file:
 
 .. code-block:: shell
 
-    git clone https://github.com/openwrt/openwrt.git
-    cd openwrt
+    git clone git://git.lede-project.org/source.git lede
+    cd lede
+    git checkout lede-17.01
 
     # include precompiled file
     mkdir -p files/etc/config
     cat <<EOF > files/etc/config/openwisp
     config controller 'http'
-    	# change the values of the following 2 options
-    	option url 'openwisp2.mydomain.com'
-    	option shared_secret 'mysharedsecret'
-    	list unmanaged 'system.@led'
-    	list unmanaged 'network.loopback'
-    	list unmanaged 'network.@switch'
-    	list unmanaged 'network.@switch_vlan'
+        # change the values of the following 2 options
+        option url 'openwisp2.mydomain.com'
+        option shared_secret 'mysharedsecret'
+        list unmanaged 'system.@led'
+        list unmanaged 'network.loopback'
+        list unmanaged 'network.@switch'
+        list unmanaged 'network.@switch_vlan'
     EOF
 
     # configure feeds
