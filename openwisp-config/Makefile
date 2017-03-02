@@ -20,6 +20,7 @@ define Package/openwisp-config/default
 	SUBMENU:=openwisp
 	DEPENDS:=+curl +lua +libuci-lua +luafilesystem $(3)
 	VARIANT:=$(1)
+	PKGARCH:=all
 	MAINTAINER:=Federico Capoano <f.capoano@cineca.it>
 	URL:=http://openwisp.org
 endef
