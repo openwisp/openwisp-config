@@ -1,6 +1,14 @@
 Change log
 ^^^^^^^^^^
 
+0.4.4 [2017-03-02]
+==================
+
+- `57e431f <https://github.com/openwisp/openwisp-config/commit/57e431f>`_:
+  [makefile] added ``PKGARCH:=all`` in order to compile an architecture indipendent package
+- `35067c8 <https://github.com/openwisp/openwisp-config/commit/35067c8>`_:
+  [docs] default compile instructions to to `LEDE <https://lede-project.org/>`_ 17.01
+
 0.4.3 [2017-03-01]
 ==================
 
