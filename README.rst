@@ -41,16 +41,16 @@ Where ``<URL>`` is the URL of the image that is suitable for your case.
 For a list of the latest built images, take a look at `downloads.openwisp.org
 <http://downloads.openwisp.org/openwisp-config/>`_.
 
-If the SoC or OpenWRT (or LEDE) version you are using is not available, you have to compile the package,
-(see `Compiling openwisp-config`_).
+**If you need to compile the package yourself**, see `Compiling openwisp-config`_
+and `Compiling a custom OpenWRT / LEDE image`_.
 
-Once installed *openwisp-config* needs to be configured (see `Configuration options <#configuration-options>`_)
+Once installed *openwisp-config* needs to be configured (see `Configuration options`_)
 and then started with::
 
     /etc/init.d/openwisp_config start
 
 To ensure the agent is working correctly find out how to perform debugging in
-the `Debugging <#debugging>`_ section.
+the `Debugging`_ section.
 
 Configuration options
 ---------------------
@@ -88,7 +88,7 @@ When the registration is completed, the agent will automatically set ``uuid`` an
 in ``/etc/config/openwisp``.
 
 To enable this feature by default on your firmware images, follow the procedure described in
-`Compiling a custom OpenWRT/LEDE image <#compiling-a-custom-openwrtlede-image>`_.
+`Compiling a custom OpenWRT / LEDE image`_.
 
 Consistent key generation
 -------------------------
@@ -195,7 +195,7 @@ The following procedure illustrates how to compile all the *openwisp-config* var
     echo "src-git openwisp https://github.com/openwisp/openwisp-config.git" >> feeds.conf
     ./scripts/feeds update -a
     ./scripts/feeds install -a
-    # replace with your desired arch target
+    # any arch/target is fine because the package is architecture indipendent
     arch="ar71xx"
     echo "CONFIG_TARGET_$arch=y" > .config;
     echo "CONFIG_PACKAGE_openwisp-config-openssl=y" >> .config
@@ -225,7 +225,7 @@ you will need to select the *openwisp-config* variant by going to ``Administrati
     make menuconfig
     # go to Administration > openwisp and select the variant you need interactively
 
-Compiling a custom OpenWRT/LEDE image
+Compiling a custom OpenWRT / LEDE image
 -------------------------------------
 
 If you are managing many devices and customizing your ``openwisp-config`` configuration by hand on
@@ -233,7 +233,7 @@ each new device, you should switch to using a custom OpenWRT/LEDE firmware image
 ``openwisp-config`` and its precompiled configuration file, this strategy has a few important benefits:
 
 * you can save yourself the effort of installing and configuring ``openwisp-config`` con each device
-* you can enable `automatic registration <#automatic-registration>`_ by setting ``shared_secret``,
+* you can enable `Automatic registration`_ by setting ``shared_secret``,
   hence saving extra time and effort to register each device on the controller app
 * if you happen to reset the firmware to initial settings, these precompiled settings will be restored as well
 
