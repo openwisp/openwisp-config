@@ -103,8 +103,10 @@ register() {
 	# if previous command fails, fallback to first non-loopback interface
 	if [ -z "$raw" ]; then raw=$(ifconfig); fi
 	local macaddr=$(echo "$raw " | egrep -v "^(lo|br-|tap[0-9]+)" | awk '/HWaddr/ { print $5 }' | head -n 1)
+	# convert hostname to lowercase for case insensitive check
+	local name=$(echo $hostname | awk '{print tolower($0)}')
 	# use macaddress if hostname is the default one or empty
-	if [ "$hostname" == "OpenWrt" ] || [ "$hostname" == "lede" ] || [ -z "$hostname" ]; then
+	if [ "$name" == "openwrt" ] || [ "$name" == "lede" ] || [ -z "$name" ]; then
 		hostname="$macaddr"
 	fi
 	local backend="netjsonconfig.OpenWrt"
