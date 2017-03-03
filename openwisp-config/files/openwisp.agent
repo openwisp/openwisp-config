@@ -19,6 +19,7 @@ while [ -n "$1" ]; do
 		--max-time) export MAX_TIME="$2"; shift;;
 		--capath) export CAPATH="$2"; shift;;
 		--mac-interface) export MAC_INTERFACE="$2"; shift;;
+		--pre-reload-hook) export PRE_RELOAD_HOOK="$2"; shift;;
 		-*)
 			echo "Invalid option: $1"
 			exit 1
@@ -201,6 +202,18 @@ configuration_changed() {
 	return 0
 }
 
+# called in `apply_configuration`
+pre_reload_hook() {
+	if [ -n "$PRE_RELOAD_HOOK" ]; then
+		$PRE_RELOAD_HOOK
+		local exit_code=$?
+		logger "Called pre-reload-hook: $PRE_RELOAD_HOOK - exit code: $exit_code" \
+		       -t openwisp \
+		       -p daemon.info
+		return $exit_code
+	fi
+}
+
 # applies a specified configuration archive
 apply_configuration() {
 	local sleep_time=${2-5}
@@ -217,6 +230,8 @@ apply_configuration() {
 	fi
 	# restore unmanaged configurations
 	/usr/sbin/openwisp-restore-unmanaged
+	# call pre-reload-hook
+	pre_reload_hook
 	# reload changes and wait $sleep_time
 	/usr/sbin/openwisp-reload-config
 	sleep $sleep_time

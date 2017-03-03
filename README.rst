@@ -73,6 +73,7 @@ UCI configuration options must go in ``/etc/config/openwisp``.
 - ``connect_timeout``: value passed to curl ``--connect-timeout`` argument, defaults to ``15``; see `curl connect-timeout argument <https://curl.haxx.se/docs/manpage.html#--connect-timeout>`_
 - ``max_time``: value passed to curl ``--max-time`` argument, defaults to ``30``; see `curl connect-timeout argument <https://curl.haxx.se/docs/manpage.html#-m>`_
 - ``mac_interface``: the interface from which the MAC address is taken when performing automatic registration, defaults to ``eth0``
+- ``pre_reload_hook``: path to custom executable script, see `pre-reload-hook`_
 
 Automatic registration
 ----------------------
@@ -171,6 +172,47 @@ Disable Unmanaged Configurations
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 To disable unmanaged configurations simply remove all the ``unmanaged`` options.
+
+Hooks
+-----
+
+Below are described the available hooks in *openwisp-config*.
+
+pre-reload-hook
+^^^^^^^^^^^^^^^
+
+This hook is called each time *openwisp-config* applies a configuration, but **before services are reloaded**,
+more precisely in these situations:
+
+* after a new remote configuration is downloaded and applied
+* after a configuration test failed (see `Configuration test`_) and a previous backup is restored
+
+You can use this hook to perform custom actions before services are reloaded, eg: to perform
+auto-configuration with `LibreMesh <http://libre-mesh.org/>`_.
+
+Example configuration::
+
+    config controller 'http'
+            ...
+            option pre_reload_hook '/usr/sbin/my-pre-reload-hook'
+            ...
+
+Complete example:
+
+.. code-block:: shell
+
+    # set hook in configuration
+    uci set openwisp.http.pre_reload_hook='/usr/sbin/my-pre-reload-hook'
+    uci commit openwisp
+    # create hook script
+    cat <<EOF > /usr/sbin/my-pre-reload-hook
+    #!/bin/sh
+    # put your custom operations here
+    EOF
+    # make script executable
+    chmod +x /usr/sbin/my-pre-reload-hook
+    # reload openwisp_config by using procd's convenient utility
+    reload_config
 
 Compiling openwisp-config
 -------------------------

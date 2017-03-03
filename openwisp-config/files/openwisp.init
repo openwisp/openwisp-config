@@ -23,6 +23,7 @@ start_service() {
 	max_time=$(config_get http max_time)
 	capath=$(config_get http capath)
 	mac_interface=$(config_get http mac_interface)
+	pre_reload_hook=$(config_get http pre_reload_hook)
 	if [ $url ]; then url="--url $url"; fi
 	if [ $interval ]; then interval="--interval $interval"; fi
 	if [ $verify_ssl ]; then verify_ssl="--verify-ssl $verify_ssl"; fi
@@ -43,6 +44,7 @@ start_service() {
 	if [ $max_time ]; then max_time="--max-time $max_time"; fi
 	if [ $capath ]; then capath="--capath $capath"; fi
 	if [ $mac_interface ]; then mac_interface="--mac-interface $mac_interface"; fi
+	if [ $pre_reload_hook ]; then pre_reload_hook="--pre-reload-hook $pre_reload_hook"; fi
 
 	if [ -z "$url" ]; then
 		logger -s "url is not set, please add it in /etc/config/openwisp" \
@@ -61,7 +63,8 @@ start_service() {
 	procd_open_instance
 	procd_set_param command $PROG $url $interval $verify_ssl $uuid $key $shared_secret \
 	                        $consistent_key $unmanaged $merge_config $test_config \
-	                        $test_script $connect_timeout $max_time $capath $mac_interface
+	                        $test_script $connect_timeout $max_time $capath $mac_interface \
+	                        $pre_reload_hook
 	procd_set_param respawn
 	procd_close_instance
 	logger -s "$PROG_NAME started" \
