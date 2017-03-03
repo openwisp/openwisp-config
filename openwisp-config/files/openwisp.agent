@@ -256,10 +256,6 @@ report_status() {
 # performs configuration test and reports result
 test_configuration() {
 	sysupgrade -b $CONFIGURATION_BACKUP
-
-	logger "Testing configuration..." \
-	       -t openwisp \
-	       -p daemon.info
 	apply_configuration $1
 	if [ $? -gt 0 ]; then
 		logger -s "Configuration could not be applied, update operation aborted" \
@@ -268,6 +264,10 @@ test_configuration() {
 		report_status "error"
 		return 1
 	fi
+
+	logger "Testing configuration..." \
+	       -t openwisp \
+	       -p daemon.info
 
 	if [ -z "$TEST_SCRIPT" ]; then
 		perform_default_test
