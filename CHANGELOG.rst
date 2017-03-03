@@ -1,10 +1,12 @@
 Change log
 ^^^^^^^^^^
 
-0.4.5 [unreleased]
+0.4.5 [2017-03-03]
 ==================
 
-WIP
+- `ade89b2 <https://github.com/openwisp/openwisp-config/commit/ade89b2>`_:
+  made default hostname check case insensitive
+- `#26 <https://github.com/openwisp/openwisp-config/issues/26>`_: added pre-reload-hook
 
 0.4.4 [2017-03-02]
 ==================
