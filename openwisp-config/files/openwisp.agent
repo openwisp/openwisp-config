@@ -56,7 +56,6 @@ TEST_CONFIG=${TEST_CONFIG:-1}
 CONSISTENT_KEY=${CONSISTENT_KEY:-1}
 CONNECT_TIMEOUT=${CONNECT_TIMEOUT:-15}
 MAX_TIME=${MAX_TIME:-30}
-CAPATH=${CAPATH:-/etc/ssl/certs}
 MAC_INTERFACE=${MAC_INTERFACE:-eth0}
 WORKING_DIR="/tmp/openwisp"
 BASEURL="$URL/controller"
@@ -69,12 +68,16 @@ STATUS_REPORT="$WORKING_DIR/status_report"
 APPLYING_CONF="$WORKING_DIR/applying_conf"
 REGISTRATION_URL="$URL/controller/register/"
 UNMANAGED_DIR="$WORKING_DIR/unmanaged"
-FETCH_COMMAND="curl -s --connect-timeout $CONNECT_TIMEOUT --max-time $MAX_TIME --capath $CAPATH"
+FETCH_COMMAND="curl -s --connect-timeout $CONNECT_TIMEOUT --max-time $MAX_TIME"
 mkdir -p $WORKING_DIR
 mkdir -p $UNMANAGED_DIR
 
 if [ "$VERIFY_SSL" != "1" ]; then
 	FETCH_COMMAND="$FETCH_COMMAND -k"
+fi
+
+if [ "$VERIFY_SSL" == "1" ] && [ -n "$CAPATH" ]; then
+	FETCH_COMMAND="$FETCH_COMMAND --capath $CAPATH"
 fi
 
 if [ -n "$UNMANAGED" ]; then
