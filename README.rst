@@ -312,7 +312,7 @@ image with a precompiled minimal ``/etc/config/openwisp`` configuration file:
     arch="ar71xx"
     echo "CONFIG_TARGET_$arch=y" > .config
     echo "CONFIG_PACKAGE_openwisp-config-openssl=y" >> .config
-    echo "CONFIG_LIBCURL_OPENSSL=y" > .config
+    echo "CONFIG_LIBCURL_OPENSSL=y" >> .config
     make defconfig
     # compile with verbose output
     make -j1 V=s
