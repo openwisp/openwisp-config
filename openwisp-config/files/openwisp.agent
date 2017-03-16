@@ -18,6 +18,7 @@ while [ -n "$1" ]; do
 		--connect-timeout) export CONNECT_TIMEOUT="$2"; shift;;
 		--max-time) export MAX_TIME="$2"; shift;;
 		--capath) export CAPATH="$2"; shift;;
+		--cacert) export CACERT="$2"; shift;;
 		--mac-interface) export MAC_INTERFACE="$2"; shift;;
 		--pre-reload-hook) export PRE_RELOAD_HOOK="$2"; shift;;
 		-*)
@@ -72,12 +73,15 @@ FETCH_COMMAND="curl -s --connect-timeout $CONNECT_TIMEOUT --max-time $MAX_TIME"
 mkdir -p $WORKING_DIR
 mkdir -p $UNMANAGED_DIR
 
-if [ "$VERIFY_SSL" != "1" ]; then
+if [ "$VERIFY_SSL" == "0" ]; then
 	FETCH_COMMAND="$FETCH_COMMAND -k"
-fi
-
-if [ "$VERIFY_SSL" == "1" ] && [ -n "$CAPATH" ]; then
-	FETCH_COMMAND="$FETCH_COMMAND --capath $CAPATH"
+else
+	if [ -n "$CAPATH" ]; then
+		FETCH_COMMAND="$FETCH_COMMAND --capath $CAPATH"
+	fi
+	if [ -n "$CACERT" ]; then
+		FETCH_COMMAND="$FETCH_COMMAND --cacert $CACERT"
+	fi
 fi
 
 if [ -n "$UNMANAGED" ]; then

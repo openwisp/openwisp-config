@@ -45,7 +45,6 @@ ifeq ($(BUILD_VARIANT),nossl)
     CONFIG_OPENWISP_UCI:=nossl
 endif
 
-
 define Package/openwisp-config-$(BUILD_VARIANT)/install
 	$(INSTALL_DIR) \
 		$(1)/usr/sbin \

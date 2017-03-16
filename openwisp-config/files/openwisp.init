@@ -22,6 +22,7 @@ start_service() {
 	connect_timeout=$(config_get http connect_timeout)
 	max_time=$(config_get http max_time)
 	capath=$(config_get http capath)
+	cacert=$(config_get http cacert)
 	mac_interface=$(config_get http mac_interface)
 	pre_reload_hook=$(config_get http pre_reload_hook)
 	if [ $url ]; then url="--url $url"; fi
@@ -43,6 +44,7 @@ start_service() {
 	if [ $connect_timeout ]; then connect_timeout="--connect-timeout $connect_timeout"; fi
 	if [ $max_time ]; then max_time="--max-time $max_time"; fi
 	if [ $capath ]; then capath="--capath $capath"; fi
+	if [ $cacert ]; then cacert="--cacert $cacert"; fi
 	if [ $mac_interface ]; then mac_interface="--mac-interface $mac_interface"; fi
 	if [ $pre_reload_hook ]; then pre_reload_hook="--pre-reload-hook $pre_reload_hook"; fi
 
@@ -63,8 +65,8 @@ start_service() {
 	procd_open_instance
 	procd_set_param command $PROG $url $interval $verify_ssl $uuid $key $shared_secret \
 	                        $consistent_key $unmanaged $merge_config $test_config \
-	                        $test_script $connect_timeout $max_time $capath $mac_interface \
-	                        $pre_reload_hook
+	                        $test_script $connect_timeout $max_time $capath $cacert \
+	                        $mac_interface $pre_reload_hook
 	procd_set_param respawn
 	procd_close_instance
 	logger -s "$PROG_NAME started" \
