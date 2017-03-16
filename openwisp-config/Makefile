@@ -36,23 +36,13 @@ define Build/Compile
 endef
 
 define Package/openwisp-config-$(BUILD_VARIANT)/conffiles
-/etc/config/openwisp
+    /etc/config/openwisp
 endef
 
-ifeq ($(BUILD_VARIANT),openssl)
 CONFIG_OPENWISP_UCI:=ssl
-endif
-ifeq ($(BUILD_VARIANT),mbedtls)
-CONFIG_OPENWISP_UCI:=ssl
-endif
-ifeq ($(BUILD_VARIANT),cyassl)
-CONFIG_OPENWISP_UCI:=ssl
-endif
-ifeq ($(BUILD_VARIANT),polarssl)
-CONFIG_OPENWISP_UCI:=ssl
-endif
+
 ifeq ($(BUILD_VARIANT),nossl)
-CONFIG_OPENWISP_UCI:=nossl
+    CONFIG_OPENWISP_UCI:=nossl
 endif
 
 
