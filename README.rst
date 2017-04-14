@@ -235,8 +235,8 @@ The following procedure illustrates how to compile all the *openwisp-config* var
     cd lede
 
     # configure feeds
-    cp feeds.conf.default feeds.conf
-    echo "src-git openwisp https://github.com/openwisp/openwisp-config.git" >> feeds.conf
+    echo "src-git openwisp https://github.com/openwisp/openwisp-config.git" > feeds.conf
+    cat feeds.conf.default >> feeds.conf
     ./scripts/feeds update -a
     ./scripts/feeds install -a
     # any arch/target is fine because the package is architecture indipendent
@@ -262,8 +262,8 @@ you will need to select the *openwisp-config* variant by going to ``Administrati
     cd lede
 
     # configure feeds
-    cp feeds.conf.default feeds.conf
-    echo "src-git openwisp https://github.com/openwisp/openwisp-config.git" >> feeds.conf
+    echo "src-git openwisp https://github.com/openwisp/openwisp-config.git" > feeds.conf
+    cat feeds.conf.default >> feeds.conf
     ./scripts/feeds update -a
     ./scripts/feeds install -a
     make menuconfig
