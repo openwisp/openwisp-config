@@ -118,13 +118,20 @@ register() {
 		hostname="$macaddr"
 	fi
 	local backend="netjsonconfig.OpenWrt"
-	local params="secret=$SHARED_SECRET&name=$hostname&backend=$backend&mac_address=$macaddr"
+	local tags=$(uci get openwisp.http.tags 2&> /dev/null)
+	# prepare POST params
+	local params="backend=$backend"
 	# generate key from macaddress + shared secret
 	if [ "$CONSISTENT_KEY" == "1" ]; then
 		local consistent_key=$(echo -n "$macaddr+$SHARED_SECRET" | md5sum | awk '{print $1}')
 		params="$params&key=$consistent_key"
 	fi
-	$($FETCH_COMMAND -i --data $params $REGISTRATION_URL > $REGISTRATION_PARAMETERS)
+	$($FETCH_COMMAND --data $params \
+	                 --data-urlencode secret="$SHARED_SECRET" \
+	                 --data-urlencode name="$hostname" \
+	                 --data-urlencode mac_address="$macaddr" \
+	                 --data-urlencode tags="$tags" \
+	                 -i $REGISTRATION_URL > $REGISTRATION_PARAMETERS)
 	local exit_code=$?
 	# report eventual failures and return
 	if [ "$exit_code" != "0" ]; then
