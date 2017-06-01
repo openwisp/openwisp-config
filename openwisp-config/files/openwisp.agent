@@ -119,10 +119,10 @@ register() {
 	fi
 	local backend="netjsonconfig.OpenWrt"
 	local tags=$(uci get openwisp.http.tags 2&> /dev/null)
-	# get OS identifier & device model
-	source /etc/openwrt_release
-	local os=$DISTRIB_DESCRIPTION
+	# get device model, OS identifier and SOC info
 	local model=$(cat /tmp/sysinfo/model)
+	local os=$(ubus call system board | grep description | awk -F\" '{ print $4 }')
+	local system=$(ubus call system board | grep system | awk -F\" '{ print $4 }')
 	# prepare POST params
 	local params="backend=$backend"
 	# generate key from macaddress + shared secret
@@ -137,6 +137,7 @@ register() {
 	                 --data-urlencode tags="$tags" \
 	                 --data-urlencode model="$model" \
 	                 --data-urlencode os="$os" \
+	                 --data-urlencode system="$system" \
 	                 -i $REGISTRATION_URL > $REGISTRATION_PARAMETERS)
 	local exit_code=$?
 	# report eventual failures and return
