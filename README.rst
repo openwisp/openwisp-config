@@ -296,7 +296,7 @@ image with a precompiled minimal ``/etc/config/openwisp`` configuration file:
     cat <<EOF > files/etc/config/openwisp
     config controller 'http'
         # change the values of the following 2 options
-        option url 'openwisp2.mydomain.com'
+        option url 'https://openwisp2.mydomain.com'
         option shared_secret 'mysharedsecret'
         list unmanaged 'system.@led'
         list unmanaged 'network.loopback'
