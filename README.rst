@@ -277,7 +277,7 @@ If you are managing many devices and customizing your ``openwisp-config`` config
 each new device, you should switch to using a custom LEDE / OpenWRT firmware image that includes
 ``openwisp-config`` and its precompiled configuration file, this strategy has a few important benefits:
 
-* you can save yourself the effort of installing and configuring ``openwisp-config`` con each device
+* you can save yourself the effort of installing and configuring ``openwisp-config`` on each device
 * you can enable `Automatic registration`_ by setting ``shared_secret``,
   hence saving extra time and effort to register each device on the controller app
 * if you happen to reset the firmware to initial settings, these precompiled settings will be restored as well
