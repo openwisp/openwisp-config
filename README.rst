@@ -2,9 +2,6 @@
 openwisp-config
 ===============
 
-.. image:: https://ci.publicwifi.it/buildStatus/icon?job=openwisp-config
-   :target: #
-
 .. image:: http://img.shields.io/github/release/openwisp/openwisp-config.svg
    :target: https://github.com/openwisp/openwisp-config/releases
 
