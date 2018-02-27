@@ -321,7 +321,7 @@ test_configuration() {
 		report_status "error"
 		local ret=1
 	else
-		logger "Configuration test succeded" \
+		logger "Configuration test succeeded" \
 		       -t openwisp \
 		       -p daemon.info
 		report_status "running"
@@ -414,7 +414,7 @@ update_configuration() {
 	rm $APPLYING_CONF
 
 	if [ "$result" == "0" ]; then
-		logger "Configuration applied succesfully" \
+		logger "Configuration applied successfully" \
 		       -t openwisp \
 		       -p daemon.info
 	fi
