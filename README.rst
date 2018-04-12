@@ -368,6 +368,11 @@ Alternatively, you can run specifc tests, eg::
 
     cd openwisp-config/tests/
     lua test_utils.lua -v
+    
+Contributing guidelines
+-----------------------
+
+See `Contributing <https://github.com/openwisp/openwisp-config/blob/master/CONTRIBUTING.md>`_.
 
 Changelog
 ---------
