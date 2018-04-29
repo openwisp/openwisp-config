@@ -10,6 +10,9 @@ openwisp-config
 `LEDE <https://lede-project.org/>`_ / `OpenWRT <https://openwrt.org/>`_ configuration agent for the new
 `OpenWISP 2 Controller <https://github.com/openwisp/ansible-openwisp2>`_.
 
+**Want to help OpenWISP?** `Find out how to help us grow here
+<http://openwisp.io/docs/general/help-us.html>`_.
+
 .. image:: http://netjsonconfig.openwisp.org/en/latest/_images/openwisp.org.svg
   :target: http://openwisp.org
 
@@ -368,6 +371,12 @@ Alternatively, you can run specifc tests, eg::
 
     cd openwisp-config/tests/
     lua test_utils.lua -v
+
+Contributing
+------------
+
+Please read the `OpenWISP contributing guidelines
+<http://openwisp.io/docs/developer/contributing.html>`_.
 
 Changelog
 ---------
