@@ -8,7 +8,17 @@ PROG_NAME="OpenWISP config agent"
 
 start_service() {
 	config_load openwisp
-	url=$(config_get http url)
+	#handle_url() {
+	#	urls_count=urls_count+1
+	#	if [[ -z "$url" ]]; then url="$1"; fi
+	#	local delimiter=""
+	#	if [[ ! -z "$urls" ]]; then local delimiter=" "; fi
+	#	# TODO: add check whitespaces in url
+	#	urls="$urls$delimiter$1"
+	#}
+	# == Variant with backward compatibility. Will use it (anoter way: using config_list_foreach http url handle_url)
+	url=$(config_get http url | tr ' ' '^') # replace space delimiter only for sending as argument to agent script
+	
 	interval=$(config_get http interval)
 	verify_ssl=$(config_get http verify_ssl)
 	uuid=$(config_get http uuid)
