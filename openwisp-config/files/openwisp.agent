@@ -31,7 +31,7 @@ while [ -n "$1" ]; do
 done
 
 ## define functions for url redundancy
-set_url() { # get next url and change url related variables after url changing
+set_url() { # get next url till success connection and change url related variables after url changing
 	if [ -n "$(urls_count)"]; then
 		# first-time init
 		urls_count=$(echo $URLS | wc -w)
@@ -40,8 +40,19 @@ set_url() { # get next url and change url related variables after url changing
 	else 
 		URL=$(get_next_url())
 	fi	
+    while [ ! check_url_connection() ]; do
+		logger -s "Failed to connect to controller during check connection. Url: ${URL}" \
+		       -t openwisp \
+		       -p daemon.err
+        sleep $(expr $INTERVAL / 4)
+    done
 	BASEURL="${URL}controller"
 	REGISTRATION_URL="${URL}controller/register/"
+    if [ ! -z "$UUID" ] && [ ! -z "$KEY" ]; then
+        CONFIGURATION_URL="$BASEURL/download-config/$UUID/?key=$KEY"
+        CHECKSUM_URL="$BASEURL/checksum/$UUID/?key=$KEY"
+        REPORT_URL="$BASEURL/report-status/$UUID/"    
+    fi
 }
 check_url_connection() { # check connection
 	# curl -Is --connect-timeout 10 -k -X POST https://fight.today/controller/register/
@@ -159,6 +170,10 @@ register() {
 		local consistent_key=$(echo -n "$macaddr+$SHARED_SECRET" | md5sum | awk '{print $1}')
 		params="$params&key=$consistent_key"
 	fi
+    while [ ! $(check_url_connection()) ]; do
+        sleep $(expr $INTERVAL / 4)
+        set_url()
+    done
 	$($FETCH_COMMAND --data $params \
 	                 --data-urlencode secret="$SHARED_SECRET" \
 	                 --data-urlencode name="$hostname" \
@@ -210,6 +225,10 @@ register() {
 
 # gets checksum from controller
 get_checksum() {
+    while [ ! $(check_url_connection()) ]; do
+        sleep $(expr $INTERVAL / 4)
+        set_url()
+    done
 	$($FETCH_COMMAND -i $CHECKSUM_URL > $1)
 	local exit_code=$?
 
@@ -291,6 +310,10 @@ apply_configuration() {
 report_status() {
 	# retry several times
 	for i in $(seq 1 10); do
+        while [ ! $(check_url_connection()) ]; do
+            sleep $(expr $INTERVAL / 4)
+            set_url()
+        done
 		$($FETCH_COMMAND -i --data "key=$KEY&status=$1" $REPORT_URL > $STATUS_REPORT)
 		local exit_code=$?
 		if [ "$exit_code" == "0" ]; then
@@ -364,6 +387,10 @@ test_configuration() {
 perform_default_test() {
 	# max 3 attempts to get checksum
 	for i in $(seq 1 3); do
+        while [ ! $(check_url_connection()) ]; do
+            sleep $(expr $INTERVAL / 4)
+            set_url()
+        done        
 		$($FETCH_COMMAND -i --connect-timeout 5 --max-time 5 $CHECKSUM_URL > $TEST_CHECKSUM)
 		local result=$?
 		if [ $result -gt 0 ]; then
@@ -406,6 +433,10 @@ update_configuration() {
 		   -p daemon.info
 
 	# download configuration
+    while [ ! $(check_url_connection()) ]; do
+        sleep $(expr $INTERVAL / 4)
+        set_url()
+    done    
 	$($FETCH_COMMAND $CONFIGURATION_URL -o $CONFIGURATION_ARCHIVE)
 	local exit_code=$?
 
