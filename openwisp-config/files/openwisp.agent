@@ -4,7 +4,7 @@
 while [ -n "$1" ]; do
 	case "$1" in
 		--version|-v) export VERSION=1; break;;
-		--url) export URL=${2%/}; shift;;  # strip trailing slash
+		--url) export URLS=$(echo ${2%/} | tr '^' ' '); shift;;  # strip trailing slash
 		--interval) export INTERVAL=$2; shift;;
 		--verify-ssl) export VERIFY_SSL=$2; shift;;
 		--uuid) export UUID="$2"; shift;;
@@ -29,6 +29,47 @@ while [ -n "$1" ]; do
 	esac
 	shift;
 done
+
+## define functions for url redundancy
+set_url() { # get next url till success connection and change url related variables after url changing
+	if [ -n "$(urls_count)"]; then
+		# first-time init
+		urls_count=$(echo $URLS | wc -w)
+		URL=$(echo $URLS | cut -d" " -f1) 
+		url_index=1	
+	else 
+		URL=$(get_next_url())
+	fi	
+    while [ ! check_url_connection() ]; do
+		logger -s "Failed to connect to controller during check connection. Url: ${URL}" \
+		       -t openwisp \
+		       -p daemon.err
+        sleep $(expr $INTERVAL / 4)
+    done
+	BASEURL="${URL}controller"
+	REGISTRATION_URL="${URL}controller/register/"
+    if [ ! -z "$UUID" ] && [ ! -z "$KEY" ]; then
+        CONFIGURATION_URL="$BASEURL/download-config/$UUID/?key=$KEY"
+        CHECKSUM_URL="$BASEURL/checksum/$UUID/?key=$KEY"
+        REPORT_URL="$BASEURL/report-status/$UUID/"    
+    fi
+}
+check_url_connection() { # check connection
+	# curl -Is --connect-timeout 10 -k -X POST https://server/controller/register/
+	# need something like https://server/controller/heartbeat/
+	if [ -n "$($FETCH_COMMAND -X POST -I $REGISTRATION_URL | grep \"X-Openwisp-Controller: true\")" ]; then return true
+	else return false
+	fi
+}
+get_next_url() { # get next url in list
+	if [[ $url_index==$urls_count ]]; then url_index=1; else url_index=$url_index+1; fi
+	return $(echo $URLS | cut -d" " -f${url_index})
+}
+get_next_url_rand() { # get random url in list... if you need then rename this one with "get_next_url" 
+	local random_index=$(head /dev/urandom | tr -dc $(echo "123456789" | cut --bytes=-$urls_count) | head -c1)
+	return $(echo $URLS | cut -d" " -f${random_index})
+}
+## end define
 
 if [ "$VERSION" -eq "1" ]; then
 	VERSION=$(cat /etc/openwisp/VERSION)
@@ -58,8 +99,9 @@ CONSISTENT_KEY=${CONSISTENT_KEY:-1}
 CONNECT_TIMEOUT=${CONNECT_TIMEOUT:-15}
 MAX_TIME=${MAX_TIME:-30}
 MAC_INTERFACE=${MAC_INTERFACE:-eth0}
+set_url()
+FETCH_COMMAND="curl -s --connect-timeout $CONNECT_TIMEOUT --max-time $MAX_TIME"
 WORKING_DIR="/tmp/openwisp"
-BASEURL="$URL/controller"
 CONFIGURATION_ARCHIVE="$WORKING_DIR/configuration.tar.gz"
 CONFIGURATION_CHECKSUM="$WORKING_DIR/checksum"
 CONFIGURATION_BACKUP="$WORKING_DIR/backup.tar.gz"
@@ -67,9 +109,7 @@ REGISTRATION_PARAMETERS="$WORKING_DIR/registration_parameters"
 TEST_CHECKSUM="$WORKING_DIR/test_checksum"
 STATUS_REPORT="$WORKING_DIR/status_report"
 APPLYING_CONF="$WORKING_DIR/applying_conf"
-REGISTRATION_URL="$URL/controller/register/"
 UNMANAGED_DIR="$WORKING_DIR/unmanaged"
-FETCH_COMMAND="curl -s --connect-timeout $CONNECT_TIMEOUT --max-time $MAX_TIME"
 mkdir -p $WORKING_DIR
 mkdir -p $UNMANAGED_DIR
 
@@ -130,6 +170,10 @@ register() {
 		local consistent_key=$(echo -n "$macaddr+$SHARED_SECRET" | md5sum | awk '{print $1}')
 		params="$params&key=$consistent_key"
 	fi
+    while [ ! $(check_url_connection()) ]; do
+        sleep $(expr $INTERVAL / 4)
+        set_url()
+    done
 	$($FETCH_COMMAND --data $params \
 	                 --data-urlencode secret="$SHARED_SECRET" \
 	                 --data-urlencode name="$hostname" \
@@ -181,6 +225,10 @@ register() {
 
 # gets checksum from controller
 get_checksum() {
+    while [ ! $(check_url_connection()) ]; do
+        sleep $(expr $INTERVAL / 4)
+        set_url()
+    done
 	$($FETCH_COMMAND -i $CHECKSUM_URL > $1)
 	local exit_code=$?
 
@@ -262,6 +310,10 @@ apply_configuration() {
 report_status() {
 	# retry several times
 	for i in $(seq 1 10); do
+        while [ ! $(check_url_connection()) ]; do
+            sleep $(expr $INTERVAL / 4)
+            set_url()
+        done
 		$($FETCH_COMMAND -i --data "key=$KEY&status=$1" $REPORT_URL > $STATUS_REPORT)
 		local exit_code=$?
 		if [ "$exit_code" == "0" ]; then
@@ -335,6 +387,10 @@ test_configuration() {
 perform_default_test() {
 	# max 3 attempts to get checksum
 	for i in $(seq 1 3); do
+        while [ ! $(check_url_connection()) ]; do
+            sleep $(expr $INTERVAL / 4)
+            set_url()
+        done        
 		$($FETCH_COMMAND -i --connect-timeout 5 --max-time 5 $CHECKSUM_URL > $TEST_CHECKSUM)
 		local result=$?
 		if [ $result -gt 0 ]; then
@@ -377,6 +433,10 @@ update_configuration() {
 		   -p daemon.info
 
 	# download configuration
+    while [ ! $(check_url_connection()) ]; do
+        sleep $(expr $INTERVAL / 4)
+        set_url()
+    done    
 	$($FETCH_COMMAND $CONFIGURATION_URL -o $CONFIGURATION_ARCHIVE)
 	local exit_code=$?
 
