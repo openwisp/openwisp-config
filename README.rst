@@ -75,6 +75,7 @@ UCI configuration options must go in ``/etc/config/openwisp``.
 - ``max_time``: value passed to curl ``--max-time`` argument, defaults to ``30``; see `curl connect-timeout argument <https://curl.haxx.se/docs/manpage.html#-m>`_
 - ``mac_interface``: the interface from which the MAC address is taken when performing automatic registration, defaults to ``eth0``
 - ``pre_reload_hook``: path to custom executable script, see `pre-reload-hook`_
+- ``post_reload_hook``: path to custom executable script, see `post-reload-hook`_
 
 Automatic registration
 ----------------------
@@ -214,6 +215,12 @@ Complete example:
     chmod +x /usr/sbin/my-pre-reload-hook
     # reload openwisp_config by using procd's convenient utility
     reload_config
+
+post-reload-hook
+^^^^^^^^^^^^^^^^
+
+Same as `pre_reload_hook` but with the difference that this hook is called
+after the configuration services have been reloaded.
 
 Compiling openwisp-config
 -------------------------

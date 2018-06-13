@@ -224,7 +224,7 @@ configuration_changed() {
 	return 0
 }
 
-# called in `apply_configuration`
+# called in `apply_configuration` before services are reloaded
 pre_reload_hook() {
 	if [ -n "$PRE_RELOAD_HOOK" ]; then
 		$PRE_RELOAD_HOOK
@@ -236,7 +236,7 @@ pre_reload_hook() {
 	fi
 }
 
-# called in `update_configuration` when everythings is OK
+# called in `apply_configuration` after services are reloaded
 post_reload_hook() {
 	if [ -n "$POST_RELOAD_HOOK" ]; then
 		$POST_RELOAD_HOOK
@@ -269,6 +269,8 @@ apply_configuration() {
 	# reload changes and wait $sleep_time
 	/usr/sbin/openwisp-reload-config
 	sleep $sleep_time
+	# call post-reload-hook
+	post_reload_hook
 }
 
 # report configuration status: "running" or "error"
@@ -430,9 +432,6 @@ update_configuration() {
 		logger "Configuration applied successfully" \
 		       -t openwisp \
 		       -p daemon.info
-
-        # call post-reload-hook
-        post_reload_hook
 	fi
 }
 
