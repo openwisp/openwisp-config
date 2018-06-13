@@ -25,6 +25,7 @@ start_service() {
 	cacert=$(config_get http cacert)
 	mac_interface=$(config_get http mac_interface)
 	pre_reload_hook=$(config_get http pre_reload_hook)
+	post_reload_hook=$(config_get http post_reload_hook)
 	if [ $url ]; then url="--url $url"; fi
 	if [ $interval ]; then interval="--interval $interval"; fi
 	if [ $verify_ssl ]; then verify_ssl="--verify-ssl $verify_ssl"; fi
@@ -47,6 +48,7 @@ start_service() {
 	if [ $cacert ]; then cacert="--cacert $cacert"; fi
 	if [ $mac_interface ]; then mac_interface="--mac-interface $mac_interface"; fi
 	if [ $pre_reload_hook ]; then pre_reload_hook="--pre-reload-hook $pre_reload_hook"; fi
+	if [ $post_reload_hook ]; then post_reload_hook="--post-reload-hook $post_reload_hook"; fi
 
 	if [ -z "$url" ]; then
 		logger -s "url is not set, please add it in /etc/config/openwisp" \
