@@ -20,6 +20,7 @@ while [ -n "$1" ]; do
 		--capath) export CAPATH="$2"; shift;;
 		--cacert) export CACERT="$2"; shift;;
 		--mac-interface) export MAC_INTERFACE="$2"; shift;;
+		--management-interface) export MANAGEMENT_INTERFACE="$2"; shift;;
 		--pre-reload-hook) export PRE_RELOAD_HOOK="$2"; shift;;
 		--post-reload-hook) export POST_RELOAD_HOOK="$2"; shift;;
 		-*)
@@ -90,6 +91,10 @@ if [ -n "$UNMANAGED" ]; then
 	UNMANAGED=$(echo $UNMANAGED | tr ',' ' ')
 fi
 
+if [ -n "$MANAGEMENT_INTERFACE" ]; then
+	MANAGEMENT_IP=$(/usr/sbin/openwisp-get-address $MANAGEMENT_INTERFACE)
+fi
+
 # ensures we are dealing with the right web server
 check_header(){
 	local is_controller=$(grep -c "X-Openwisp-Controller: true" $1)
@@ -130,6 +135,10 @@ register() {
 	if [ "$CONSISTENT_KEY" == "1" ]; then
 		local consistent_key=$(echo -n "$macaddr+$SHARED_SECRET" | md5sum | awk '{print $1}')
 		params="$params&key=$consistent_key"
+	fi
+	# add management ip in params if present
+	if [ -n "$MANAGEMENT_IP" ]; then
+		params="$params&management_ip=$MANAGEMENT_IP"
 	fi
 	$($FETCH_COMMAND --data $params \
 	                 --data-urlencode secret="$SHARED_SECRET" \
@@ -451,6 +460,11 @@ fi
 CONFIGURATION_URL="$BASEURL/download-config/$UUID/?key=$KEY"
 CHECKSUM_URL="$BASEURL/checksum/$UUID/?key=$KEY"
 REPORT_URL="$BASEURL/report-status/$UUID/"
+
+if [ -n "$MANAGEMENT_IP" ]; then
+	CONFIGURATION_URL="$CONFIGURATION_URL&management_ip=$MANAGEMENT_IP"
+	CHECKSUM_URL="$CHECKSUM_URL&management_ip=$MANAGEMENT_IP"
+fi
 
 while true
 do

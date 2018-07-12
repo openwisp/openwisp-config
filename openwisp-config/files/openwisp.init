@@ -24,6 +24,7 @@ start_service() {
 	capath=$(config_get http capath)
 	cacert=$(config_get http cacert)
 	mac_interface=$(config_get http mac_interface)
+	management_interface=$(config_get http management_interface)
 	pre_reload_hook=$(config_get http pre_reload_hook)
 	post_reload_hook=$(config_get http post_reload_hook)
 	if [ $url ]; then url="--url $url"; fi
@@ -47,6 +48,7 @@ start_service() {
 	if [ $capath ]; then capath="--capath $capath"; fi
 	if [ $cacert ]; then cacert="--cacert $cacert"; fi
 	if [ $mac_interface ]; then mac_interface="--mac-interface $mac_interface"; fi
+	if [ $management_interface ]; then management_interface="--management-interface $management_interface"; fi
 	if [ $pre_reload_hook ]; then pre_reload_hook="--pre-reload-hook $pre_reload_hook"; fi
 	if [ $post_reload_hook ]; then post_reload_hook="--post-reload-hook $post_reload_hook"; fi
 
@@ -68,7 +70,7 @@ start_service() {
 	procd_set_param command $PROG $url $interval $verify_ssl $uuid $key $shared_secret \
 	                        $consistent_key $unmanaged $merge_config $test_config \
 	                        $test_script $connect_timeout $max_time $capath $cacert \
-	                        $mac_interface $pre_reload_hook
+	                        $mac_interface $management_interface $pre_reload_hook
 	procd_set_param respawn
 	procd_close_instance
 	logger -s "$PROG_NAME started" \

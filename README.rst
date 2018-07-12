@@ -74,6 +74,8 @@ UCI configuration options must go in ``/etc/config/openwisp``.
 - ``connect_timeout``: value passed to curl ``--connect-timeout`` argument, defaults to ``15``; see `curl connect-timeout argument <https://curl.haxx.se/docs/manpage.html#--connect-timeout>`_
 - ``max_time``: value passed to curl ``--max-time`` argument, defaults to ``30``; see `curl connect-timeout argument <https://curl.haxx.se/docs/manpage.html#-m>`_
 - ``mac_interface``: the interface from which the MAC address is taken when performing automatic registration, defaults to ``eth0``
+- ``management_interface``: management interface name (both openwrt UCI names and
+  linux interface names are supported), it's used to collect the management interface ip address
 - ``pre_reload_hook``: path to custom executable script, see `pre-reload-hook`_
 - ``post_reload_hook``: path to custom executable script, see `post-reload-hook`_
 

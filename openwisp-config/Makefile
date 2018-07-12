@@ -92,6 +92,10 @@ define Package/openwisp-config-$(BUILD_VARIANT)/install
 		files/sbin/openwisp-update-config.lua \
 		$(1)/usr/sbin/openwisp-update-config
 
+	$(INSTALL_BIN) \
+		files/sbin/openwisp-get-address.lua \
+		$(1)/usr/sbin/openwisp-get-address
+
 	$(CP) ../VERSION $(1)/etc/openwisp/
 
 	if [ "$(BUILD_VARIANT)" == "mbedtls" ] || [ "$(BUILD_VARIANT)" == "cyassl" ]; then \
