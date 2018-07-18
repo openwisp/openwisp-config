@@ -312,8 +312,8 @@ image with a precompiled minimal ``/etc/config/openwisp`` configuration file:
     EOF
 
     # configure feeds
-    cp feeds.conf.default feeds.conf
-    echo "src-git openwisp https://github.com/openwisp/openwisp-config.git" >> feeds.conf
+    echo "src-git openwisp https://github.com/openwisp/openwisp-config.git" > feeds.conf
+    cat feeds.conf.default >> feeds.conf
     ./scripts/feeds update -a
     ./scripts/feeds install -a
     # replace with your desired arch target
