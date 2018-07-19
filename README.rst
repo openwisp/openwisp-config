@@ -185,6 +185,9 @@ Below are described the available hooks in *openwisp-config*.
 pre-reload-hook
 ^^^^^^^^^^^^^^^
 
+Defaults to ``/etc/openwisp/pre-reload-hook``; the hook is not called if the
+path does not point to an executable script file.
+
 This hook is called each time *openwisp-config* applies a configuration, but **before services are reloaded**,
 more precisely in these situations:
 
@@ -220,6 +223,9 @@ Complete example:
 
 post-reload-hook
 ^^^^^^^^^^^^^^^^
+
+Defaults to ``/etc/openwisp/post-reload-hook``; the hook is not called if the
+path does not point to an executable script file.
 
 Same as `pre_reload_hook` but with the difference that this hook is called
 after the configuration services have been reloaded.

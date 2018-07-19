@@ -60,6 +60,8 @@ CONSISTENT_KEY=${CONSISTENT_KEY:-1}
 CONNECT_TIMEOUT=${CONNECT_TIMEOUT:-15}
 MAX_TIME=${MAX_TIME:-30}
 MAC_INTERFACE=${MAC_INTERFACE:-eth0}
+PRE_RELOAD_HOOK=${PRE_RELOAD_HOOK:-/etc/openwisp/pre-reload-hook}
+POST_RELOAD_HOOK=${POST_RELOAD_HOOK:-/etc/openwisp/post-reload-hook}
 WORKING_DIR="/tmp/openwisp"
 BASEURL="$URL/controller"
 CONFIGURATION_ARCHIVE="$WORKING_DIR/configuration.tar.gz"
@@ -235,8 +237,8 @@ configuration_changed() {
 
 # called in `apply_configuration` before services are reloaded
 pre_reload_hook() {
-	if [ -n "$PRE_RELOAD_HOOK" ]; then
-		$PRE_RELOAD_HOOK
+	if [ -x "$PRE_RELOAD_HOOK" ]; then
+		$($PRE_RELOAD_HOOK)
 		local exit_code=$?
 		logger "Called pre-reload-hook: $PRE_RELOAD_HOOK - exit code: $exit_code" \
 		       -t openwisp \
@@ -247,8 +249,8 @@ pre_reload_hook() {
 
 # called in `apply_configuration` after services are reloaded
 post_reload_hook() {
-	if [ -n "$POST_RELOAD_HOOK" ]; then
-		$POST_RELOAD_HOOK
+	if [ -x "$POST_RELOAD_HOOK" ]; then
+		$($POST_RELOAD_HOOK)
 		local exit_code=$?
 		logger "Called post-reload-hook: $POST_RELOAD_HOOK - exit code: $exit_code" \
 		       -t openwisp \
