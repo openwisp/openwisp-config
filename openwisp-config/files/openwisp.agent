@@ -93,6 +93,8 @@ if [ -n "$UNMANAGED" ]; then
 	UNMANAGED=$(echo $UNMANAGED | tr ',' ' ')
 fi
 
+# if management interface is not ready, the ip will be empty but other
+# attempts at determining it will be done before the start-up is completed
 if [ -n "$MANAGEMENT_INTERFACE" ]; then
 	MANAGEMENT_IP=$(/usr/sbin/openwisp-get-address $MANAGEMENT_INTERFACE)
 fi
@@ -189,6 +191,9 @@ register() {
 	logger "$prefix device registered successfully as $name, id: $UUID" \
 		   -t openwisp \
 		   -p daemon.info
+	# indicates this function has been called
+	# (used by `discover_management_ip`)
+	export REGISTER_CALLED=1
 }
 
 # gets checksum from controller
@@ -446,6 +451,51 @@ update_configuration() {
 	fi
 }
 
+discover_management_ip(){
+	# return if not using management interface
+	if [ -z "$MANAGEMENT_INTERFACE" ]; then
+		return
+	fi
+	# if being called just after `register` was called
+	if [ -n "$REGISTER_CALLED" ]; then
+		# don't do anything now, but unset the
+		# control variable so the logic will be
+		# executed at the next iteration
+		unset REGISTER_CALLED
+		return
+	fi
+	MANAGEMENT_IP=$(/usr/sbin/openwisp-get-address $MANAGEMENT_INTERFACE)
+	# if management interface is defined but its ip could not be determined
+	# try waiting for the management interface to be ready
+	if [ -z "$MANAGEMENT_IP" ]; then
+		MAX_ATTEMPTS=6
+		for attempt in `seq $MAX_ATTEMPTS`; do
+			MANAGEMENT_IP=$(/usr/sbin/openwisp-get-address $MANAGEMENT_INTERFACE)
+
+			if [ -z "$MANAGEMENT_IP" ]; then
+				retry_after=$(expr $INTERVAL / 12)
+				logger -s "management interface not ready (attempt $attempt of $MAX_ATTEMPTS)" \
+				       -t openwisp \
+				       -p daemon.notice
+				if [ $attempt -lt $MAX_ATTEMPTS ]; then
+					sleep $retry_after
+				else
+					logger -s "could not determine ip address of management interface, giving up..." \
+								 -t openwisp \
+								 -p daemon.warning
+				fi
+			else
+				break
+			fi
+		done
+	fi
+	# add management ip to URLs if present
+	if [ -n "$MANAGEMENT_IP" ]; then
+		export CONFIGURATION_URL="$BASE_CONFIGURATION_URL&management_ip=$MANAGEMENT_IP"
+		export CHECKSUM_URL="$BASE_CHECKSUM_URL&management_ip=$MANAGEMENT_IP"
+	fi
+}
+
 # ensure both UUID and KEY are defined
 # otherwise perform registration
 if [ -z "$UUID" ] || [ -z "$KEY" ]; then
@@ -459,17 +509,19 @@ if [ -z "$UUID" ] || [ -z "$KEY" ]; then
 fi
 
 # these variables are evaluated here because "register()" might set UUID and KEY
-CONFIGURATION_URL="$BASEURL/download-config/$UUID/?key=$KEY"
-CHECKSUM_URL="$BASEURL/checksum/$UUID/?key=$KEY"
+BASE_CONFIGURATION_URL="$BASEURL/download-config/$UUID/?key=$KEY"
+BASE_CHECKSUM_URL="$BASEURL/checksum/$UUID/?key=$KEY"
+CONFIGURATION_URL=$BASE_CONFIGURATION_URL
+CHECKSUM_URL=$BASE_CHECKSUM_URL
 REPORT_URL="$BASEURL/report-status/$UUID/"
-
-if [ -n "$MANAGEMENT_IP" ]; then
-	CONFIGURATION_URL="$CONFIGURATION_URL&management_ip=$MANAGEMENT_IP"
-	CHECKSUM_URL="$CHECKSUM_URL&management_ip=$MANAGEMENT_IP"
-fi
 
 while true
 do
+	# check management interface at each iteration
+	# (because the address may change due to
+	# configuration updates or manual reconfigurations)
+	discover_management_ip
+
 	configuration_changed
 
 	if [ "$?" == "1" ]; then
