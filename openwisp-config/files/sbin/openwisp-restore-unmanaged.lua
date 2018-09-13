@@ -2,7 +2,7 @@
 -- restores unmanaged configurations
 
 require('uci')
-require('openwisp.utils')
+local utils = require('openwisp.utils')
 
 -- parse arguments
 local arg={...}
@@ -25,7 +25,7 @@ for file in lfs.dir(unmanaged_path) do
     if file ~= '.' and file ~= '..' then
         for key, section in pairs(unmanaged:get_all(file)) do
             standard:delete(file, key)
-            write_uci_section(standard, file, section)
+            utils.write_uci_section(standard, file, section)
         end
         standard:commit(file)
     end

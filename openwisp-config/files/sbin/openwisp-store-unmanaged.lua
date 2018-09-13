@@ -4,7 +4,7 @@
 require('os')
 require('io')
 require('uci')
-require('openwisp.utils')
+local utils = require('openwisp.utils')
 local sections
 local arg={...}
 
@@ -45,9 +45,9 @@ end
 --   }
 -- }
 local unmanaged_map = {}
-local section_list = split(sections)
+local section_list = utils.split(sections)
 for i, section in pairs(section_list) do
-    local parts = split(section, '.')
+    local parts = utils.split(section, '.')
     -- skip unrecognized strings
     if parts[1] and parts[2] then
         local config = parts[1]
@@ -89,11 +89,11 @@ for config_name, config_values in pairs(unmanaged_map) do
             if element.name then
                 local section = uci_table[element.name]
                 if section then
-                    write_uci_section(unmanaged, config_name, section)
+                    utils.write_uci_section(unmanaged, config_name, section)
                 end
             else
                 standard:foreach(config_name, element.type, function(section)
-                    write_uci_section(unmanaged, config_name, section)
+                    utils.write_uci_section(unmanaged, config_name, section)
                 end)
             end
         end

@@ -3,7 +3,7 @@ package.path = package.path .. ';../files/lib/?.lua'
 require('os')
 require('io')
 require('uci')
-require('openwisp.utils')
+local utils = require('openwisp.utils')
 luaunit = require('luaunit')
 write_dir = './utils'
 
@@ -18,14 +18,14 @@ TestUtils = {
 }
 
 function TestUtils.test_starts_with_dot()
-    luaunit.assertEquals(starts_with_dot('.name'), true)
-    luaunit.assertEquals(starts_with_dot('.type'), true)
-    luaunit.assertEquals(starts_with_dot('ifname'), false)
+    luaunit.assertEquals(utils.starts_with_dot('.name'), true)
+    luaunit.assertEquals(utils.starts_with_dot('.type'), true)
+    luaunit.assertEquals(utils.starts_with_dot('ifname'), false)
 end
 
 function TestUtils.test_write_uci_section_named()
     u = uci.cursor(write_dir)
-    write_uci_section(u, 'network', {
+    utils.write_uci_section(u, 'network', {
         [".name"] = "globals",
         [".type"] = "globals",
         [".anonymous"] = false,
@@ -41,7 +41,7 @@ end
 
 function TestUtils.test_write_uci_section_anon()
     u = uci.cursor(write_dir)
-    write_uci_section(u, 'network', {
+    utils.write_uci_section(u, 'network', {
         [".anonymous"] = true,
         [".name"] = "cfg0c1ec7",
         [".type"] = "switch_vlan",
@@ -62,7 +62,7 @@ end
 
 function TestUtils.test_write_uci_section_duplicate_list()
     u = uci.cursor(write_dir)
-    write_uci_section(u, 'network', {
+    utils.write_uci_section(u, 'network', {
         [".name"] = "lan",
         [".type"] = "interface",
         [".anonymous"] = false,
@@ -81,7 +81,7 @@ function TestUtils.test_write_uci_section_duplicate_list()
 end
 
 function TestUtils.test_is_uci_empty_false()
-    luaunit.assertEquals(is_uci_empty({
+    luaunit.assertEquals(utils.is_uci_empty({
         [".name"] = "lan",
         [".type"] = "interface",
         [".anonymous"] = false,
@@ -91,7 +91,7 @@ function TestUtils.test_is_uci_empty_false()
         force_link = "0",
         ifname = "eth0.1"
     }), false)
-    luaunit.assertEquals(is_uci_empty({
+    luaunit.assertEquals(utils.is_uci_empty({
         [".name"] = "globals",
         [".type"] = "globals",
         [".anonymous"] = false,
@@ -100,7 +100,7 @@ function TestUtils.test_is_uci_empty_false()
 end
 
 function TestUtils.test_is_uci_empty_true()
-    luaunit.assertEquals(is_uci_empty({
+    luaunit.assertEquals(utils.is_uci_empty({
         [".name"] = "lan",
         [".type"] = "interface",
         [".anonymous"] = false,
@@ -111,7 +111,7 @@ end
 function TestUtils.test_remove_uci_options()
     os.execute('cp ./config/network '..write_dir..'/network')
     u = uci.cursor(write_dir)
-    remove_uci_options(u, 'network', {
+    utils.remove_uci_options(u, 'network', {
         [".name"] = "wlan1",
         [".type"] = "interface",
         [".anonymous"] = false,
@@ -132,7 +132,7 @@ end
 function TestUtils.test_remove_uci_options_twice()
     os.execute('cp ./config/network '..write_dir..'/network')
     u = uci.cursor(write_dir)
-    remove_uci_options(u, 'network', {
+    utils.remove_uci_options(u, 'network', {
         [".name"] = "wlan1",
         [".type"] = "interface",
         [".anonymous"] = false,
@@ -142,7 +142,7 @@ function TestUtils.test_remove_uci_options_twice()
         ifname = "wlan1"
     })
     u:commit('network')
-    remove_uci_options(u, 'network', {
+    utils.remove_uci_options(u, 'network', {
         [".name"] = "wlan1",
         [".type"] = "interface",
         [".anonymous"] = false,
@@ -161,11 +161,11 @@ function TestUtils.test_remove_uci_options_twice()
 end
 
 function TestUtils.test_is_table_empty_true()
-    luaunit.assertEquals(is_table_empty({}), true)
+    luaunit.assertEquals(utils.is_table_empty({}), true)
 end
 
 function TestUtils.test_is_table_empty_false()
-    luaunit.assertEquals(is_table_empty({
+    luaunit.assertEquals(utils.is_table_empty({
         el = "value"
     }), false)
 end
@@ -173,7 +173,7 @@ end
 function TestUtils.test_merge_uci_option()
     u = uci.cursor(write_dir)
     -- prepare config
-    write_uci_section(u, 'network', {
+    utils.write_uci_section(u, 'network', {
         [".name"] = "wlan1",
         [".type"] = "interface",
         [".anonymous"] = false,
@@ -184,7 +184,7 @@ function TestUtils.test_merge_uci_option()
     })
     u:commit('network')
     -- add one option
-    write_uci_section(u, 'network', {
+    utils.write_uci_section(u, 'network', {
         [".name"] = "wlan1",
         [".type"] = "interface",
         [".anonymous"] = false,
@@ -205,7 +205,7 @@ end
 function TestUtils.test_merge_uci_list()
     u = uci.cursor(write_dir)
     -- prepare config
-    write_uci_section(u, 'network', {
+    utils.write_uci_section(u, 'network', {
         [".name"] = "wlan1",
         [".type"] = "interface",
         [".anonymous"] = false,
@@ -216,7 +216,7 @@ function TestUtils.test_merge_uci_list()
     })
     u:commit('network')
     -- add one option
-    write_uci_section(u, 'network', {
+    utils.write_uci_section(u, 'network', {
         [".name"] = "wlan1",
         [".type"] = "interface",
         [".anonymous"] = false,
@@ -234,7 +234,7 @@ end
 function TestUtils.test_merge_uci_list_duplicate()
     u = uci.cursor(write_dir)
     -- prepare config
-    write_uci_section(u, 'network', {
+    utils.write_uci_section(u, 'network', {
         [".name"] = "wlan1",
         [".type"] = "interface",
         [".anonymous"] = false,
@@ -245,7 +245,7 @@ function TestUtils.test_merge_uci_list_duplicate()
     })
     u:commit('network')
     -- add one option
-    write_uci_section(u, 'network', {
+    utils.write_uci_section(u, 'network', {
         [".name"] = "wlan1",
         [".type"] = "interface",
         [".anonymous"] = false,
@@ -267,22 +267,22 @@ function TestUtils.test_dirtree()
     os.execute('mkdir '..write_dir..'/inner')
     os.execute('touch '..write_dir..'/f3')
     count = 0
-    for filename, attr in dirtree(write_dir) do
+    for filename, attr in utils.dirtree(write_dir) do
         count = count + 1
     end
     luaunit.assertEquals(count, 4)
 end
 
 function TestUtils.test_file_exists()
-    luaunit.assertEquals(file_exists('./test_utils.lua'), true)
-    luaunit.assertEquals(file_exists('./WRONG'), false)
+    luaunit.assertEquals(utils.file_exists('./test_utils.lua'), true)
+    luaunit.assertEquals(utils.file_exists('./WRONG'), false)
 end
 
 function TestUtils.test_file_to_set()
     os.execute('echo "line1" > '..write_dir..'/read.list')
     os.execute('echo "line2" >> '..write_dir..'/read.list')
     os.execute('echo "line3" >> '..write_dir..'/read.list')
-    set = file_to_set(write_dir..'/read.list')
+    set = utils.file_to_set(write_dir..'/read.list')
     luaunit.assertEquals(set.line1, true)
     luaunit.assertEquals(set.line2, true)
     luaunit.assertEquals(set.line3, true)
@@ -291,9 +291,9 @@ end
 
 function TestUtils.test_set_to_file()
     write = {line1=true, line2=true}
-    result = set_to_file(write, write_dir..'/write.list')
+    result = utils.set_to_file(write, write_dir..'/write.list')
     luaunit.assertEquals(result, true)
-    read = file_to_set(write_dir..'/write.list')
+    read = utils.file_to_set(write_dir..'/write.list')
     luaunit.assertEquals(read.line1, true)
     luaunit.assertEquals(read.line2, true)
     luaunit.assertEquals(read.line3, nil)
@@ -301,18 +301,18 @@ end
 
 function TestUtils.test_split()
     t = {'a', 'b', 'c'}
-    luaunit.assertEquals(split('a b c'), t)
-    luaunit.assertEquals(split('a,b,c', ','), t)
-    luaunit.assertEquals(split('a/b/c', '/'), t)
+    luaunit.assertEquals(utils.split('a b c'), t)
+    luaunit.assertEquals(utils.split('a,b,c', ','), t)
+    luaunit.assertEquals(utils.split('a/b/c', '/'), t)
 end
 
 function TestUtils.test_basename()
-    luaunit.assertEquals(basename('/etc/config/network'), 'network')
-    luaunit.assertEquals(basename('./profile'), 'profile')
+    luaunit.assertEquals(utils.basename('/etc/config/network'), 'network')
+    luaunit.assertEquals(utils.basename('./profile'), 'profile')
 end
 
 function TestUtils.test_dirname()
-    luaunit.assertEquals(dirname('/etc/config/network'), '/etc/config/')
+    luaunit.assertEquals(utils.dirname('/etc/config/network'), '/etc/config/')
 end
 
 os.exit(luaunit.LuaUnit.run())

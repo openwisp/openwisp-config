@@ -4,7 +4,7 @@
 require('os')
 require('lfs')
 require('uci')
-require('openwisp.utils')
+local utils = require('openwisp.utils')
 
 -- parse arguments
 MERGE = true -- default value
@@ -37,12 +37,12 @@ if lfs.attributes(remote_config_dir, 'mode') == 'directory' then
         local standard_path = standard_config_dir .. '/' .. file
         if lfs.attributes(standard_path, 'mode') == 'file' then
             for key, section in pairs(remote:get_all(file)) do
-                remove_uci_options(standard, file, section)
+                utils.remove_uci_options(standard, file, section)
             end
             standard:commit(file)
             -- remove uci file if empty
             local uci = standard:get_all(file)
-            if uci and is_table_empty(uci) then
+            if uci and utils.is_table_empty(uci) then
                 os.remove(standard_path)
             end
         end
@@ -69,7 +69,7 @@ if lfs.attributes(remote_config_dir, 'mode') == 'directory' then
                 -- avoid "file does not exist" error
                 os.execute('touch ' .. standard_path)
                 for key, section in pairs(remote:get_all(file)) do
-                    write_uci_section(standard, file, section)
+                    utils.write_uci_section(standard, file, section)
                 end
                 standard:commit(file)
             -- OVERWRITE mode
