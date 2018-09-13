@@ -1,11 +1,11 @@
 #!/usr/bin/env lua
 -- ensures anonymous configurations are named
 
-require('io')
-require('uci')
-require('lfs')
-require('openwisp.utils')
-local arg={...}
+local uci = require('uci')
+local lfs = require('lfs')
+local utils = require('openwisp.utils')
+local arg = {...}
+local test = false
 
 -- parse arguments
 for key, value in pairs(arg) do
@@ -39,7 +39,7 @@ for file in lfs.dir(standard_path) do
                         section['.name'] = 'system'
                     end
                     section['.anonymous'] = false
-                    write_uci_section(output, file, section)
+                    utils.write_uci_section(output, file, section)
                     output:reorder(file, 'system', 0)
                     changed = true
                     -- append new named section to stdout var
