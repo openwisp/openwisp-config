@@ -7,7 +7,7 @@ openwisp-config
 
 ------------
 
-`LEDE <https://lede-project.org/>`_ / `OpenWRT <https://openwrt.org/>`_ configuration agent for the new
+`OpenWRT <https://openwrt.org/>`_ configuration agent for the new
 `OpenWISP 2 Controller <https://github.com/openwisp/ansible-openwisp2>`_.
 
 **Want to help OpenWISP?** `Find out how to help us grow here
@@ -43,7 +43,7 @@ For a list of the latest built images, take a look at `downloads.openwisp.org
 <http://downloads.openwisp.org/openwisp-config/>`_.
 
 **If you need to compile the package yourself**, see `Compiling openwisp-config`_
-and `Compiling a custom LEDE / OpenWRT image`_.
+and `Compiling a custom OpenWRT image`_.
 
 Once installed *openwisp-config* needs to be configured (see `Configuration options`_)
 and then started with::
@@ -87,14 +87,14 @@ the router to be unregistered and it will attempt to perform an automatic regist
 
 The automatic registration is performed only if ``shared_secret`` is correctly set.
 
-The device will choose as name one of its mac addresses, unless its hostname is not ``OpenWrt`` or ``LEDE``,
+The device will choose as name one of its mac addresses, unless its hostname is not ``OpenWrt``,
 in the latter case it will simply register itself with the current hostname.
 
 When the registration is completed, the agent will automatically set ``uuid`` and ``key``
 in ``/etc/config/openwisp``.
 
 To enable this feature by default on your firmware images, follow the procedure described in
-`Compiling a custom LEDE / OpenWRT image`_.
+`Compiling a custom OpenWRT image`_.
 
 Consistent key generation
 -------------------------
@@ -239,15 +239,16 @@ There are 4 variants of *openwisp-config*:
 - **openwisp-config-mbedtls**: depends on *ca-certificates* and *libmbedtls*
 - **openwisp-config-cyassl**: depends on *ca-certificates* and *libcyassl*
 - **openwisp-config-polarssl**: depends on *ca-certificates* and *libpolarssl* (**note**: polarssl
-  has been deprecated in favour of mbedtls on more recent OpenWRT and LEDE versions)
+  has been deprecated in favour of mbedtls on more recent OpenWRT versions)
 - **openwisp-config-nossl**: doesn't depend on any SSL library and doesn't install trusted CA certificates
 
 The following procedure illustrates how to compile all the *openwisp-config* variants and their dependencies:
 
 .. code-block:: shell
 
-    git clone git://git.lede-project.org/source.git lede
-    cd lede
+    git clone https://github.com/openwrt/openwrt.git openwrt
+    cd openwrt
+    git checkout v18.06.1
 
     # configure feeds
     echo "src-git openwisp https://github.com/openwisp/openwisp-config.git" > feeds.conf
@@ -273,8 +274,9 @@ you will need to select the *openwisp-config* variant by going to ``Administrati
 
 .. code-block:: shell
 
-    git clone git://git.lede-project.org/source.git lede
-    cd lede
+    git clone https://github.com/openwrt/openwrt.git openwrt
+    cd openwrt
+    git checkout v18.06.1
 
     # configure feeds
     echo "src-git openwisp https://github.com/openwisp/openwisp-config.git" > feeds.conf
@@ -285,11 +287,11 @@ you will need to select the *openwisp-config* variant by going to ``Administrati
     # go to Administration > openwisp and select the variant you need interactively
     make -j1 V=s
 
-Compiling a custom LEDE / OpenWRT image
+Compiling a custom OpenWRT image
 ---------------------------------------
 
 If you are managing many devices and customizing your ``openwisp-config`` configuration by hand on
-each new device, you should switch to using a custom LEDE / OpenWRT firmware image that includes
+each new device, you should switch to using a custom OpenWRT firmware image that includes
 ``openwisp-config`` and its precompiled configuration file, this strategy has a few important benefits:
 
 * you can save yourself the effort of installing and configuring ``openwisp-config`` on each device
@@ -297,14 +299,14 @@ each new device, you should switch to using a custom LEDE / OpenWRT firmware ima
   hence saving extra time and effort to register each device on the controller app
 * if you happen to reset the firmware to initial settings, these precompiled settings will be restored as well
 
-The following procedure illustrates how to compile a custom `LEDE 17.01 <https://lede-project.org>`_
+The following procedure illustrates how to compile a custom `OpenWRT 18.06.1 <https://openwrt.org/>`_
 image with a precompiled minimal ``/etc/config/openwisp`` configuration file:
 
 .. code-block:: shell
 
-    git clone git://git.lede-project.org/source.git lede
-    cd lede
-    git checkout lede-17.01
+    git clone https://github.com/openwrt/openwrt.git openwrt
+    cd openwrt
+    git checkout v18.06.1
 
     # include precompiled file
     mkdir -p files/etc/config
