@@ -43,6 +43,9 @@ for file in lfs.dir(standard_path) do
                 if file == 'system' and section['.type'] == 'system' then
                     section['.name'] = 'system'
                 end
+                if file == 'system' and section['.type'] == 'led' then
+                    section['.name'] = 'led_' .. string.lower(section['name'])
+                end
                 section['.anonymous'] = false
                 utils.write_uci_section(output, file, section)
                 output:reorder(file, section['.name'], index)
