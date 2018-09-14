@@ -288,7 +288,7 @@ you will need to select the *openwisp-config* variant by going to ``Administrati
     make -j1 V=s
 
 Compiling a custom OpenWRT image
----------------------------------------
+--------------------------------
 
 If you are managing many devices and customizing your ``openwisp-config`` configuration by hand on
 each new device, you should switch to using a custom OpenWRT firmware image that includes
