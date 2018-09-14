@@ -37,7 +37,8 @@ Then install one of the `latest builds <http://downloads.openwisp.org/openwisp-c
 
     opkg install <URL>
 
-Where ``<URL>`` is the URL of the image that is suitable for your case.
+Where ``<URL>`` is the URL of the image that is suitable for your case
+(we suggest ``openssl`` or alternatively ``mbedtls``).
 
 For a list of the latest built images, take a look at `downloads.openwisp.org
 <http://downloads.openwisp.org/openwisp-config/>`_.
