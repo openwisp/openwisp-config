@@ -30,25 +30,29 @@ end
 for file in lfs.dir(standard_path) do
     if file ~= '.' and file ~= '..' then
         local changed = false
-        local config = standard:get_all(file)
-        if config then
-            for key, section in pairs(config) do
-                if section['.anonymous'] then
-                    output:delete(file, section['.name'])
-                    if file == 'system' and section['.type'] == 'system' then
-                        section['.name'] = 'system'
-                    end
-                    section['.anonymous'] = false
-                    utils.write_uci_section(output, file, section)
-                    output:reorder(file, 'system', 0)
-                    changed = true
-                    -- append new named section to stdout var
-                    stdout = stdout .. file .. '.' .. section['.name'] .. ', '
+        standard:foreach(file, nil, function(section)
+            local index = section['.index']
+            if section['.anonymous'] then
+                output:delete(file, section['.name'])
+                if file == 'firewall' and section['.type'] == 'defaults' then
+                    section['.name'] = 'defaults'
                 end
+                if file == 'network' and section['.type'] == 'globals' then
+                    section['.name'] = 'globals'
+                end
+                if file == 'system' and section['.type'] == 'system' then
+                    section['.name'] = 'system'
+                end
+                section['.anonymous'] = false
+                utils.write_uci_section(output, file, section)
+                output:reorder(file, section['.name'], index)
+                changed = true
+                -- append new named section to stdout var
+                stdout = stdout .. file .. '.' .. section['.name'] .. ', '
             end
-            if changed then
-                output:commit(file)
-            end
+        end)
+        if changed then
+            output:commit(file)
         end
     end
 end
