@@ -265,7 +265,6 @@ The following procedure illustrates how to compile all the *openwisp-config* var
     make tools/install
     make toolchain/install
     make package/openwisp-config/compile
-    make package/openwisp-config/install
 
 Alternatively, you can configure your build interactively with ``make menuconfig``, in this case
 you will need to select the *openwisp-config* variant by going to ``Administration > openwisp``:
