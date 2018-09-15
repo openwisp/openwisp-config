@@ -22,7 +22,9 @@ if ! [ -d "openwrt" ]; then
   git clone https://github.com/openwrt/openwrt.git openwrt
 fi
 cd openwrt
-git checkout v18.06.1
+git reset --hard HEAD
+git checkout openwrt-18.06
+git pull origin openwrt-18.06
 
 # configure feeds
 echo "src-git openwisp https://github.com/openwisp/openwisp-config.git" > feeds.conf
