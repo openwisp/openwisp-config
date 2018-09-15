@@ -28,8 +28,6 @@ endef
 Package/openwisp-config-openssl=$(call Package/openwisp-config/default,openssl,OpenSSL,+ca-certificates +libopenssl)
 Package/openwisp-config-mbedtls=$(call Package/openwisp-config/default,mbedtls,mbedTLS,+ca-certificates +libmbedtls)
 Package/openwisp-config-cyassl=$(call Package/openwisp-config/default,cyassl,CyaSSL,+ca-certificates +libcyassl)
-# deprecated on recent versions of OpenWRT (>= Designated Driver) and LEDE (>= 17.01)
-Package/openwisp-config-polarssl=$(call Package/openwisp-config/default,polarssl,PolarSSL,+ca-certificates +libpolarssl)
 Package/openwisp-config-nossl=$(call Package/openwisp-config/default,nossl,No SSL)
 
 define Build/Compile
@@ -107,5 +105,4 @@ endef
 $(eval $(call BuildPackage,openwisp-config-openssl))
 $(eval $(call BuildPackage,openwisp-config-mbedtls))
 $(eval $(call BuildPackage,openwisp-config-cyassl))
-$(eval $(call BuildPackage,openwisp-config-polarssl))
 $(eval $(call BuildPackage,openwisp-config-nossl))
