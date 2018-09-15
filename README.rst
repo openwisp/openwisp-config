@@ -31,7 +31,7 @@ First run:
 
     opkg update
 
-Then install one of the `latest builds <http://downloads.openwisp.org/openwisp-config/>`_:
+Then install one of the `latest builds <http://downloads.openwisp.io/openwisp-config/>`_:
 
 .. code-block:: shell
 
@@ -40,8 +40,8 @@ Then install one of the `latest builds <http://downloads.openwisp.org/openwisp-c
 Where ``<URL>`` is the URL of the image that is suitable for your case
 (we suggest ``openssl`` or alternatively ``mbedtls``).
 
-For a list of the latest built images, take a look at `downloads.openwisp.org
-<http://downloads.openwisp.org/openwisp-config/>`_.
+For a list of the latest built images, take a look at `downloads.openwisp.io/openwisp-config/
+<http://downloads.openwisp.io/openwisp-config/>`_.
 
 **If you need to compile the package yourself**, see `Compiling openwisp-config`_
 and `Compiling a custom OpenWRT image`_.
