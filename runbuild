@@ -1,0 +1,51 @@
+#!/bin/bash
+# ci build script
+# runs tests and then builds the OpenWRT package
+# requires the following env vars:
+# - $BUILD_DIR
+# - $DOWNLOADS_DIR
+# - $CORES (defaults to 1)
+set -e
+
+./runtests
+
+START_TIME=$(date +"%Y-%m-%d-%H%M%S")
+VERSIONED_DIR="$DOWNLOADS_DIR/$START_TIME"
+LATEST_LINK="$DOWNLOADS_DIR/latest"
+CORES=${CORES:-1}
+
+mkdir -p $BUILD_DIR
+mkdir -p $DOWNLOADS_DIR
+cd $BUILD_DIR
+
+if ! [ -d "openwrt" ]; then
+  git clone https://github.com/openwrt/openwrt.git openwrt
+fi
+cd openwrt
+git checkout v18.06.1
+
+# configure feeds
+echo "src-git openwisp https://github.com/openwisp/openwisp-config.git" > feeds.conf
+cat feeds.conf.default >> feeds.conf
+# remove unneeded feeds
+sed -i '/telephony/d' feeds.conf
+sed -i '/routing/d' feeds.conf
+sed -i '/luci/d' feeds.conf
+./scripts/feeds update -a
+./scripts/feeds install -a
+# any arch/target is fine because the package is architecture indipendent
+arch="ar71xx"
+echo "CONFIG_TARGET_$arch=y" > .config;
+echo "CONFIG_PACKAGE_openwisp-config-openssl=y" >> .config
+echo "CONFIG_PACKAGE_openwisp-config-mbedtls=y" >> .config
+echo "CONFIG_PACKAGE_openwisp-config-cyassl=y" >> .config
+echo "CONFIG_PACKAGE_openwisp-config-nossl=y" >> .config
+make defconfig
+make -j$CORES tools/install
+make -j$CORES toolchain/install
+make -j$CORES package/openwisp-config/compile || exit 1
+
+mv $BUILD_DIR/openwrt/bin/packages/mips_24kc/openwisp $VERSIONED_DIR
+
+rm $LATEST_LINK || true
+ln -s $VERSIONED_DIR $LATEST_LINK
