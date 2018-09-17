@@ -46,6 +46,13 @@ for file in lfs.dir(standard_path) do
                 if file == 'system' and section['.type'] == 'led' then
                     section['.name'] = 'led_' .. string.lower(section['name'])
                 end
+                if file == 'wireless' and section['.type'] == 'wifi-iface' then
+                    if section['ifname'] == nil then
+                        section['.name'] = 'wifi_' .. string.gsub(standard:get('network', section['network'], 'ifname'),'%.','_')
+                    else
+                        section['.name'] = 'wifi_' .. section['ifname']
+                    end
+                end
                 section['.anonymous'] = false
                 utils.write_uci_section(output, file, section)
                 output:reorder(file, section['.name'], index)
