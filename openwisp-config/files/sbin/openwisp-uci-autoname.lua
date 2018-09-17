@@ -18,6 +18,23 @@ local standard_path = standard_prefix .. 'config'
 local standard = uci.cursor(standard_path) -- read operations
 local output = standard  -- write operations
 local stdout = ''  -- result
+local count = {}
+
+local function getCount(type)
+    return count[type]
+end
+
+local function incCount(type)
+    if count[type] == nil then
+        count[type] = 1
+    else
+        count[type] = count[type] + 1
+    end
+end
+
+local function getUCIName(name)
+    return string.gsub(string.gsub(name, '%.', '_'), '-', '_')
+end
 
 -- if test mode
 if test then
@@ -36,22 +53,24 @@ for file in lfs.dir(standard_path) do
                 output:delete(file, section['.name'])
                 if file == 'firewall' and section['.type'] == 'defaults' then
                     section['.name'] = 'defaults'
-                end
-                if file == 'network' and section['.type'] == 'globals' then
+                elseif file == 'network' and section['.type'] == 'globals' then
                     section['.name'] = 'globals'
-                end
-                if file == 'system' and section['.type'] == 'system' then
+                elseif file == 'network' and (section['.type'] == 'route' or section['.type'] == 'route6') then
+                    incCount('route')
+                    section['.name'] = 'route' .. getCount('route')
+                elseif file == 'system' and section['.type'] == 'system' then
                     section['.name'] = 'system'
-                end
-                if file == 'system' and section['.type'] == 'led' then
+                elseif file == 'system' and section['.type'] == 'led' then
                     section['.name'] = 'led_' .. string.lower(section['name'])
-                end
-                if file == 'wireless' and section['.type'] == 'wifi-iface' then
+                elseif file == 'wireless' and section['.type'] == 'wifi-iface' then
                     if section['ifname'] == nil then
-                        section['.name'] = 'wifi_' .. string.gsub(standard:get('network', section['network'], 'ifname'),'%.','_')
+                        section['.name'] = 'wifi_' .. getUCIName(standard:get('network', section['network'], 'ifname'))
                     else
-                        section['.name'] = 'wifi_' .. section['ifname']
+                        section['.name'] = 'wifi_' .. getUCIName(section['ifname'])
                     end
+                else
+                    incCount(section['.type'])
+                    section['.name'] = getUCIName(section['.type']) .. getCount(section['.type'])
                 end
                 section['.anonymous'] = false
                 utils.write_uci_section(output, file, section)
