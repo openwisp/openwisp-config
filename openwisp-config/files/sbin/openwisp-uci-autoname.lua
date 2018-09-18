@@ -58,6 +58,12 @@ for file in lfs.dir(standard_path) do
                 elseif file == 'network' and (section['.type'] == 'route' or section['.type'] == 'route6') then
                     incCount('route')
                     section['.name'] = 'route' .. getCount('route')
+                elseif file == 'network' and section['.type'] == 'switch' then
+                    section['.name'] = section['name']
+                elseif file == 'network' and section['.type'] == 'switch_vlan' then
+                    section['.name'] = section['device'] .. '_vlan' .. section['vlan']
+                elseif file == 'network' and section['.type'] == 'switch_port' then
+                    section['.name'] = section['device'] .. '_port' .. section['port']
                 elseif file == 'system' and section['.type'] == 'system' then
                     section['.name'] = 'system'
                 elseif file == 'system' and section['.type'] == 'led' then
