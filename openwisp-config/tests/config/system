@@ -10,6 +10,9 @@ config timeserver 'ntp'
 	option enabled '1'
 	option enable_server '0'
 
+config led
+	option name 'TEST1'
+
 config led 'led_usb1'
 	option name 'USB1'
 	option sysfs 'tp-link:green:usb1'

@@ -7,7 +7,7 @@ store_unmanaged = assert(loadfile("../files/sbin/openwisp-store-unmanaged.lua"))
 default_blocks = "system.ntp " ..
                  "system.@led " ..
                  "network.loopback " ..
-                 "network.globals " ..
+                 "network.@globals " ..
                  "network.lan " ..
                  "network.wan " ..
                  "network.@switch " ..

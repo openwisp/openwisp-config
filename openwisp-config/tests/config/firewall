@@ -1,0 +1,2 @@
+config defaults
+  option test 1

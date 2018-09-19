@@ -1,0 +1,5 @@
+config wifi-iface
+	option ifname 'wlan0'
+
+config wifi-iface
+	option network 'wlan1'
