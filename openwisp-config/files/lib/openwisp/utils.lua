@@ -52,7 +52,7 @@ end
 
 -- writes uci section, eg:
 --
--- write_uci_section(cursor, 'network', {
+-- utils.write_uci_section(cursor, 'network', {
 --     [".name"] = "wan",
 --     [".type"] = "interface",
 --     [".anonymous"] = false,
