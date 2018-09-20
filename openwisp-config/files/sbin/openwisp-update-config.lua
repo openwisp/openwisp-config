@@ -84,25 +84,25 @@ end
 os.execute('touch ' .. added_file)
 os.execute('touch ' .. modified_file)
 -- convert lists to lua sets
-added = file_to_set(added_file)
-modified = file_to_set(modified_file)
+added = utils.file_to_set(added_file)
+modified = utils.file_to_set(modified_file)
 added_changed = false
 modified_changed = false
 
 -- loop each file except directories and standard UCI config files
 ignored_path = remote_config_dir .. '/'
 
-for path, attr in dirtree(remote_dir) do
+for path, attr in utils.dirtree(remote_dir) do
     if attr.mode == 'file' and string.sub(path, 1, 32) ~= ignored_path then
         -- calculates destination dir
         local dest_path = string.sub(path, 21)
-        local dest_dir = dirname(dest_path)
+        local dest_dir = utils.dirname(dest_path)
         local is_added = added[dest_path] == true
         local is_modified = modified[dest_path] == true
         -- if file is neither in added.list nor modified.list
         if is_added == false and is_modified == false then
             -- if file exists
-            if file_exists(dest_path) then
+            if utils.file_exists(dest_path) then
                 -- add file path to modified set
                 modified[dest_path] = true
                 modified_changed = true
@@ -126,7 +126,7 @@ end
 for file, bool in pairs(added) do
     local remote_path = remote_dir .. file
     -- if file is not in /etc/openwisp/remote anymore
-    if not file_exists(remote_path) then
+    if not utils.file_exists(remote_path) then
         -- remove file
         os.remove(file)
         -- remove entry from added set
@@ -141,11 +141,11 @@ for file, bool in pairs(modified) do
     local remote_path = remote_dir .. file
     local stored_path = stored_dir .. file
     -- if file is not in /etc/openwisp/remote anymore
-    if not file_exists(remote_path) then
+    if not utils.file_exists(remote_path) then
         -- restore original file
         os.execute('mv '..stored_path..' '..file)
         -- remove stored dir if empty
-        lfs.rmdir(dirname(stored_path))
+        lfs.rmdir(utils.dirname(stored_path))
         -- remove entry from modified set
         modified[file] = nil
         modified_changed = true
@@ -153,5 +153,5 @@ for file, bool in pairs(modified) do
 end
 
 -- persist changes to file lists
-if added_changed then set_to_file(added, added_file) end
-if modified_changed then set_to_file(modified, modified_file) end
+if added_changed then utils.set_to_file(added, added_file) end
+if modified_changed then utils.set_to_file(modified, modified_file) end
