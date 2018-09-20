@@ -329,6 +329,12 @@ test_configuration() {
 		       -t openwisp \
 		       -p daemon.err
 		report_status "error"
+		# if this case is triggered, the configuration may
+		# be damaged and so we need to do some clean up
+		sysupgrade -r $CONFIGURATION_BACKUP
+		logger -s "The most recent configuration backup was restored" \
+		       -t openwisp \
+		       -p daemon.info
 		return 1
 	fi
 
