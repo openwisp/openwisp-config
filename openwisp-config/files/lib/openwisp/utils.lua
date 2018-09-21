@@ -186,4 +186,8 @@ function utils.set_to_file(set, path)
     return true
 end
 
+function utils.starts_with(str, start)
+   return str:sub(1, #start) == start
+end
+
 return utils

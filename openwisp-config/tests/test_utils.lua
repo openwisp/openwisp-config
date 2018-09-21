@@ -315,4 +315,9 @@ function TestUtils.test_dirname()
     luaunit.assertEquals(utils.dirname('/etc/config/network'), '/etc/config/')
 end
 
+function TestUtils.test_starts_with()
+    luaunit.assertEquals(utils.starts_with('/etc/config/network', '/etc/config/'), true)
+    luaunit.assertEquals(utils.starts_with('/etc/mypackage/myfile', '/etc/config/'), false)
+end
+
 os.exit(luaunit.LuaUnit.run())
