@@ -5,10 +5,7 @@ local lfs = require('lfs')
 local utils = {}
 
 function utils.starts_with_dot(str)
-    if string.sub(str, 1, 1) == '.' then
-        return true
-    end
-    return false
+    return str:sub(1, 1) == '.'
 end
 
 function utils.split(input, sep)
