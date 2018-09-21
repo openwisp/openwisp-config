@@ -18,6 +18,8 @@ end
 
 working_dir = lfs.currentdir()
 tmp_dir = not TEST and '/tmp/openwisp' or working_dir
+check_dir = tmp_dir .. '/check'
+check_config_dir = check_dir..'/etc/config'
 downloaded_conf = tmp_dir .. '/configuration.tar.gz'
 openwisp_dir = not TEST and '/etc/openwisp' or working_dir .. '/openwisp'
 standard_config_dir = not TEST and '/etc/config' or working_dir .. '/update-test/etc/config'
@@ -29,10 +31,34 @@ added_file = openwisp_dir .. '/added.list'
 modified_file = openwisp_dir .. '/modified.list'
 get_standard = function() return uci.cursor(standard_config_dir) end
 get_remote = function() return uci.cursor(remote_config_dir, '/tmp/openwisp/.uci') end
+get_check = function() return uci.cursor(check_config_dir, '/tmp/openwisp/.uci') end
 
 -- uci cursors
 standard = get_standard()
 remote = get_remote()
+
+-- check downloaded UCI files before proceeding
+os.execute('mkdir -p '..check_dir)
+os.execute('tar -zxf '..downloaded_conf..' -C '..check_dir)
+check = get_check()
+
+if lfs.attributes(check_config_dir, 'mode') == 'directory' then
+    for file in lfs.dir(check_config_dir) do
+        path = check_config_dir..'/'..file
+        if lfs.attributes(path, 'mode') == 'file' then
+            if check:get_all(file) == nil then
+                print('ERROR: invalid UCI configuration file: '..file)
+                os.execute('rm -rf '..check_dir)
+                if TEST then
+                  return
+                else
+                  os.exit(2)
+                end
+            end
+        end
+    end
+end
+os.execute('rm -rf '..check_dir)
 
 -- update UCI configuration
 -- (overwrite or merge)
