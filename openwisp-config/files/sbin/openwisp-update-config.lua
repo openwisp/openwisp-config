@@ -5,19 +5,25 @@ require('os')
 require('lfs')
 require('uci')
 local utils = require('openwisp.utils')
+local arg = {...}
 
 -- parse arguments
-MERGE = true -- default value
+MERGE = true
+TEST = false
 for key, value in pairs(arg) do
     -- test argument
     if value == '--merge=0' then MERGE = false; end
+    if value == '--test=1' then TEST = true; end
 end
 
-downloaded_conf = '/tmp/openwisp/configuration.tar.gz'
-openwisp_dir = '/etc/openwisp'
-standard_config_dir = '/etc/config'
+working_dir = lfs.currentdir()
+tmp_dir = not TEST and '/tmp/openwisp' or working_dir
+downloaded_conf = tmp_dir .. '/configuration.tar.gz'
+openwisp_dir = not TEST and '/etc/openwisp' or working_dir .. '/openwisp'
+standard_config_dir = not TEST and '/etc/config' or working_dir .. '/update-test/etc/config'
+test_root_dir = working_dir .. '/update-test'
 remote_dir = openwisp_dir .. '/remote'
-remote_config_dir = remote_dir .. standard_config_dir
+remote_config_dir = remote_dir .. '/etc/config'
 stored_dir = openwisp_dir .. '/stored'
 added_file = openwisp_dir .. '/added.list'
 modified_file = openwisp_dir .. '/modified.list'
@@ -91,29 +97,38 @@ modified_changed = false
 
 -- loop each file except directories and standard UCI config files
 ignored_path = remote_config_dir .. '/'
+function is_ignored(path)
+    return utils.starts_with(path, ignored_path)
+end
 
 for path, attr in utils.dirtree(remote_dir) do
-    if attr.mode == 'file' and string.sub(path, 1, 32) ~= ignored_path then
+    if attr.mode == 'file' and not is_ignored(path) then
         -- calculates destination dir
-        local dest_path = string.sub(path, 21)
+        local dest_path = path:sub(#(remote_dir .. '/'))
         local dest_dir = utils.dirname(dest_path)
+        -- like dest_path but used during automated tests
+        local check_path = not TEST and dest_path or test_root_dir .. dest_path
         local is_added = added[dest_path] == true
         local is_modified = modified[dest_path] == true
         -- if file is neither in added.list nor modified.list
         if is_added == false and is_modified == false then
             -- if file exists
-            if utils.file_exists(dest_path) then
+            if utils.file_exists(check_path) then
                 -- add file path to modified set
                 modified[dest_path] = true
                 modified_changed = true
                 -- store original in /etc/openwisp/stored/<path>
                 os.execute('mkdir -p '..stored_dir..dest_dir)
-                os.execute('cp '..dest_path..' '..stored_dir..dest_path)
+                os.execute('cp '..check_path..' '..stored_dir..dest_path)
             else
                 -- add file path added set
                 added[dest_path] = true
                 added_changed = true
             end
+        end
+        if TEST then
+          dest_path = test_root_dir .. dest_path
+          dest_dir = test_root_dir .. dest_dir
         end
         -- add file to filesystem
         os.execute('mkdir -p '..dest_dir)
@@ -125,10 +140,11 @@ end
 -- which are not present anymore
 for file, bool in pairs(added) do
     local remote_path = remote_dir .. file
+    local dest_path = not TEST and file or test_root_dir .. file
     -- if file is not in /etc/openwisp/remote anymore
     if not utils.file_exists(remote_path) then
         -- remove file
-        os.remove(file)
+        os.remove(dest_path)
         -- remove entry from added set
         added[file] = nil
         added_changed = true
@@ -140,10 +156,11 @@ end
 for file, bool in pairs(modified) do
     local remote_path = remote_dir .. file
     local stored_path = stored_dir .. file
+    local dest_path = not TEST and file or test_root_dir .. file
     -- if file is not in /etc/openwisp/remote anymore
     if not utils.file_exists(remote_path) then
         -- restore original file
-        os.execute('mv '..stored_path..' '..file)
+        os.execute('mv '..stored_path..' '..dest_path)
         -- remove stored dir if empty
         lfs.rmdir(utils.dirname(stored_path))
         -- remove entry from modified set
