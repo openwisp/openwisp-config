@@ -320,4 +320,34 @@ function TestUtils.test_starts_with()
     luaunit.assertEquals(utils.starts_with('/etc/mypackage/myfile', '/etc/config/'), false)
 end
 
+function TestUtils.test_sorted_pairs()
+    t = {b='b', z='z', a='a', m='m', g='g'}
+    list = {}
+    for key, value in utils.sorted_pairs(t) do
+        table.insert(list, value)
+    end
+    expected = {'a', 'b', 'g', 'm', 'z'}
+    luaunit.assertEquals(list, expected)
+end
+
+function TestUtils.test_write_uci_section_order()
+    u = uci.cursor(write_dir)
+    utils.write_uci_section(u, 'network', {
+        [".name"] = "globals",
+        [".type"] = "globals",
+        [".anonymous"] = false,
+        ula_prefix = "fd8e:f40a:fede::/48",
+        zzzzzz = "just a test",
+        aaaaaa = "should come first"
+    })
+    u:commit('network')
+    local file = io.open(write_dir .. '/network')
+    luaunit.assertNotNil(file)
+    local contents = file:read('*all')
+    expected = "\toption aaaaaa 'should come first'\n" ..
+               "\toption ula_prefix 'fd8e:f40a:fede::/48'\n" ..
+               "\toption zzzzzz 'just a test'"
+    luaunit.assertNotNil(string.find(contents, expected))
+end
+
 os.exit(luaunit.LuaUnit.run())

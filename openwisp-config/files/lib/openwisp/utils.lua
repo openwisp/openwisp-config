@@ -74,7 +74,7 @@ function utils.write_uci_section(cursor, config, section)
         name = cursor:add(config, section['.type'])
     end
     -- write options for section
-    for key, value in pairs(section) do
+    for key, value in utils.sorted_pairs(section) do
         utils.write_uci_option(cursor, config, name, key, value)
     end
 end
@@ -188,6 +188,24 @@ end
 
 function utils.starts_with(str, start)
    return str:sub(1, #start) == start
+end
+
+-- iterates over a table in alphabeticaly order
+function utils.sorted_pairs(t)
+    -- collect keys
+    local keys = {}
+    for key in pairs(t) do keys[#keys+1] = key end
+
+    table.sort(keys)
+
+    -- return the iterator function
+    local i = 0
+    return function()
+        i = i + 1
+        if keys[i] then
+            return keys[i], t[keys[i]]
+        end
+    end
 end
 
 return utils
