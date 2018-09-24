@@ -71,6 +71,10 @@ define Package/openwisp-config-$(BUILD_VARIANT)/install
 		$(1)/usr/lib/lua/openwisp/utils.lua
 
 	$(INSTALL_BIN) \
+		files/lib/openwisp/net.lua \
+		$(1)/usr/lib/lua/openwisp/net.lua
+
+	$(INSTALL_BIN) \
 		files/sbin/openwisp-store-unmanaged.lua \
 		$(1)/usr/sbin/openwisp-store-unmanaged
 
