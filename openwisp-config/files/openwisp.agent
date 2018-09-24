@@ -279,7 +279,7 @@ apply_configuration() {
 		return 1
 	fi
 	# restore unmanaged configurations
-	/usr/sbin/openwisp-restore-unmanaged
+	call_restore_unmanaged
 	# call pre-reload-hook
 	pre_reload_hook
 	# reload changes and wait $sleep_time
@@ -391,6 +391,15 @@ call_store_unmanaged() {
 		return 0
 	fi
 	/usr/sbin/openwisp-store-unmanaged -o="$UNMANAGED"
+}
+
+# restores unmanaged configuration sections that will be merged
+# with the configuration downloaded from the controller
+call_restore_unmanaged() {
+	if [ -z "$UNMANAGED" ]; then
+		return 0
+	fi
+	/usr/sbin/openwisp-restore-unmanaged
 }
 
 # 1. removes default wifi-ifaces directive (LEDE or OpenWrt SSID)
