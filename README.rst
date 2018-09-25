@@ -152,12 +152,13 @@ If the exit code of the executable script is higher than ``0`` the test will be 
 Unmanaged Configurations
 ------------------------
 
-In some cases it is necessary to ensure that some configuration sections won't be
+In some cases it could be necessary to ensure that some configuration sections won't be
 overwritten by the controller.
 
-These settings are called "unmanaged", in the sense that are not managed remotely.
+These settings are called "unmanaged", in the sense that they are not managed remotely.
+In the default configuration of *openwisp_config* there are no unmanaged settings.
 
-The default unmanaged settings are the following ones::
+Example unmanaged settings::
 
     config controller 'http'
             ...
@@ -172,11 +173,6 @@ Note the lines with the `@` sign; this syntax means any UCI section of the speci
 In the previous example, the loopback interface, all ``led settings``, all ``switch`` and ``switch_vlan``
 directives will never be overwritten by the remote configuration and will only be editable via SSH
 or via the web interface.
-
-Disable Unmanaged Configurations
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-To disable unmanaged configurations simply remove all the ``unmanaged`` options.
 
 Hooks
 -----
@@ -312,10 +308,6 @@ image with a precompiled minimal ``/etc/config/openwisp`` configuration file:
         # change the values of the following 2 options
         option url 'https://openwisp2.mydomain.com'
         option shared_secret 'mysharedsecret'
-        list unmanaged 'system.@led'
-        list unmanaged 'network.loopback'
-        list unmanaged 'network.@switch'
-        list unmanaged 'network.@switch_vlan'
     EOF
 
     # configure feeds
