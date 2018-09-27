@@ -14,7 +14,7 @@ for key, value in pairs(arg) do
 end
 
 local standard_prefix = test and '../tests/' or '/etc/'
-local standard_path = standard_prefix .. 'config'
+local standard_path = standard_prefix .. (test and 'anonymous' or 'config')
 local standard = uci.cursor(standard_path) -- read operations
 local output = standard  -- write operations
 local stdout = ''  -- result
