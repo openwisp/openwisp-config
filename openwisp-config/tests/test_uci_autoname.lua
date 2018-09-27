@@ -11,7 +11,7 @@ TestUciAutoname = {
         os.execute('mkdir -p ' .. write_dir)
         os.execute('cp ./config/system '..write_dir..'system')
         os.execute('cp ./config/network '..write_dir..'network')
-        os.execute('cp ./wifi/wireless-autoname '..write_dir..'wireless')
+        os.execute('cp ./config/wireless-autoname '..write_dir..'wireless')
         os.execute('cp ./config/firewall '..write_dir..'firewall')
     end,
     tearDown = function()
@@ -39,11 +39,11 @@ function TestUciAutoname.test_default_behaviour()
     luaunit.assertNotNil(string.find(contents, "config interface 'loopback'"))
     luaunit.assertNotNil(string.find(contents, "config interface 'lan'"))
     -- check wireless
-    -- local file = io.open(write_dir .. 'wireless')
+    local file = io.open(write_dir .. 'wireless')
     luaunit.assertNotNil(file)
     local contents = file:read('*all')
-    -- luaunit.assertNotNil(string.find(contents, "config wifi-iface 'wifi_wlan0", nil, true))
-    -- luaunit.assertNotNil(string.find(contents, "config wifi-iface 'wifi_wlan1", nil, true))
+    luaunit.assertNotNil(string.find(contents, "config wifi-iface 'wifi_wlan0", nil, true))
+    luaunit.assertNotNil(string.find(contents, "config wifi-iface 'wifi_wlan1", nil, true))
     -- check system
     local file = io.open(write_dir .. 'system')
     luaunit.assertNotNil(file)
