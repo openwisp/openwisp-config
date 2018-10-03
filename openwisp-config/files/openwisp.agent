@@ -483,7 +483,7 @@ discover_management_ip(){
 	# if management interface is defined but its ip could not be determined
 	# try waiting for the management interface to be ready
 	if [ -z "$MANAGEMENT_IP" ]; then
-		MAX_ATTEMPTS=6
+		MAX_ATTEMPTS=3
 		for attempt in `seq $MAX_ATTEMPTS`; do
 			MANAGEMENT_IP=$(/usr/sbin/openwisp-get-address $MANAGEMENT_INTERFACE)
 
