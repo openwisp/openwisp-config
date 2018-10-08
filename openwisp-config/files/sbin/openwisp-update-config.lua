@@ -58,7 +58,6 @@ if lfs.attributes(check_config_dir, 'mode') == 'directory' then
         end
     end
 end
-os.execute('rm -rf '..check_dir)
 
 -- update UCI configuration
 -- (overwrite or merge)
@@ -69,7 +68,27 @@ if lfs.attributes(remote_config_dir, 'mode') == 'directory' then
         local standard_path = standard_config_dir .. '/' .. file
         if lfs.attributes(standard_path, 'mode') == 'file' then
             for key, section in pairs(remote:get_all(file)) do
-                utils.remove_uci_options(standard, file, section)
+                -- search section in the downloaded configuration
+                local section_check = check:get(file, section['.name'])
+                -- remove section from current configuration if not in downloaded configuration
+                if section_check == nil then
+                    utils.remove_uci_options(standard, file, section)
+                else
+                    -- compare each option in current and downloaded configuration
+                    for option, value in pairs(section) do
+                        if not utils.starts_with_dot(option) then
+                            -- remove option from current configuration if not in downloaded configuration
+                            if check:get(file, section['.name'], option) == nil then
+                                standard:delete(file, section['.name'], option)
+                            end
+                        end
+                    end
+                    -- remove entire section if empty
+                    local result = standard:get_all(file, section['.name'])
+                    if result and utils.is_uci_empty(result) then
+                        standard:delete(file, section['.name'])
+                    end
+                end
             end
             standard:commit(file)
             -- remove uci file if empty
@@ -80,6 +99,7 @@ if lfs.attributes(remote_config_dir, 'mode') == 'directory' then
         end
     end
 end
+os.execute('rm -rf '..check_dir)
 
 -- persist remote config in /etc/openwisp/remote
 os.execute('rm -rf '..remote_dir)
