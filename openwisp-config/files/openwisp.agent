@@ -11,6 +11,8 @@ while [ -n "$1" ]; do
 		--key) export KEY="$2"; shift;;
 		--shared-secret) export SHARED_SECRET="$2"; shift;;
 		--consistent-key) export CONSISTENT_KEY="$2"; shift;;
+		--hardware-id-script) export HARDWARE_ID_SCRIPT="$2"; shift;;
+		--hardware-id-key) export HARDWARE_ID_KEY="$2"; shift;;
 		--merge-config) export MERGE_CONFIG="$2"; shift;;
 		--unmanaged) export UNMANAGED="$2"; shift;;
 		--test-config) export TEST_CONFIG="$2"; shift;;
@@ -57,6 +59,7 @@ VERIFY_SSL=${VERIFY_SSL:-1}
 MERGE_CONFIG=${MERGE_CONFIG:-1}
 TEST_CONFIG=${TEST_CONFIG:-1}
 CONSISTENT_KEY=${CONSISTENT_KEY:-1}
+HARDWARE_ID_KEY=${HARDWARE_ID_KEY:-1}
 CONNECT_TIMEOUT=${CONNECT_TIMEOUT:-15}
 MAX_TIME=${MAX_TIME:-30}
 MAC_INTERFACE=${MAC_INTERFACE:-eth0}
@@ -86,6 +89,10 @@ else
 	if [ -n "$CACERT" ]; then
 		FETCH_COMMAND="$FETCH_COMMAND --cacert $CACERT"
 	fi
+fi
+
+if [ ! -x "$HARDWARE_ID_SCRIPT" ]; then
+	HARDWARE_ID_KEY=0
 fi
 
 if [ -n "$UNMANAGED" ]; then
@@ -133,11 +140,23 @@ register() {
 	local model=$(cat /tmp/sysinfo/model)
 	local os=$(ubus call system board | grep description | awk -F\" '{ print $4 }')
 	local system=$(ubus call system board | grep system | awk -F\" '{ print $4 }')
+	# get hardware id if script is given
+	if [ -x "$HARDWARE_ID_SCRIPT" ]; then
+		local hardware_id=$("$HARDWARE_ID_SCRIPT")
+	else
+		local hardware_id=""
+	fi
 	# prepare POST params
 	local params="backend=$backend"
-	# generate key from macaddress + shared secret
 	if [ "$CONSISTENT_KEY" == "1" ]; then
-		local consistent_key=$(echo -n "$macaddr+$SHARED_SECRET" | md5sum | awk '{print $1}')
+		if [ -x "$HARDWARE_ID_SCRIPT" ] && [ "$HARDWARE_ID_KEY" = "1" ]; then
+			# use hardware id as base for the key
+			local keybase=$hardware_id
+		else
+			# use macaddress as base for the key
+			local keybase=$macaddr
+		fi
+		local consistent_key=$(echo -n "$keybase+$SHARED_SECRET" | md5sum | awk '{print $1}')
 		params="$params&key=$consistent_key"
 	fi
 	# add management ip in params if present
@@ -147,6 +166,7 @@ register() {
 	$($FETCH_COMMAND --data $params \
 	                 --data-urlencode secret="$SHARED_SECRET" \
 	                 --data-urlencode name="$hostname" \
+	                 --data-urlencode hardware_id="$hardware_id" \
 	                 --data-urlencode mac_address="$macaddr" \
 	                 --data-urlencode tags="$tags" \
 	                 --data-urlencode model="$model" \
