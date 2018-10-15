@@ -32,11 +32,13 @@ local test_root_dir = working_dir .. '/update-test'
 local remote_dir = openwisp_dir .. '/remote'
 local remote_config_dir = remote_dir .. '/etc/config'
 local stored_dir = openwisp_dir .. '/stored'
+local stored_config_dir = openwisp_dir .. '/etc/config'
 local added_file = openwisp_dir .. '/added.list'
 local modified_file = openwisp_dir .. '/modified.list'
 local get_standard = function() return uci.cursor(standard_config_dir) end
 local get_remote = function() return uci.cursor(remote_config_dir, '/tmp/openwisp/.uci') end
 local get_check = function() return uci.cursor(check_config_dir, '/tmp/openwisp/.uci') end
+local get_stored = function() return uci.cursor(stored_config_dir, '/tmp/openwisp/.uci') end
 
 -- uci cursors
 local standard = get_standard()
@@ -67,24 +69,46 @@ end
 -- update UCI configuration
 -- (overwrite or merge)
 
+local stored = get_stored()
 -- remove config items added via openwisp-config
 if lfs.attributes(remote_config_dir, 'mode') == 'directory' then
     for file in lfs.dir(remote_config_dir) do
         local standard_path = standard_config_dir .. '/' .. file
         if lfs.attributes(standard_path, 'mode') == 'file' then
             for _, section in pairs(remote:get_all(file)) do
-                -- search section in the downloaded configuration
-                local section_check = check:get(file, section['.name'])
-                -- remove section from current configuration if not in downloaded configuration
-                if section_check == nil then
-                    utils.remove_uci_options(standard, file, section)
+                -- if section has been removed in the new configuration
+                if check:get(file, section['.name']) == nil then
+                    -- search section in the backup configuration
+                    local section_stored = stored:get_all(file, section['.name'])
+                    -- section is not in the backup configuration -> remove
+                    if section_stored == nil then
+                        utils.remove_uci_options(standard, file, section)
+                    -- section is in the backup configuration -> restore
+                    -- delete all options first
+                    else
+                        for option, value in pairs(section) do
+                            if not utils.starts_with_dot(option) then
+                                standard:delete(file, section['.name'], option)
+                            end
+                        end
+                        utils.write_uci_section(standard, file, section_stored)
+                    end
+                -- if section still exists in the new configuration
                 else
-                    -- compare each option in current and downloaded configuration
+                    -- compare each option in current with new configuration
                     for option, value in pairs(section) do
                         if not utils.starts_with_dot(option) then
-                            -- remove option from current configuration if not in downloaded configuration
+                            -- if option has been removed in the new configuration
                             if check:get(file, section['.name'], option) == nil then
-                                standard:delete(file, section['.name'], option)
+                                -- search option in the backup configuration
+                                local value_stored = stored:get(file, section['.name'], option)
+                                if value_stored == nil then
+                                    -- option is not in the backup configuration -> remove
+                                    standard:delete(file, section['.name'], option)
+                                else
+                                    -- option is in the backup configuration -> restore
+                                    standard:set(file, section['.name'], option, value_stored)
+                                end
                             end
                         end
                     end
@@ -110,6 +134,7 @@ os.execute('rm -rf '..check_dir)
 os.execute('rm -rf '..remote_dir)
 os.execute('mkdir -p '..remote_dir)
 os.execute('tar -zxf '..downloaded_conf..' -C '..remote_dir)
+os.execute('mkdir -p '..stored_config_dir)
 -- reload uci cursors
 standard = get_standard()
 remote = get_remote()
@@ -119,8 +144,13 @@ if lfs.attributes(remote_config_dir, 'mode') == 'directory' then
     for file in lfs.dir(remote_config_dir) do
         local standard_path = standard_config_dir .. '/' .. file
         local remote_path = remote_config_dir .. '/' .. file
+        local stored_path = stored_config_dir .. '/' .. file
         -- ensure we are acting on a file
         if lfs.attributes(remote_path, 'mode') == 'file' then
+            -- if there's no backup of the file yet, create one
+            if not utils.file_exists(stored_path) then
+                os.execute('cp '..standard_path..' '..stored_path)
+            end
             -- MERGE mode
             if MERGE then
                 -- avoid "file does not exist" error
