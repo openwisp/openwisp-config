@@ -1,0 +1,13 @@
+# .travis.yml
+language: python
+sudo: true
+env:
+  - LUA="lua=5.1.5"
+before_install:
+  - sudo ./install-dev.sh
+
+install:
+  - sudo luarocks install luacheck
+
+script:
+  - ./runtests

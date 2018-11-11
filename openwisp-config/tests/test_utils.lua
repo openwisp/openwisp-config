@@ -2,7 +2,7 @@
 package.path = package.path .. ';../files/lib/?.lua'
 require('os')
 require('io')
-require('uci')
+uci = require('uci')
 local utils = require('openwisp.utils')
 luaunit = require('luaunit')
 write_dir = './utils'
