@@ -69,6 +69,8 @@ UCI configuration options must go in ``/etc/config/openwisp``.
 - ``test_script``: custom test script, read more about this feature in `Configuration test`_
 - ``uuid``: unique identifier of the router configuration in the controller application
 - ``key``: key required to download the configuration
+- ``hardware_id_script``: custom script to read out a hardware id (e.g. a serial number), read more about this feature in `Hardware ID`_
+- ``hardware_id_key``: whether to use the hardware id for key generation or not, defaults to ``1``
 - ``unmanaged``: list of config sections which won't be overwritten, see `Unmanaged Configurations`_
 - ``capath``: value passed to curl ``--capath`` argument, by default is empty; see also `curl capath argument <https://curl.haxx.se/docs/manpage.html#--capath>`_
 - ``cacert``: value passed to curl ``--cacert`` argument, by default is empty; see also `curl cacert argument <https://curl.haxx.se/docs/manpage.html#--cacert>`_
@@ -148,6 +150,20 @@ If the default test does not satisfy your needs, you can define your own tests i
 **executable** script and indicate the path to this script in the ``test_script`` config option.
 
 If the exit code of the executable script is higher than ``0`` the test will be considered failed.
+
+Hardware ID
+-----------
+
+It is possible to use a unique hardware id for device identification, for example a serial number.
+
+If ``hardware_id_script`` contains the path to an executable script, it will be used to read out the hardware
+id from the device. The hardware id will then be sent to the controller when the device is registered.
+
+If the above configuration option is set then the hardware id will also be used for generating the device key,
+instead of the mac address. If you use a hardware id script but prefer to use the mac address for key
+generation then set ``hardware_id_key`` to ``0``.
+
+For settings in ``django-netjsonconfig`` related to the hardware id, take a look at the `README <https://github.com/openwisp/django-netjsonconfig/#netjsonconfig-hardware-id-enabled>`_
 
 Unmanaged Configurations
 ------------------------
