@@ -99,11 +99,6 @@ define Package/openwisp-config-$(BUILD_VARIANT)/install
 		$(1)/usr/sbin/openwisp-get-address
 
 	$(CP) ../VERSION $(1)/etc/openwisp/
-
-	if [ "$(BUILD_VARIANT)" == "mbedtls" ] || [ "$(BUILD_VARIANT)" == "cyassl" ]; then \
-		mkdir -p $(1)/etc/ssl/certs; \
-		cat $(BUILD_DIR)/ca-certificates*/ipkg-install/usr/share/ca-certificates/*/*.crt > $(1)/etc/ssl/certs/ca-certificates.crt; \
-	fi
 endef
 
 $(eval $(call BuildPackage,openwisp-config-openssl))
