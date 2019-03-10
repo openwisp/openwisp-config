@@ -81,6 +81,7 @@ UCI configuration options must go in ``/etc/config/openwisp``.
   linux interface names are supported), it's used to collect the management interface ip address
 - ``pre_reload_hook``: path to custom executable script, see `pre-reload-hook`_
 - ``post_reload_hook``: path to custom executable script, see `post-reload-hook`_
+- ``post_registration_hook``: path to custom executable script, see `post-registration-hook`_
 
 Automatic registration
 ----------------------
@@ -242,6 +243,13 @@ path does not point to an executable script file.
 
 Same as `pre_reload_hook` but with the difference that this hook is called
 after the configuration services have been reloaded.
+
+post-registration-hook
+^^^^^^^^^^^^^^^^^^^^^^
+
+Defaults to ``/etc/openwisp/post-registration-hook``;
+
+Path to an executable script that will be called after the registration is completed.
 
 Compiling openwisp-config
 -------------------------
