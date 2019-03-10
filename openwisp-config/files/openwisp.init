@@ -75,7 +75,7 @@ start_service() {
 	                        $consistent_key $hardware_id_script $hardware_id_key \
 	                        $unmanaged $merge_config $test_config $test_script \
 	                        $connect_timeout $max_time $capath $cacert $mac_interface \
-	                        $management_interface $pre_reload_hook
+	                        $management_interface $pre_reload_hook $post_reload_hook
 	procd_set_param respawn
 	procd_close_instance
 	logger -s "$PROG_NAME started" \
