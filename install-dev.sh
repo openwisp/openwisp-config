@@ -21,9 +21,8 @@ ldconfig -v
 # install luafilesystem
 luarocks install luafilesystem
 # install luaunit
-git clone https://github.com/bluebird75/luaunit.git --depth=1
-mkdir -p /usr/share/lua/5.1/
-cd luaunit && cp luaunit.lua /usr/share/lua/5.1/ && cd ..
-test -f /usr/share/lua/5.1/luaunit.lua
+luarocks install luaunit
+# install luacheck
+luarocks install luacheck
 # clean
-rm -rf json-c libubox uci luaunit
+rm -rf json-c libubox uci
