@@ -98,6 +98,9 @@ UCI configuration options must go in ``/etc/config/openwisp``.
 - ``post_reload_hook``: path to custom executable script, see `post-reload-hook`_
 - ``post_reload_delay``: delay in seconds to wait before the post-reload-hook and any configuration test, defaults to ``5``
 - ``post_registration_hook``: path to custom executable script, see `post-registration-hook`_
+- ``respawn_threshold``: time in seconds used as procd respawn threshold, defaults to ``3600``
+- ``respawn_timeout``: time in seconds used as procd respawn timeout, defaults to ``5``
+- ``respawn_retry``: number of procd respawn retries (use ``0`` for infinity), defaults to ``5``
 
 Automatic registration
 ----------------------
