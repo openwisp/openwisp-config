@@ -91,7 +91,7 @@ the router to be unregistered and it will attempt to perform an automatic regist
 
 The automatic registration is performed only if ``shared_secret`` is correctly set.
 
-The device will choose as name one of its mac addresses, unless its hostname is not ``OpenWrt``,
+The device will choose as its name one of its mac addresses, unless its hostname is not ``OpenWrt``,
 in the latter case it will simply register itself with the current hostname.
 
 When the registration is completed, the agent will automatically set ``uuid`` and ``key``
@@ -103,8 +103,8 @@ To enable this feature by default on your firmware images, follow the procedure 
 Consistent key generation
 -------------------------
 
-When using `Automatic registration`_, this feature allows devices to keep the same configuration
-even if reset or reflashed.
+When using `Automatic registration`_, this feature allows the devices to keep the same configuration
+even if they are reset or reflashed.
 
 The ``key`` is generated consistently with an operation like ``md5sum(mac_address + shared_secret)``;
 this allows the controller application to recognize that an existing device is registering itself again.
@@ -132,7 +132,7 @@ Configuration test
 
 When a new configuration is downloaded, the agent will first backup the current running
 configuration, then it will try to apply the new one and perform a basic test, which consists
-in trying to contact the controller again;
+of trying to contact the controller again.
 
 If the test succeeds, the configuration is considered applied and the backup is deleted.
 
