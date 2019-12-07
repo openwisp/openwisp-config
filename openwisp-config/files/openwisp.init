@@ -5,6 +5,10 @@ STOP=15
 USE_PROCD=1
 PROG="/usr/sbin/openwisp_config"
 PROG_NAME="OpenWISP config agent"
+mkdir -p /var/log/openwisp
+
+. ./openwisp-logger.sh --source-only
+
 
 start_service() {
 	config_load openwisp
@@ -81,9 +85,11 @@ start_service() {
 	                        $post_registration_hook
 	procd_set_param respawn
 	procd_close_instance
-	logger -s "$PROG_NAME started" \
-	       -t openwisp \
-	       -p daemon.info
+	# logger -s "$PROG_NAME started" \
+	#        -t openwisp \
+	#        -p daemon.info
+
+	log "$PROG_NAAME started" openwisp daemon.info
 }
 
 service_triggers() {

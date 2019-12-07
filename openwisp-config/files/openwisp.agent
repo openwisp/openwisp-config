@@ -26,6 +26,8 @@ while [ -n "$1" ]; do
 		--pre-reload-hook) export PRE_RELOAD_HOOK="$2"; shift;;
 		--post-reload-hook) export POST_RELOAD_HOOK="$2"; shift;;
 		--post-registration-hook) export POST_REGISTRATION_HOOK="$2"; shift;;
+		--enable_logging) export ENABLE_LOGGING="$2"; shift;;
+		--log_file) export LOG_FILE="$2"; shift;;
 		-*)
 			echo "Invalid option: $1"
 			exit 1
