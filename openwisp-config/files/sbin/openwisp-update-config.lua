@@ -1,50 +1,50 @@
 #!/usr/bin/env lua
 -- openwisp-config configuration updater
 
-require('os')
-require('lfs')
-require('uci')
+local os = require('os')
+local lfs = require('lfs')
+local uci = require('uci')
 local utils = require('openwisp.utils')
 local arg = {...}
 
 -- parse arguments
-MERGE = true
-TEST = false
-for key, value in pairs(arg) do
+local MERGE = true
+local TEST = false
+for _, value in pairs(arg) do
     -- test argument
     if value == '--merge=0' then MERGE = false; end
     if value == '--test=1' then TEST = true; end
 end
 
-working_dir = lfs.currentdir()
-tmp_dir = not TEST and '/tmp/openwisp' or working_dir
-check_dir = tmp_dir .. '/check'
-check_config_dir = check_dir..'/etc/config'
-downloaded_conf = tmp_dir .. '/configuration.tar.gz'
-openwisp_dir = not TEST and '/etc/openwisp' or working_dir .. '/openwisp'
-standard_config_dir = not TEST and '/etc/config' or working_dir .. '/update-test/etc/config'
-test_root_dir = working_dir .. '/update-test'
-remote_dir = openwisp_dir .. '/remote'
-remote_config_dir = remote_dir .. '/etc/config'
-stored_dir = openwisp_dir .. '/stored'
-added_file = openwisp_dir .. '/added.list'
-modified_file = openwisp_dir .. '/modified.list'
-get_standard = function() return uci.cursor(standard_config_dir) end
-get_remote = function() return uci.cursor(remote_config_dir, '/tmp/openwisp/.uci') end
-get_check = function() return uci.cursor(check_config_dir, '/tmp/openwisp/.uci') end
+local working_dir = lfs.currentdir()
+local tmp_dir = not TEST and '/tmp/openwisp' or working_dir
+local check_dir = tmp_dir .. '/check'
+local check_config_dir = check_dir..'/etc/config'
+local downloaded_conf = tmp_dir .. '/configuration.tar.gz'
+local openwisp_dir = not TEST and '/etc/openwisp' or working_dir .. '/openwisp'
+local standard_config_dir = not TEST and '/etc/config' or working_dir .. '/update-test/etc/config'
+local test_root_dir = working_dir .. '/update-test'
+local remote_dir = openwisp_dir .. '/remote'
+local remote_config_dir = remote_dir .. '/etc/config'
+local stored_dir = openwisp_dir .. '/stored'
+local added_file = openwisp_dir .. '/added.list'
+local modified_file = openwisp_dir .. '/modified.list'
+local get_standard = function() return uci.cursor(standard_config_dir) end
+local get_remote = function() return uci.cursor(remote_config_dir, '/tmp/openwisp/.uci') end
+local get_check = function() return uci.cursor(check_config_dir, '/tmp/openwisp/.uci') end
 
 -- uci cursors
-standard = get_standard()
-remote = get_remote()
+local standard = get_standard()
+local remote = get_remote()
 
 -- check downloaded UCI files before proceeding
 os.execute('mkdir -p '..check_dir)
 os.execute('tar -zxf '..downloaded_conf..' -C '..check_dir)
-check = get_check()
+local check = get_check()
 
 if lfs.attributes(check_config_dir, 'mode') == 'directory' then
     for file in lfs.dir(check_config_dir) do
-        path = check_config_dir..'/'..file
+        local path = check_config_dir..'/'..file
         if lfs.attributes(path, 'mode') == 'file' then
             if check:get_all(file) == nil then
                 print('ERROR: invalid UCI configuration file: '..file)
@@ -67,7 +67,7 @@ if lfs.attributes(remote_config_dir, 'mode') == 'directory' then
     for file in lfs.dir(remote_config_dir) do
         local standard_path = standard_config_dir .. '/' .. file
         if lfs.attributes(standard_path, 'mode') == 'file' then
-            for key, section in pairs(remote:get_all(file)) do
+            for _, section in pairs(remote:get_all(file)) do
                 -- search section in the downloaded configuration
                 local section_check = check:get(file, section['.name'])
                 -- remove section from current configuration if not in downloaded configuration
@@ -92,8 +92,8 @@ if lfs.attributes(remote_config_dir, 'mode') == 'directory' then
             end
             standard:commit(file)
             -- remove uci file if empty
-            local uci = standard:get_all(file)
-            if uci and utils.is_table_empty(uci) then
+            local uciFile = standard:get_all(file)
+            if uciFile and utils.is_table_empty(uciFile) then
                 os.remove(standard_path)
             end
         end
@@ -120,7 +120,7 @@ if lfs.attributes(remote_config_dir, 'mode') == 'directory' then
             if MERGE then
                 -- avoid "file does not exist" error
                 os.execute('touch ' .. standard_path)
-                for key, section in pairs(remote:get_all(file)) do
+                for _, section in pairs(remote:get_all(file)) do
                     utils.write_uci_section(standard, file, section)
                 end
                 standard:commit(file)
@@ -136,14 +136,14 @@ end
 os.execute('touch ' .. added_file)
 os.execute('touch ' .. modified_file)
 -- convert lists to lua sets
-added = utils.file_to_set(added_file)
-modified = utils.file_to_set(modified_file)
-added_changed = false
-modified_changed = false
+local added = utils.file_to_set(added_file)
+local modified = utils.file_to_set(modified_file)
+local added_changed = false
+local modified_changed = false
 
 -- loop each file except directories and standard UCI config files
-ignored_path = remote_config_dir .. '/'
-function is_ignored(path)
+local ignored_path = remote_config_dir .. '/'
+local function is_ignored(path)
     return utils.starts_with(path, ignored_path)
 end
 

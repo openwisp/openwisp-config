@@ -2,12 +2,12 @@
 package.path = package.path .. ';../files/lib/?.lua'
 require('os')
 require('io')
-luaunit = require('luaunit')
-update_config = assert(loadfile("../files/sbin/openwisp-update-config.lua"))
-write_dir = './update-test/'
-config_dir = write_dir .. 'etc/config/'
-openwisp_dir = './openwisp/'
-remote_config_dir = openwisp_dir .. 'remote/etc/config'
+local luaunit = require('luaunit')
+local update_config = assert(loadfile("../files/sbin/openwisp-update-config.lua"))
+local write_dir = './update-test/'
+local config_dir = write_dir .. 'etc/config/'
+local openwisp_dir = './openwisp/'
+local remote_config_dir = openwisp_dir .. 'remote/etc/config'
 
 TestBrokenConfig = {
     setUp = function()
@@ -30,13 +30,13 @@ TestBrokenConfig = {
 
 function TestBrokenConfig.test_update()
     update_config('--test=1')
-    local_system = io.open(config_dir..'/system')
+    local local_system = io.open(config_dir..'/system')
     luaunit.assertNotNil(local_system)
-    remote_system = io.open(remote_config_dir..'/system')
+    local remote_system = io.open(remote_config_dir..'/system')
     luaunit.assertNotNil(remote_system)
-    local_network = io.open(config_dir..'/network')
+    local local_network = io.open(config_dir..'/network')
     luaunit.assertNotNil(local_network)
-    remote_network = io.open(remote_config_dir..'/network')
+    local remote_network = io.open(remote_config_dir..'/network')
     luaunit.assertNotNil(local_system:read('*all'), remote_system:read('*all'))
     luaunit.assertNotNil(local_network:read('*all'), remote_network:read('*all'))
 end

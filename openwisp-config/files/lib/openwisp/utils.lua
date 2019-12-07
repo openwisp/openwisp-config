@@ -30,18 +30,18 @@ end
 
 function utils.dirname(path)
     local parts = utils.split(path, '/')
-    local path = '/'
+    local returnPath = '/'
     local length = table.getn(parts)
     for i, part in ipairs(parts) do
         if i < length then
-            path = path..part..'/'
+            returnPath = returnPath..part..'/'
         end
     end
-    return path
+    return returnPath
 end
 
 function utils.add_values_to_set(set, values)
-    for i, el in pairs(values) do
+    for _, el in pairs(values) do
         set[el] = true
     end
     return set
@@ -142,10 +142,10 @@ end
 
 -- Code by David Kastrup
 -- http://lua-users.org/wiki/DirTreeIterator
-function utils.dirtree(dir)
-    assert(dir and dir ~= '', 'directory parameter is missing or empty')
-    if string.sub(dir, -1) == '/' then
-        local dir = string.sub(dir, 1, -2)
+function utils.dirtree(dirParam)
+    assert(dirParam and dirParam ~= '', 'directory parameter is missing or empty')
+    if string.sub(dirParam, -1) == '/' then
+        dirParam = string.sub(dirParam, 1, -2)
     end
     local function yieldtree(dir)
         for entry in lfs.dir(dir) do
@@ -159,7 +159,7 @@ function utils.dirtree(dir)
             end
         end
     end
-    return coroutine.wrap(function() yieldtree(dir) end)
+    return coroutine.wrap(function() yieldtree(dirParam) end)
 end
 
 function utils.file_exists(path)

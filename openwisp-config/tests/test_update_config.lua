@@ -2,12 +2,12 @@
 package.path = package.path .. ';../files/lib/?.lua'
 require('os')
 require('io')
-luaunit = require('luaunit')
-update_config = assert(loadfile("../files/sbin/openwisp-update-config.lua"))
-write_dir = './update-test/'
-config_dir = write_dir .. 'etc/config/'
-openwisp_dir = './openwisp/'
-remote_config_dir = openwisp_dir .. 'remote/etc/config'
+local luaunit = require('luaunit')
+local update_config = assert(loadfile("../files/sbin/openwisp-update-config.lua"))
+local write_dir = './update-test/'
+local config_dir = write_dir .. 'etc/config/'
+local openwisp_dir = './openwisp/'
+local remote_config_dir = openwisp_dir .. 'remote/etc/config'
 
 TestUpdateConfig = {
     setUp = function()
@@ -40,54 +40,54 @@ TestUpdateConfig = {
 function TestUpdateConfig.test_update()
     update_config('--test=1')
     -- check network
-    local file = io.open(config_dir .. 'network')
-    luaunit.assertNotNil(file)
-    local contents = file:read('*all')
-    luaunit.assertNotNil(string.find(contents, "config interface 'added'"))
-    luaunit.assertNotNil(string.find(contents, "option ifname 'added0'"))
+    local networkFile = io.open(config_dir .. 'network')
+    luaunit.assertNotNil(networkFile)
+    local networkContents = networkFile:read('*all')
+    luaunit.assertNotNil(string.find(networkContents, "config interface 'added'"))
+    luaunit.assertNotNil(string.find(networkContents, "option ifname 'added0'"))
     -- check system
-    local file = io.open(config_dir .. 'system')
-    luaunit.assertNotNil(file)
-    local contents = file:read('*all')
-    luaunit.assertNotNil(string.find(contents, "config system 'system'"))
-    luaunit.assertNotNil(string.find(contents, "option custom 'custom'"))
-    luaunit.assertNotNil(string.find(contents, "option hostname 'update_config'"))
-    luaunit.assertNotNil(string.find(contents, "config new 'new'"))
-    luaunit.assertNotNil(string.find(contents, "option test 'test'"))
+    local systemFile = io.open(config_dir .. 'system')
+    luaunit.assertNotNil(systemFile)
+    local systemContents = systemFile:read('*all')
+    luaunit.assertNotNil(string.find(systemContents, "config system 'system'"))
+    luaunit.assertNotNil(string.find(systemContents, "option custom 'custom'"))
+    luaunit.assertNotNil(string.find(systemContents, "option hostname 'update_config'"))
+    luaunit.assertNotNil(string.find(systemContents, "config new 'new'"))
+    luaunit.assertNotNil(string.find(systemContents, "option test 'test'"))
     -- ensure rest of config options are present
-    luaunit.assertNotNil(string.find(contents, "config timeserver 'ntp'"))
-    luaunit.assertNotNil(string.find(contents, "list server '3.openwrt.pool.ntp.org'"))
+    luaunit.assertNotNil(string.find(systemContents, "config timeserver 'ntp'"))
+    luaunit.assertNotNil(string.find(systemContents, "list server '3.openwrt.pool.ntp.org'"))
     -- ensure test file is present
-    local file = io.open('./update-test/etc/test')
-    luaunit.assertNotNil(file)
-    local contents = file:read('*all')
-    luaunit.assertEquals(contents, 'test\n')
+    local testFile = io.open('./update-test/etc/test')
+    luaunit.assertNotNil(testFile)
+    local testContents = testFile:read('*all')
+    luaunit.assertEquals(testContents, 'test\n')
     -- ensure added.list is what we expect
-    local file = io.open(openwisp_dir .. '/added.list')
-    luaunit.assertNotNil(file)
+    local addedListFile = io.open(openwisp_dir .. '/added.list')
+    luaunit.assertNotNil(addedListFile)
     -- ensure test file is present
-    local contents = file:read('*all')
-    luaunit.assertEquals(contents, '/etc/test\n')
+    local addedListContents = addedListFile:read('*all')
+    luaunit.assertEquals(addedListContents, '/etc/test\n')
     -- ensure files are removed
     luaunit.assertNil(io.open(config_dir..'/wireless'))
     luaunit.assertNil(io.open(remote_config_dir..'/wireless'))
     -- ensure existing original file has been stored
-    local file = io.open(openwisp_dir .. '/modified.list')
-    luaunit.assertNotNil(file)
-    luaunit.assertEquals(file:read('*all'), '/etc/existing\n')
-    local file = io.open(openwisp_dir .. '/stored/etc/existing')
-    luaunit.assertNotNil(file)
-    luaunit.assertEquals(file:read('*all'), 'original\n')
+    local modifiedListFile = io.open(openwisp_dir .. '/modified.list')
+    luaunit.assertNotNil(modifiedListFile)
+    luaunit.assertEquals(modifiedListFile:read('*all'), '/etc/existing\n')
+    local storedExisitngFile = io.open(openwisp_dir .. '/stored/etc/existing')
+    luaunit.assertNotNil(storedExisitngFile)
+    luaunit.assertEquals(storedExisitngFile:read('*all'), 'original\n')
     -- ensure it has been modified
-    local file = io.open(write_dir .. '/etc/existing')
-    luaunit.assertNotNil(file)
-    luaunit.assertEquals(file:read('*all'), 'modified\n')
+    local existingFile = io.open(write_dir .. '/etc/existing')
+    luaunit.assertNotNil(existingFile)
+    luaunit.assertEquals(existingFile:read('*all'), 'modified\n')
     -- ensure file is removed
     luaunit.assertNil(io.open(write_dir .. '/etc/remove-me'))
     -- ensure file is restored
-    local file = io.open(write_dir..'/etc/restore-me')
-    luaunit.assertNotNil(file)
-    luaunit.assertEquals(file:read('*all'), 'restore-me\n')
+    local restoreFile = io.open(write_dir..'/etc/restore-me')
+    luaunit.assertNotNil(restoreFile)
+    luaunit.assertEquals(restoreFile:read('*all'), 'restore-me\n')
     luaunit.assertNil(io.open(openwisp_dir..'/stored/etc/restore-me'))
 end
 

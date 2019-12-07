@@ -2,10 +2,10 @@
 package.path = package.path .. ';../files/lib/?.lua'
 require('os')
 require('io')
-uci = require('uci')
+local uci = require('uci')
 local utils = require('openwisp.utils')
-luaunit = require('luaunit')
-write_dir = './utils'
+local luaunit = require('luaunit')
+local write_dir = './utils'
 
 TestUtils = {
     setUp = function()
@@ -24,7 +24,7 @@ function TestUtils.test_starts_with_dot()
 end
 
 function TestUtils.test_write_uci_section_named()
-    u = uci.cursor(write_dir)
+    local u = uci.cursor(write_dir)
     utils.write_uci_section(u, 'network', {
         [".name"] = "globals",
         [".type"] = "globals",
@@ -40,7 +40,7 @@ function TestUtils.test_write_uci_section_named()
 end
 
 function TestUtils.test_write_uci_section_anon()
-    u = uci.cursor(write_dir)
+    local u = uci.cursor(write_dir)
     utils.write_uci_section(u, 'network', {
         [".anonymous"] = true,
         [".name"] = "cfg0c1ec7",
@@ -61,7 +61,7 @@ function TestUtils.test_write_uci_section_anon()
 end
 
 function TestUtils.test_write_uci_section_duplicate_list()
-    u = uci.cursor(write_dir)
+    local u = uci.cursor(write_dir)
     utils.write_uci_section(u, 'network', {
         [".name"] = "lan",
         [".type"] = "interface",
@@ -110,7 +110,7 @@ end
 
 function TestUtils.test_remove_uci_options()
     os.execute('cp ./config/network '..write_dir..'/network')
-    u = uci.cursor(write_dir)
+    local u = uci.cursor(write_dir)
     utils.remove_uci_options(u, 'network', {
         [".name"] = "wlan1",
         [".type"] = "interface",
@@ -131,7 +131,7 @@ end
 
 function TestUtils.test_remove_uci_options_twice()
     os.execute('cp ./config/network '..write_dir..'/network')
-    u = uci.cursor(write_dir)
+    local u = uci.cursor(write_dir)
     utils.remove_uci_options(u, 'network', {
         [".name"] = "wlan1",
         [".type"] = "interface",
@@ -171,7 +171,7 @@ function TestUtils.test_is_table_empty_false()
 end
 
 function TestUtils.test_merge_uci_option()
-    u = uci.cursor(write_dir)
+    local u = uci.cursor(write_dir)
     -- prepare config
     utils.write_uci_section(u, 'network', {
         [".name"] = "wlan1",
@@ -203,7 +203,7 @@ function TestUtils.test_merge_uci_option()
 end
 
 function TestUtils.test_merge_uci_list()
-    u = uci.cursor(write_dir)
+    local u = uci.cursor(write_dir)
     -- prepare config
     utils.write_uci_section(u, 'network', {
         [".name"] = "wlan1",
@@ -232,7 +232,7 @@ function TestUtils.test_merge_uci_list()
 end
 
 function TestUtils.test_merge_uci_list_duplicate()
-    u = uci.cursor(write_dir)
+    local u = uci.cursor(write_dir)
     -- prepare config
     utils.write_uci_section(u, 'network', {
         [".name"] = "wlan1",
@@ -266,7 +266,7 @@ function TestUtils.test_dirtree()
     os.execute('touch '..write_dir..'/f2')
     os.execute('mkdir '..write_dir..'/inner')
     os.execute('touch '..write_dir..'/f3')
-    count = 0
+    local count = 0
     for filename, attr in utils.dirtree(write_dir) do
         count = count + 1
     end
@@ -282,7 +282,7 @@ function TestUtils.test_file_to_set()
     os.execute('echo "line1" > '..write_dir..'/read.list')
     os.execute('echo "line2" >> '..write_dir..'/read.list')
     os.execute('echo "line3" >> '..write_dir..'/read.list')
-    set = utils.file_to_set(write_dir..'/read.list')
+    local set = utils.file_to_set(write_dir..'/read.list')
     luaunit.assertEquals(set.line1, true)
     luaunit.assertEquals(set.line2, true)
     luaunit.assertEquals(set.line3, true)
@@ -290,17 +290,17 @@ function TestUtils.test_file_to_set()
 end
 
 function TestUtils.test_set_to_file()
-    write = {line1=true, line2=true}
-    result = utils.set_to_file(write, write_dir..'/write.list')
+    local write = {line1=true, line2=true}
+    local result = utils.set_to_file(write, write_dir..'/write.list')
     luaunit.assertEquals(result, true)
-    read = utils.file_to_set(write_dir..'/write.list')
+    local read = utils.file_to_set(write_dir..'/write.list')
     luaunit.assertEquals(read.line1, true)
     luaunit.assertEquals(read.line2, true)
     luaunit.assertEquals(read.line3, nil)
 end
 
 function TestUtils.test_split()
-    t = {'a', 'b', 'c'}
+    local t = {'a', 'b', 'c'}
     luaunit.assertEquals(utils.split('a b c'), t)
     luaunit.assertEquals(utils.split('a,b,c', ','), t)
     luaunit.assertEquals(utils.split('a/b/c', '/'), t)
@@ -321,17 +321,17 @@ function TestUtils.test_starts_with()
 end
 
 function TestUtils.test_sorted_pairs()
-    t = {b='b', z='z', a='a', m='m', g='g'}
-    list = {}
-    for key, value in utils.sorted_pairs(t) do
+    local t = {b='b', z='z', a='a', m='m', g='g'}
+    local list = {}
+    for _key, value in utils.sorted_pairs(t) do
         table.insert(list, value)
     end
-    expected = {'a', 'b', 'g', 'm', 'z'}
+    local expected = {'a', 'b', 'g', 'm', 'z'}
     luaunit.assertEquals(list, expected)
 end
 
 function TestUtils.test_write_uci_section_order()
-    u = uci.cursor(write_dir)
+    local u = uci.cursor(write_dir)
     utils.write_uci_section(u, 'network', {
         [".name"] = "globals",
         [".type"] = "globals",
@@ -344,7 +344,7 @@ function TestUtils.test_write_uci_section_order()
     local file = io.open(write_dir .. '/network')
     luaunit.assertNotNil(file)
     local contents = file:read('*all')
-    expected = "\toption aaaaaa 'should come first'\n" ..
+    local expected = "\toption aaaaaa 'should come first'\n" ..
                "\toption ula_prefix 'fd8e:f40a:fede::/48'\n" ..
                "\toption zzzzzz 'just a test'"
     luaunit.assertNotNil(string.find(contents, expected))
