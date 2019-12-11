@@ -1,14 +1,15 @@
 #!/usr/bin/env lua
 -- stores unmanaged configurations
 
-require('os')
-require('io')
-require('uci')
+local os = require('os')
+local io = require('io')
+local uci = require('uci')
 local utils = require('openwisp.utils')
 local sections
 local arg={...}
 
 -- parse arguments
+local test = false
 for key, value in pairs(arg) do
     -- test argument
     if value == '--test=1' then test = true; end
@@ -25,7 +26,7 @@ local standard_path = standard_prefix .. 'config/'
 local unmanaged_path = unmanaged_prefix .. 'unmanaged/'
 local uci_tmp_path = '/tmp/openwisp/.uci'
 
-function empty_file(path)
+local function empty_file(path)
     local file = io.open(path, 'w')
     file:write('')
     file:close()
@@ -46,7 +47,7 @@ end
 -- }
 local unmanaged_map = {}
 local section_list = utils.split(sections)
-for i, section in pairs(section_list) do
+for _, section in pairs(section_list) do
     local parts = utils.split(section, '.')
     -- skip unrecognized strings
     if parts[1] and parts[2] then
@@ -64,7 +65,7 @@ for i, section in pairs(section_list) do
             if not unmanaged_map[config] then
                 unmanaged_map[config] = {}
             end
-            el = {name=section_name, type=section_type}
+            local el = {name=section_name, type=section_type}
             table.insert(unmanaged_map[config], el)
         end
     end

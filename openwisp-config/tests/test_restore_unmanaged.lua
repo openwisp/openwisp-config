@@ -2,9 +2,9 @@
 package.path = package.path .. ';../files/lib/?.lua'
 require('os')
 require('io')
-luaunit = require('luaunit')
-restore_unmanaged = assert(loadfile("../files/sbin/openwisp-restore-unmanaged.lua"))
-write_dir = './unmanaged/'
+local luaunit = require('luaunit')
+local restore_unmanaged = assert(loadfile("../files/sbin/openwisp-restore-unmanaged.lua"))
+local write_dir = './unmanaged/'
 
 TestRestoreUnmanaged = {
     setUp = function()

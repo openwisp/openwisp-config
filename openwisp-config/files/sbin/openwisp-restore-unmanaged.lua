@@ -1,10 +1,12 @@
 #!/usr/bin/env lua
 -- restores unmanaged configurations
 
-require('uci')
+local uci = require('uci')
+local lfs = require('lfs')
 local utils = require('openwisp.utils')
 
 -- parse arguments
+local test = false
 local arg={...}
 for key, value in pairs(arg) do
     -- test argument

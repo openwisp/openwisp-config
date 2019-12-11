@@ -2,9 +2,9 @@
 package.path = package.path .. ';../files/lib/?.lua'
 require('os')
 require('io')
-luaunit = require('luaunit')
-store_unmanaged = assert(loadfile("../files/sbin/openwisp-store-unmanaged.lua"))
-default_blocks = "system.ntp " ..
+local luaunit = require('luaunit')
+local store_unmanaged = assert(loadfile("../files/sbin/openwisp-store-unmanaged.lua"))
+local default_blocks = "system.ntp " ..
                  "system.@led " ..
                  "network.loopback " ..
                  "network.@globals " ..
@@ -12,10 +12,10 @@ default_blocks = "system.ntp " ..
                  "network.wan " ..
                  "network.@switch " ..
                  "network.@switch_vlan"
-write_dir = './unmanaged/'
-assertNotNil = luaunit.assertNotNil
-assertNil = luaunit.assertNil
-assertEquals = luaunit.assertEquals
+local write_dir = './unmanaged/'
+local assertNotNil = luaunit.assertNotNil
+local assertNil = luaunit.assertNil
+local assertEquals = luaunit.assertEquals
 
 local function _clean()
     os.remove(write_dir .. 'network')
@@ -37,27 +37,27 @@ end
 function TestStoreUnmanaged.test_default()
     store_unmanaged('--test=1', '-o=' .. default_blocks)
     -- ensure network config file has been created correctly
-    local file = io.open(write_dir .. 'network')
-    assertNotNil(file)
-    local contents = file:read('*all')
-    assertNotNil(string.find(contents, "config interface 'loopback'"))
-    assertNotNil(string.find(contents, "option ipaddr '127.0.0.1'"))
-    assertNotNil(string.find(contents, "option ula_prefix 'fd8e:f40a:6701::/48'"))
-    assertNotNil(string.find(contents, "config interface 'wan'"))
-    assertNotNil(string.find(contents, "config switch"))
-    assertNotNil(string.find(contents, "option vlan '2'"))
-    assertNotNil(string.find(contents, "option vlan '1'"))
-    assertNil(string.find(contents, "config interface 'wlan0'"))
-    assertNil(string.find(contents, "config interface 'wlan1'"))
+    local networkFile = io.open(write_dir .. 'network')
+    assertNotNil(networkFile)
+    local networkContents = networkFile:read('*all')
+    assertNotNil(string.find(networkContents, "config interface 'loopback'"))
+    assertNotNil(string.find(networkContents, "option ipaddr '127.0.0.1'"))
+    assertNotNil(string.find(networkContents, "option ula_prefix 'fd8e:f40a:6701::/48'"))
+    assertNotNil(string.find(networkContents, "config interface 'wan'"))
+    assertNotNil(string.find(networkContents, "config switch"))
+    assertNotNil(string.find(networkContents, "option vlan '2'"))
+    assertNotNil(string.find(networkContents, "option vlan '1'"))
+    assertNil(string.find(networkContents, "config interface 'wlan0'"))
+    assertNil(string.find(networkContents, "config interface 'wlan1'"))
     -- ensure system config file exists
-    local file = io.open(write_dir .. 'system')
-    assertNotNil(file)
-    local contents = file:read('*all')
-    assertNotNil(string.find(contents, "list server '1.openwrt.pool.ntp.org'"))
-    assertNotNil(string.find(contents, "config led 'led_usb1'"))
-    assertNotNil(string.find(contents, "config led 'led_usb2'"))
-    assertNotNil(string.find(contents, "config led 'led_wlan2g'"))
-    assertNil(string.find(contents, "option hostname 'OpenWrt'"))
+    local systemFile = io.open(write_dir .. 'system')
+    assertNotNil(systemFile)
+    local systemContents = systemFile:read('*all')
+    assertNotNil(string.find(systemContents, "list server '1.openwrt.pool.ntp.org'"))
+    assertNotNil(string.find(systemContents, "config led 'led_usb1'"))
+    assertNotNil(string.find(systemContents, "config led 'led_usb2'"))
+    assertNotNil(string.find(systemContents, "config led 'led_wlan2g'"))
+    assertNil(string.find(systemContents, "option hostname 'OpenWrt'"))
 end
 
 function TestStoreUnmanaged.test_specific_name()
