@@ -71,6 +71,7 @@ UCI configuration options must go in ``/etc/config/openwisp``.
 - ``key``: key required to download the configuration
 - ``hardware_id_script``: custom script to read out a hardware id (e.g. a serial number), read more about this feature in `Hardware ID`_
 - ``hardware_id_key``: whether to use the hardware id for key generation or not, defaults to ``1``
+- ``bootup_delay``: maximum value in seconds of a random delay after bootup, defaults to ``0``, see `Bootup Delay`_
 - ``unmanaged``: list of config sections which won't be overwritten, see `Unmanaged Configurations`_
 - ``capath``: value passed to curl ``--capath`` argument, by default is empty; see also `curl capath argument <https://curl.haxx.se/docs/manpage.html#--capath>`_
 - ``cacert``: value passed to curl ``--cacert`` argument, by default is empty; see also `curl cacert argument <https://curl.haxx.se/docs/manpage.html#--cacert>`_
@@ -165,6 +166,16 @@ instead of the mac address. If you use a hardware id script but prefer to use th
 generation then set ``hardware_id_key`` to ``0``.
 
 For settings in ``django-netjsonconfig`` related to the hardware id, take a look at the `README <https://github.com/openwisp/django-netjsonconfig/#netjsonconfig-hardware-id-enabled>`_
+
+Bootup Delay
+------------
+
+The option ``bootup_delay`` can be used to make the agent wait for a random amount of seconds after the bootup of
+the device. Allowed random values range from 0 up to the value of ``bootup_delay``. The delay is applied only after the
+device has been registered.
+
+The random bootup delay reduces the load on the OpenWISP controller when a large amount of devices boot up at the
+same time after a power failure, all trying to connect to the controller.
 
 Unmanaged Configurations
 ------------------------

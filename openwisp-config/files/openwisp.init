@@ -17,6 +17,7 @@ start_service() {
 	consistent_key=$(config_get http consistent_key)
 	hardware_id_script=$(config_get http hardware_id_script)
 	hardware_id_key=$(config_get http hardware_id_key)
+	bootup_delay=$(config_get http bootup_delay)
 	unmanaged=$(config_get http unmanaged)
 	merge_config=$(config_get http merge_config)
 	test_config=$(config_get http test_config)
@@ -39,6 +40,7 @@ start_service() {
 	if [ $consistent_key ]; then consistent_key="--consistent-key $consistent_key"; fi
 	if [ $hardware_id_script ]; then hardware_id_script="--hardware-id-script $hardware_id_script"; fi
 	if [ $hardware_id_key ]; then hardware_id_key="--hardware-id-key $hardware_id_key"; fi
+	if [ $bootup_delay ]; then bootup_delay="--bootup-delay $bootup_delay"; fi
 	if [ -n "$unmanaged" ]; then
 		# replace spaces with commas to avoid problems when
 		# passing this arg to procd_set_param command
@@ -75,10 +77,10 @@ start_service() {
 	procd_open_instance
 	procd_set_param command $PROG $url $interval $verify_ssl $uuid $key $shared_secret \
 	                        $consistent_key $hardware_id_script $hardware_id_key \
-	                        $unmanaged $merge_config $test_config $test_script \
-	                        $connect_timeout $max_time $capath $cacert $mac_interface \
-	                        $management_interface $pre_reload_hook $post_reload_hook \
-	                        $post_registration_hook
+	                        $bootup_delay $unmanaged $merge_config $test_config \
+	                        $test_script $connect_timeout $max_time $capath $cacert \
+	                        $mac_interface $management_interface $pre_reload_hook \
+	                        $post_reload_hook $post_registration_hook
 	procd_set_param respawn
 	procd_close_instance
 	logger -s "$PROG_NAME started" \
