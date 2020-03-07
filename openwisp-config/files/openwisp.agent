@@ -13,6 +13,7 @@ while [ -n "$1" ]; do
 		--consistent-key) export CONSISTENT_KEY="$2"; shift;;
 		--hardware-id-script) export HARDWARE_ID_SCRIPT="$2"; shift;;
 		--hardware-id-key) export HARDWARE_ID_KEY="$2"; shift;;
+		--bootup-delay) export BOOTUP_DELAY="$2"; shift;;
 		--merge-config) export MERGE_CONFIG="$2"; shift;;
 		--unmanaged) export UNMANAGED="$2"; shift;;
 		--test-config) export TEST_CONFIG="$2"; shift;;
@@ -61,6 +62,7 @@ MERGE_CONFIG=${MERGE_CONFIG:-1}
 TEST_CONFIG=${TEST_CONFIG:-1}
 CONSISTENT_KEY=${CONSISTENT_KEY:-1}
 HARDWARE_ID_KEY=${HARDWARE_ID_KEY:-1}
+BOOTUP_DELAY=${BOOTUP_DELAY:-0}
 CONNECT_TIMEOUT=${CONNECT_TIMEOUT:-15}
 MAX_TIME=${MAX_TIME:-30}
 MAC_INTERFACE=${MAC_INTERFACE:-eth0}
@@ -76,6 +78,7 @@ REGISTRATION_PARAMETERS="$WORKING_DIR/registration_parameters"
 TEST_CHECKSUM="$WORKING_DIR/test_checksum"
 STATUS_REPORT="$WORKING_DIR/status_report"
 APPLYING_CONF="$WORKING_DIR/applying_conf"
+BOOTUP="$WORKING_DIR/bootup"
 REGISTRATION_URL="$URL/controller/register/"
 UNMANAGED_DIR="$WORKING_DIR/unmanaged"
 FETCH_COMMAND="curl -s --connect-timeout $CONNECT_TIMEOUT --max-time $MAX_TIME"
@@ -557,6 +560,18 @@ if [ -z "$UUID" ] || [ -z "$KEY" ]; then
 	do
 		sleep $(expr $INTERVAL / 4)
 	done
+	touch "$BOOTUP"
+else
+	# add delay only after bootup, not after registration or restart
+	if [ "$BOOTUP_DELAY" != "0" ] && [ ! -f "$BOOTUP" ]; then
+		# random bootup delay between 0..300 seconds
+		DELAY="$(($RANDOM%$BOOTUP_DELAY))"
+		logger "Delaying startup for $DELAY seconds..." \
+				 -t openwisp \
+				 -p daemon.info
+		sleep $DELAY
+		touch "$BOOTUP"
+	fi
 fi
 
 # these variables are evaluated here because "register()" might set UUID and KEY
