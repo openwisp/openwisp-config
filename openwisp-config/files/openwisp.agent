@@ -188,13 +188,20 @@ register() {
 	fi
 	# exit if response does not seem to come from openwisp controller
 	check_header $REGISTRATION_PARAMETERS
-	# exit if controller returns errors
 	if [ $(head -n 1 $REGISTRATION_PARAMETERS | grep -c "201 Created") -lt 1 ]; then
 		local message=$(tail -n 1 $REGISTRATION_PARAMETERS)
 		logger -s "Registration failed! $message" \
 			   -t openwisp \
 			   -p daemon.err
-		exit 5
+		# if controller returns 403, stop retrying because it's useless
+		if [ $(head -n 1 $REGISTRATION_PARAMETERS | grep -c "403 Forbidden") -gt 0 ]; then
+			exit 5
+		# in all other cases, keep re-trying because the problem can be fixed
+		# on the server (eg: self creation disabled and device needs to be created
+		# or temporary error condition on the server)
+		else
+			return 2
+		fi
 	fi
 	# set configuration options and reload
 	export UUID=$(cat $REGISTRATION_PARAMETERS | grep uuid | awk '/uuid: / { print $2 }')
