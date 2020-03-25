@@ -76,6 +76,7 @@ CONFIGURATION_CHECKSUM="$WORKING_DIR/checksum"
 CONFIGURATION_BACKUP="$WORKING_DIR/backup.tar.gz"
 REGISTRATION_PARAMETERS="$WORKING_DIR/registration_parameters"
 TEST_CHECKSUM="$WORKING_DIR/test_checksum"
+UPDATE_INFO="$WORKING_DIR/update_info"
 STATUS_REPORT="$WORKING_DIR/status_report"
 APPLYING_CONF="$WORKING_DIR/applying_conf"
 BOOTUP="$WORKING_DIR/bootup"
@@ -335,6 +336,49 @@ apply_configuration() {
 	post_reload_hook
 }
 
+# send up to date device info to the controller
+update_info() {
+	# get device model, OS identifier and SOC info
+	local model=$(cat /tmp/sysinfo/model)
+	local os=$(ubus call system board | grep description | awk -F\" '{ print $4 }')
+	local system=$(ubus call system board | grep system | awk -F\" '{ print $4 }')
+	# retry several times
+	for i in $(seq 1 10); do
+		$FETCH_COMMAND -i \
+			 --data "key=$KEY" \
+			 --data-urlencode model="$model" \
+			 --data-urlencode os="$os" \
+			 --data-urlencode system="$system" \
+		"$UPDATE_INFO_URL" > $UPDATE_INFO
+		local exit_code=$?
+		if [ "$exit_code" = "0" ]; then
+			logger "Device info updated on the controller" \
+			       -t openwisp \
+			       -p daemon.info
+			break
+		else
+			sleep 2
+		fi
+	done
+
+	if [ "$exit_code" != "0" ]; then
+		logger -s "Failed to connect to controller during update-info: curl exit code $exit_code" \
+		       -t openwisp \
+		       -p daemon.err
+		return 2
+	fi
+
+	if [ "$(head -n 1 "$UPDATE_INFO" | grep -c "200 OK")" -lt 1 ]; then
+		local status=$(head -n 1 $UPDATE_INFO)
+		logger -s "Failed to update device info: $status" \
+		       -t openwisp \
+		       -p daemon.err
+		return 3
+	fi
+	check_header $UPDATE_INFO
+	rm $UPDATE_INFO
+}
+
 # report configuration status: "running" or "error"
 report_status() {
 	# retry several times
@@ -568,17 +612,6 @@ if [ -z "$UUID" ] || [ -z "$KEY" ]; then
 		sleep $(expr $INTERVAL / 4)
 	done
 	touch "$BOOTUP"
-else
-	# add delay only after bootup, not after registration or restart
-	if [ "$BOOTUP_DELAY" != "0" ] && [ ! -f "$BOOTUP" ]; then
-		# random bootup delay between 0..300 seconds
-		DELAY="$(($RANDOM%$BOOTUP_DELAY))"
-		logger "Delaying startup for $DELAY seconds..." \
-				 -t openwisp \
-				 -p daemon.info
-		sleep $DELAY
-		touch "$BOOTUP"
-	fi
 fi
 
 # these variables are evaluated here because "register()" might set UUID and KEY
@@ -586,7 +619,23 @@ BASE_CONFIGURATION_URL="$BASEURL/download-config/$UUID/?key=$KEY"
 BASE_CHECKSUM_URL="$BASEURL/checksum/$UUID/?key=$KEY"
 CONFIGURATION_URL=$BASE_CONFIGURATION_URL
 CHECKSUM_URL=$BASE_CHECKSUM_URL
+UPDATE_INFO_URL="$BASEURL/update-info/$UUID/"
 REPORT_URL="$BASEURL/report-status/$UUID/"
+
+if [ ! -f "$BOOTUP" ]; then
+	# actions to do only after agent start, not after registration or agent restart
+	if [ "$BOOTUP_DELAY" != "0" ]; then
+		# random bootup delay between 0..300 seconds
+		DELAY="$(($RANDOM%$BOOTUP_DELAY))"
+		logger "Delaying startup for $DELAY seconds..." \
+				 -t openwisp \
+				 -p daemon.info
+		sleep $DELAY
+	fi
+	# send up to date device info
+	update_info
+	touch "$BOOTUP"
+fi
 
 while true
 do
