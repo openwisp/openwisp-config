@@ -112,6 +112,10 @@ if [ -n "$MANAGEMENT_INTERFACE" ]; then
 	MANAGEMENT_IP=$(/usr/sbin/openwisp-get-address $MANAGEMENT_INTERFACE)
 fi
 
+get_model(){ cat /tmp/sysinfo/model; }
+get_os(){ ubus call system board | grep description | awk -F\" '{ print $4 }'; }
+get_system(){ ubus call system board | grep system | awk -F\" '{ print $4 }'; }
+
 # ensures we are dealing with the right web server
 check_header(){
 	local is_controller=$(grep -c "X-Openwisp-Controller: true" $1)
@@ -143,9 +147,9 @@ register() {
 	local backend="netjsonconfig.OpenWrt"
 	local tags=$(uci get openwisp.http.tags 2&> /dev/null)
 	# get device model, OS identifier and SOC info
-	local model=$(cat /tmp/sysinfo/model)
-	local os=$(ubus call system board | grep description | awk -F\" '{ print $4 }')
-	local system=$(ubus call system board | grep system | awk -F\" '{ print $4 }')
+	local model=$(get_model)
+	local os=$(get_os)
+	local system=$(get_system)
 	# get hardware id if script is given
 	if [ -x "$HARDWARE_ID_SCRIPT" ]; then
 		local hardware_id=$("$HARDWARE_ID_SCRIPT")
@@ -339,9 +343,9 @@ apply_configuration() {
 # send up to date device info to the controller
 update_info() {
 	# get device model, OS identifier and SOC info
-	local model=$(cat /tmp/sysinfo/model)
-	local os=$(ubus call system board | grep description | awk -F\" '{ print $4 }')
-	local system=$(ubus call system board | grep system | awk -F\" '{ print $4 }')
+	local model=$(get_model)
+	local os=$(get_os)
+	local system=$(get_system)
 	# retry several times
 	for i in $(seq 1 10); do
 		$FETCH_COMMAND -i \
