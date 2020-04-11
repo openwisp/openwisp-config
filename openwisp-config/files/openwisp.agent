@@ -70,10 +70,13 @@ PRE_RELOAD_HOOK=${PRE_RELOAD_HOOK:-/etc/openwisp/pre-reload-hook}
 POST_RELOAD_HOOK=${POST_RELOAD_HOOK:-/etc/openwisp/post-reload-hook}
 POST_REGISTRATION_HOOK=${POST_REGISTRATION_HOOK:-/etc/openwisp/post-registration-hook}
 WORKING_DIR="/tmp/openwisp"
-BASEURL="$URL/controller"
+BASEURL="$URL/controller/device"
 CONFIGURATION_ARCHIVE="$WORKING_DIR/configuration.tar.gz"
 CONFIGURATION_CHECKSUM="$WORKING_DIR/checksum"
 CONFIGURATION_BACKUP="$WORKING_DIR/backup.tar.gz"
+ACTIVE_CONFIGURATION_BACKUP="$WORKING_DIR/active_config.tar.gz"
+REMOTE_KNOWN_CONFIG_CHECKSUM="$WORKING_DIR/remote_config_checksum"
+UPLOAD_CONFIG_RESPONSE="$WORKING_DIR/upload_config_response"
 REGISTRATION_PARAMETERS="$WORKING_DIR/registration_parameters"
 TEST_CHECKSUM="$WORKING_DIR/test_checksum"
 UPDATE_INFO="$WORKING_DIR/update_info"
@@ -237,7 +240,7 @@ register() {
 
 # gets checksum from controller
 get_checksum() {
-	$($FETCH_COMMAND -i $CHECKSUM_URL > $1)
+	$($FETCH_COMMAND -i $2 > $1)
 	local exit_code=$?
 
 	if [ "$exit_code" != "0" ]; then
@@ -260,7 +263,7 @@ get_checksum() {
 # returns 1 if configuration in controller has changed
 configuration_changed() {
 	local CURRENT_CHECKSUM=$(tail -n 1 $CONFIGURATION_CHECKSUM 2> /dev/null)
-	get_checksum $CONFIGURATION_CHECKSUM
+	get_checksum $CONFIGURATION_CHECKSUM $CHECKSUM_URL
 	local exit_code=$?
 
 	if [ "$exit_code" != "0" ]; then
@@ -626,6 +629,11 @@ CHECKSUM_URL=$BASE_CHECKSUM_URL
 UPDATE_INFO_URL="$BASEURL/update-info/$UUID/"
 REPORT_URL="$BASEURL/report-status/$UUID/"
 
+BASE_CONFIG_BACKUP_CHECKSUM_URL="$BASEURL/known-active-config/checksum/$UUID/?key=$KEY"
+CONFIG_BACKUP_CHECKSUM_URL=$BASE_CONFIG_BACKUP_CHECKSUM_URL
+BASE_CONFIG_BACKUP_UPLOAD_URL="$BASEURL/upload-config/$UUID/?key=$KEY"
+CONFIG_BACKUP_UPLOAD_URL=$BASE_CONFIG_BACKUP_UPLOAD_URL
+
 if [ ! -f "$BOOTUP" ]; then
 	# actions to do only after agent start, not after registration or agent restart
 	if [ "$BOOTUP_DELAY" != "0" ]; then
@@ -641,17 +649,78 @@ if [ ! -f "$BOOTUP" ]; then
 	touch "$BOOTUP"
 fi
 
+create_backup() {
+	$(sysupgrade -q -b $ACTIVE_CONFIGURATION_BACKUP)
+	if [ ! -f $ACTIVE_CONFIGURATION_BACKUP ]; then
+		logger -s "Failed to create a configuration backup" \
+		       -t openwisp \
+		       -p daemon.err
+		return 2
+	fi
+}
+
+remote_configuration_changed() {
+	create_backup
+	# Backup process failed
+	local exit_code=$?
+	if [ "$exit_code" != "0" ]; then
+		return 2
+	fi
+	# Compare checksum
+	local local_md5hash=$(md5sum $ACTIVE_CONFIGURATION_BACKUP | awk '{print $1}')
+	get_checksum $REMOTE_KNOWN_CONFIG_CHECKSUM $CONFIG_BACKUP_CHECKSUM_URL
+	local remote_md5hash=$(tail -n 1 $REMOTE_KNOWN_CONFIG_CHECKSUM 2> /dev/null)
+	# Getting remote md hash failed
+	local exit_code=$?
+	if [ "$exit_code" != "0" ]; then
+		return 2
+	fi
+	if [ "$local_md5hash" != "$remote_md5hash" ]; then
+		logger "Remote configuration outdated" \
+		       -t openwisp \
+		       -p daemon.info
+		return 1
+	fi
+	return 0
+}
+
+remote_update_configuration() {
+	$($FETCH_COMMAND -i -F config=@$ACTIVE_CONFIGURATION_BACKUP $CONFIG_BACKUP_UPLOAD_URL > $UPLOAD_CONFIG_RESPONSE)
+
+	if [ "$?" != "0" ]; then
+		logger -s "Failed to connect to controller while getting uploading configurations: curl exit code $exit_code" \
+		       -t openwisp \
+		       -p daemon.err
+		return 2
+	fi
+
+	check_header $UPLOAD_CONFIG_RESPONSE
+	local response_message=$(tail -n 1 $UPLOAD_CONFIG_RESPONSE)
+	if [ $(echo $response_message | grep -c "config-upload: success") -lt 1 ]; then
+		logger -s "Local config upload failed: $response_message, will retry in $INTERVAL seconds." \
+			   -t openwisp \
+			   -p daemon.err
+		return 2
+	fi
+	rm $UPLOAD_CONFIG_RESPONSE
+}
+
 while true
 do
 	# check management interface at each iteration
 	# (because the address may change due to
 	# configuration updates or manual reconfigurations)
 	discover_management_ip
-
+	# Check if configurations changed on the server
 	configuration_changed
-
 	if [ "$?" == "1" ]; then
 		update_configuration
+	fi
+	# Check if local configurations are different from
+	# openwisp configurations
+	remote_configuration_changed
+	if [ "$?" == "1" ]; then
+		remote_update_configuration
 	fi
 
 	sleep $INTERVAL
