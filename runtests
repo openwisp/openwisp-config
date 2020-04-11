@@ -1,6 +1,6 @@
 #!/bin/bash
 set -e
-luacheck . -a
+luacheck ./openwisp-config/ -a
 cd openwisp-config/tests/
 lua test_store_unmanaged.lua -v
 lua test_restore_unmanaged.lua -v
