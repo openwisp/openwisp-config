@@ -4,7 +4,6 @@ START=99
 STOP=15
 USE_PROCD=1
 PROG="/usr/sbin/openwisp_config"
-PROG_NAME="OpenWISP config agent"
 
 add_option() {
 	local cfg="$1"
@@ -72,25 +71,13 @@ start_service() {
 
 	procd_set_param respawn ${respawn_threshold:-3600} ${respawn_timeout:-5} ${respawn_retry:-5}
 	procd_close_instance
-	logger -s "$PROG_NAME started" \
-	       -t openwisp \
-	       -p daemon.info
 }
 
 service_triggers() {
 	procd_add_reload_trigger openwisp
 }
 
-stop_service() {
-	logger -s "$PROG_NAME stopping" \
-	       -t openwisp \
-	       -p daemon.info
-}
-
 reload_service() {
-	logger -s "$PROG_NAME received reload trigger" \
-		   -t openwisp \
-		   -p daemon.info
 	local control_file=/tmp/openwisp/applying_conf
 	# avoid reloading while configuration is being applied
 	# will wait for a maximum of 30 seconds
