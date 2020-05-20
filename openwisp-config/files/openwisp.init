@@ -4,6 +4,7 @@ START=99
 
 USE_PROCD=1
 PROG="/usr/sbin/openwisp_config"
+CONTROL_FILE=/tmp/openwisp/applying_conf
 
 add_option() {
 	local cfg="$1"
@@ -78,18 +79,17 @@ service_triggers() {
 }
 
 reload_service() {
-	local control_file=/tmp/openwisp/applying_conf
 	# avoid reloading while configuration is being applied
 	# will wait for a maximum of 30 seconds
 	for i in $(seq 1 30); do
-		if [ -f $control_file ]; then
+		if [ -f "$CONTROL_FILE" ]; then
 			sleep 1
 		else
 			break
 		fi
 	done
 	# ensure control file is removed
-	rm $control_file
+	rm "$CONTROL_FILE"
 	# reload
 	start
 }
