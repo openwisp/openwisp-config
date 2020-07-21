@@ -194,7 +194,8 @@ register() {
 	# exit if response does not seem to come from openwisp controller
 	check_header $REGISTRATION_PARAMETERS
 	if [ $(head -n 1 $REGISTRATION_PARAMETERS | grep -c "201 Created") -lt 1 ]; then
-		local message=$(tail -n 1 $REGISTRATION_PARAMETERS)
+		# get body of failure response, seperated from header by a blank line (CRLF-ended)
+		local message=$(awk 'BEGIN{RS="\r\n\r\n"}{if(NR>1)print $0}' $REGISTRATION_PARAMETERS)
 		logger -s "Registration failed! $message" \
 			   -t openwisp \
 			   -p daemon.err
