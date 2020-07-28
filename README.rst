@@ -123,7 +123,7 @@ Merge configuration
 
 By default the remote configuration is merged with the local one. This has several advantages:
 
-* less bolierplate configuration stored in the remote controller
+* less boilerplate configuration stored in the remote controller
 * local users can change local configurations without fear of losing their changes
 
 It is possible to turn this feature off by setting ``merge_config`` to ``0`` in ``/etc/config/openwisp``.
