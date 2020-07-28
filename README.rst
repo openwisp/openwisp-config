@@ -278,7 +278,7 @@ The following procedure illustrates how to compile all the *openwisp-config* var
 
     git clone https://github.com/openwrt/openwrt.git openwrt
     cd openwrt
-    git checkout openwrt-18.06
+    git checkout openwrt-19.07
 
     # configure feeds
     echo "src-git openwisp https://github.com/openwisp/openwisp-config.git" > feeds.conf
@@ -304,7 +304,7 @@ you will need to select the *openwisp-config* variant by going to ``Administrati
 
     git clone https://github.com/openwrt/openwrt.git openwrt
     cd openwrt
-    git checkout openwrt-18.06
+    git checkout openwrt-19.07
 
     # configure feeds
     echo "src-git openwisp https://github.com/openwisp/openwisp-config.git" > feeds.conf
@@ -334,7 +334,7 @@ image with a precompiled minimal ``/etc/config/openwisp`` configuration file:
 
     git clone https://github.com/openwrt/openwrt.git openwrt
     cd openwrt
-    git checkout openwrt-18.06
+    git checkout openwrt-19.07
 
     # include precompiled file
     mkdir -p files/etc/config
