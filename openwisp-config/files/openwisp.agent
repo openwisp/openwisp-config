@@ -24,6 +24,7 @@ while [ -n "$1" ]; do
 		--cacert) export CACERT="$2"; shift;;
 		--mac-interface) export MAC_INTERFACE="$2"; shift;;
 		--management-interface) export MANAGEMENT_INTERFACE="$2"; shift;;
+		--default-hostname) export DEFAULT_HOSTNAME="$2"; shift;;
 		--pre-reload-hook) export PRE_RELOAD_HOOK="$2"; shift;;
 		--post-reload-hook) export POST_RELOAD_HOOK="$2"; shift;;
 		--post-registration-hook) export POST_REGISTRATION_HOOK="$2"; shift;;
@@ -66,6 +67,9 @@ BOOTUP_DELAY=${BOOTUP_DELAY:-0}
 CONNECT_TIMEOUT=${CONNECT_TIMEOUT:-15}
 MAX_TIME=${MAX_TIME:-30}
 MAC_INTERFACE=${MAC_INTERFACE:-eth0}
+# LEDE was a popular fork of OpenWRT used in 2017
+# it's kept here for backward compatibility
+DEFAULT_HOSTNAME=${DEFAULT_HOSTNAME:"LEDE"}
 PRE_RELOAD_HOOK=${PRE_RELOAD_HOOK:-/etc/openwisp/pre-reload-hook}
 POST_RELOAD_HOOK=${POST_RELOAD_HOOK:-/etc/openwisp/post-reload-hook}
 POST_REGISTRATION_HOOK=${POST_REGISTRATION_HOOK:-/etc/openwisp/post-registration-hook}
@@ -140,8 +144,8 @@ register() {
 	local macaddr=$(echo "$raw " | egrep -v "^(lo|tap[0-9]+)" | awk '/HWaddr/ { print $5 }' | head -n 1)
 	# convert hostname to lowercase for case insensitive check
 	local name=$(echo $hostname | awk '{print tolower($0)}')
-	# use macaddress if hostname is the default one or empty
-	if [ "$name" == "openwrt" ] || [ "$name" == "lede" ] || [ -z "$name" ]; then
+	# use mac address if hostname is the default one or empty
+	if [ "$name" == "openwrt" ] || [ "$hostname" == "$DEFAULT_HOSTNAME" ] || [ -z "$name" ]; then
 		hostname="$macaddr"
 	fi
 	local backend="netjsonconfig.OpenWrt"
