@@ -10,9 +10,14 @@ local arg = {...}
 -- parse arguments
 local MERGE = true
 local TEST = false
+local conf = nil
+
 for _, value in pairs(arg) do
-    -- test argument
+    if utils.starts_with(value, '--conf=') then
+        conf = string.sub(value, 8)
+    end
     if value == '--merge=0' then MERGE = false; end
+    -- test argument
     if value == '--test=1' then TEST = true; end
 end
 
@@ -20,7 +25,7 @@ local working_dir = lfs.currentdir()
 local tmp_dir = not TEST and '/tmp/openwisp' or working_dir
 local check_dir = tmp_dir .. '/check'
 local check_config_dir = check_dir..'/etc/config'
-local downloaded_conf = tmp_dir .. '/configuration.tar.gz'
+local downloaded_conf = conf or (tmp_dir .. '/configuration.tar.gz')
 local openwisp_dir = not TEST and '/etc/openwisp' or working_dir .. '/openwisp'
 local standard_config_dir = not TEST and '/etc/config' or working_dir .. '/update-test/etc/config'
 local test_root_dir = working_dir .. '/update-test'

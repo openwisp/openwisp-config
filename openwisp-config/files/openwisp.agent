@@ -326,7 +326,7 @@ apply_configuration() {
 	# store unmanaged config (if enabled)
 	call_store_unmanaged
 	# update local configuration
-	/usr/sbin/openwisp-update-config --merge=$MERGE_CONFIG
+	/usr/sbin/openwisp-update-config --conf=$1 --merge=$MERGE_CONFIG
 	local exit_code=$?
 	if [ "$exit_code" != "0" ]; then
 		logger -s "Could not update configuration, openwisp-update-config exit code was $exit_code" \
@@ -431,6 +431,7 @@ test_configuration() {
 		# if this case is triggered, the configuration may
 		# be damaged and so we need to do some clean up
 		sysupgrade -r $CONFIGURATION_BACKUP
+		/usr/sbin/openwisp-reload-config
 		logger -s "The most recent configuration backup was restored" \
 		       -t openwisp \
 		       -p daemon.info
@@ -453,7 +454,8 @@ test_configuration() {
 		logger -s "Configuration test failed! Restoring previous backup" \
 		       -t openwisp \
 		       -p daemon.err
-		apply_configuration $CONFIGURATION_BACKUP
+		sysupgrade -r $CONFIGURATION_BACKUP
+		/usr/sbin/openwisp-reload-config
 		report_status "error"
 		local ret=1
 	else
