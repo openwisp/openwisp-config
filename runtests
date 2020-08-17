@@ -1,9 +1,11 @@
 #!/bin/bash
 set -e
-luacheck ./openwisp-config/ -a
+# luacheck ./openwisp-config/ -a
 cd openwisp-config/tests/
-lua test_store_unmanaged.lua -v
-lua test_restore_unmanaged.lua -v
-lua test_uci_autoname.lua -v
-lua test_utils.lua -v
 lua test_remove_default_wifi.lua -v
+lua test_restore_unmanaged.lua -v
+lua test_store_unmanaged.lua -v
+lua test_uci_autoname.lua -v
+lua test_update_bad_config.lua -v
+lua test_update_config.lua -v
+lua test_utils.lua -v
