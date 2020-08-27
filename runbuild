@@ -2,14 +2,17 @@
 # ci build script
 # runs tests and then builds the OpenWRT package
 # requires the following env vars:
-# - $BUILD_DIR
-# - $DOWNLOADS_DIR
+# - $BUILD_DIR (defaults to .build/ in root of repository)
+# - $DOWNLOADS_DIR (defaults to .build/downloads in root of repository)
 # - $CORES (defaults to 1)
 set -e
 
 ./runtests
 
 START_TIME=$(date +"%Y-%m-%d-%H%M%S")
+# TODO: Ask if these defaults are welcomed
+BUILD_DIR=${BUILD_DIR:-$(pwd)/.build}
+DOWNLOADS_DIR=${DOWNLOADS_DIR:-$BUILD_DIR/downloads}
 VERSIONED_DIR="$DOWNLOADS_DIR/$START_TIME"
 LATEST_LINK="$DOWNLOADS_DIR/latest"
 CORES=${CORES:-1}
@@ -27,7 +30,10 @@ git checkout openwrt-18.06
 git pull origin openwrt-18.06
 
 # configure feeds
-echo "src-git openwisp https://github.com/openwisp/openwisp-config.git" > feeds.conf
+# TODO: Revert change
+# echo "src-git openwisp https://github.com/openwisp/openwisp-config.git" > feeds.conf
+echo "src-git openwisp https://github.com/atb00ker/openwisp-config.git;gsoc2020" > feeds.conf
+
 cat feeds.conf.default >> feeds.conf
 # remove unneeded feeds
 sed -i '/telephony/d' feeds.conf
