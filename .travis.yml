@@ -1,5 +1,11 @@
 # .travis.yml
 language: python
+
+notifications:
+  # will post a summary as comment on githubin case of failure
+  webhooks: https://www.travisbuddy.com/
+  on_success: never
+
 env:
   - LUA="lua=5.1.5"
 before_install:
