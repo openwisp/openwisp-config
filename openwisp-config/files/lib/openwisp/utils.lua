@@ -87,18 +87,20 @@ function utils.write_uci_option(cursor, config, name, key, value)
     end
     -- avoid duplicate list settings
     if type(value) == 'table' then
-        -- create set with unique values
-        local set = {}
-        -- read existing value
         local current = cursor:get(config, name, key)
         if type(current) == 'table' then
-            set = utils.add_values_to_set(set, current)
-        end
-        set = utils.add_values_to_set(set, value)
-        -- reset value var with set contents
-        value = {}
-        for item_value, present in pairs(set) do
-            table.insert(value, item_value)
+            for k_new, v_new in pairs(value) do
+                found = false
+                for k_old, v_old in pairs(current) do
+                    if v_new == v_old then
+                        found = true
+                    end
+                end
+                if found == false then
+                    table.insert(current, v_new)
+                end
+            end
+            value = current
         end
     end
     cursor:set(config, name, key, value)
