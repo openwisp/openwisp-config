@@ -78,6 +78,7 @@ BASEURL="$URL/controller"
 CONFIGURATION_ARCHIVE="$WORKING_DIR/configuration.tar.gz"
 CONFIGURATION_CHECKSUM="$WORKING_DIR/checksum"
 CONFIGURATION_BACKUP="$WORKING_DIR/backup.tar.gz"
+BACKUP_FILE_LIST="$WORKING_DIR/backup_file_list.conf"
 REGISTRATION_PARAMETERS="$WORKING_DIR/registration_parameters"
 TEST_CHECKSUM="$WORKING_DIR/test_checksum"
 UPDATE_INFO="$WORKING_DIR/update_info"
@@ -328,14 +329,17 @@ apply_configuration() {
 	# update local configuration
 	/usr/sbin/openwisp-update-config --conf=$1 --merge=$MERGE_CONFIG
 	local exit_code=$?
-	if [ "$exit_code" != "0" ]; then
-		logger -s "Could not update configuration, openwisp-update-config exit code was $exit_code" \
-		       -t openwisp \
-		       -p daemon.crit
-		return 1
-	fi
 	# restore unmanaged configurations
 	call_restore_unmanaged
+	# if configuration could not be applied
+	# (because of a syntax error) restore a backup
+	if [ "$exit_code" != "0" ]; then
+		logger -s "Could not apply configuration, openwisp-update-config exit code was $exit_code" \
+		       -t openwisp \
+		       -p daemon.crit
+		restore_backup
+		return 1
+	fi
 	# call pre-reload-hook
 	pre_reload_hook
 	# reload changes and wait $sleep_time
@@ -421,20 +425,8 @@ report_status() {
 
 # performs configuration test and reports result
 test_configuration() {
-	sysupgrade -b $CONFIGURATION_BACKUP
 	apply_configuration $1
 	if [ $? -gt 0 ]; then
-		logger -s "Configuration could not be applied, update operation aborted" \
-		       -t openwisp \
-		       -p daemon.err
-		report_status "error"
-		# if this case is triggered, the configuration may
-		# be damaged and so we need to do some clean up
-		sysupgrade -r $CONFIGURATION_BACKUP
-		/usr/sbin/openwisp-reload-config
-		logger -s "The most recent configuration backup was restored" \
-		       -t openwisp \
-		       -p daemon.info
 		return 1
 	fi
 
@@ -454,15 +446,12 @@ test_configuration() {
 		logger -s "Configuration test failed! Restoring previous backup" \
 		       -t openwisp \
 		       -p daemon.err
-		sysupgrade -r $CONFIGURATION_BACKUP
-		/usr/sbin/openwisp-reload-config
-		report_status "error"
+		restore_backup
 		local ret=1
 	else
 		logger "Configuration test succeeded" \
 		       -t openwisp \
 		       -p daemon.info
-		report_status "running"
 		local ret=0
 	fi
 
@@ -546,6 +535,9 @@ update_configuration() {
 	# configuration is still being applied
 	touch $APPLYING_CONF
 
+	# performs backup of files that are going to be changed
+	backup_configuration
+
 	# testing enabled
 	if [ "$TEST_CONFIG" == "1" ]; then
 		test_configuration $CONFIGURATION_ARCHIVE
@@ -553,8 +545,6 @@ update_configuration() {
 	# testing diabled
 	else
 		apply_configuration $CONFIGURATION_ARCHIVE
-		# only try to report success
-		report_status "running"
 		result=$?
 	fi
 
@@ -564,7 +554,32 @@ update_configuration() {
 		logger "Configuration applied successfully" \
 		       -t openwisp \
 		       -p daemon.info
+		report_status "running"
+	else
+		report_status "error"
 	fi
+}
+
+backup_configuration() {
+	# save list of files that are going to be changed by openwisp
+	# so that if the changes sent by openwisp cause problems,
+	# the previous version can be rolled back
+	tar -ztf $CONFIGURATION_ARCHIVE | sed 's/^/\//' > $BACKUP_FILE_LIST
+	# backup only those files
+	tar -zcf $CONFIGURATION_BACKUP -T $BACKUP_FILE_LIST
+	rm $BACKUP_FILE_LIST
+}
+
+restore_backup() {
+	# restores backup created in backup_configuration() function
+	sysupgrade -r $CONFIGURATION_BACKUP
+	pre_reload_hook
+	/usr/sbin/openwisp-reload-config
+	sleep 2
+	post_reload_hook
+	logger -s "The most recent configuration backup was restored" \
+	       -t openwisp \
+	       -p daemon.info
 }
 
 discover_management_ip(){
