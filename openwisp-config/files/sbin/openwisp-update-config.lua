@@ -97,8 +97,8 @@ if lfs.attributes(remote_config_dir, 'mode') == 'directory' then
             end
             standard:commit(file)
             -- remove uci file if empty
-            local uciFile = standard:get_all(file)
-            if uciFile and utils.is_table_empty(uciFile) then
+            local uci_file = standard:get_all(file)
+            if uci_file and utils.is_table_empty(uci_file) then
                 os.remove(standard_path)
             end
         end

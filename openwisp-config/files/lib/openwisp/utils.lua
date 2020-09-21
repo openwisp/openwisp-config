@@ -142,10 +142,10 @@ end
 
 -- Code by David Kastrup
 -- http://lua-users.org/wiki/DirTreeIterator
-function utils.dirtree(dirParam)
-    assert(dirParam and dirParam ~= '', 'directory parameter is missing or empty')
-    if string.sub(dirParam, -1) == '/' then
-        dirParam = string.sub(dirParam, 1, -2)
+function utils.dirtree(dir_param)
+    assert(dir_param and dir_param ~= '', 'directory parameter is missing or empty')
+    if string.sub(dir_param, -1) == '/' then
+        dir_param = string.sub(dir_param, 1, -2)
     end
     local function yieldtree(dir)
         for entry in lfs.dir(dir) do
@@ -159,7 +159,7 @@ function utils.dirtree(dirParam)
             end
         end
     end
-    return coroutine.wrap(function() yieldtree(dirParam) end)
+    return coroutine.wrap(function() yieldtree(dir_param) end)
 end
 
 function utils.file_exists(path)
