@@ -9,6 +9,8 @@ set -e
 
 ./runtests
 
+BUILD_DIR=${BUILD_DIR-./build}
+DOWNLOADS_DIR=${DOWNLOADS_DIR-./downloads}
 START_TIME=$(date +"%Y-%m-%d-%H%M%S")
 VERSIONED_DIR="$DOWNLOADS_DIR/$START_TIME"
 LATEST_LINK="$DOWNLOADS_DIR/latest"
@@ -23,8 +25,8 @@ if ! [ -d "openwrt" ]; then
 fi
 cd openwrt
 git reset --hard HEAD
-git checkout openwrt-18.06
-git pull origin openwrt-18.06
+git checkout openwrt-19.07
+git pull origin openwrt-19.07
 
 # configure feeds
 echo "src-git openwisp https://github.com/openwisp/openwisp-config.git" > feeds.conf

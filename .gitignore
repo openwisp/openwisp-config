@@ -1,2 +1,4 @@
 *.DS_Store
 openwrt*
+build/
+downloads/
