@@ -21,6 +21,7 @@ start_service() {
 	unmanaged=$(config_get http unmanaged)
 	merge_config=$(config_get http merge_config)
 	test_config=$(config_get http test_config)
+	test_retries=$(config_get http test_retries)
 	test_script=$(config_get http test_script)
 	connect_timeout=$(config_get http connect_timeout)
 	max_time=$(config_get http max_time)
@@ -31,6 +32,7 @@ start_service() {
 	default_hostname=$(config_get http default_hostname)
 	pre_reload_hook=$(config_get http pre_reload_hook)
 	post_reload_hook=$(config_get http post_reload_hook)
+	post_reload_delay=$(config_get http post_reload_delay)
 	post_registration_hook=$(config_get http post_registration_hook)
 	if [ $url ]; then url="--url $url"; fi
 	if [ $interval ]; then interval="--interval $interval"; fi
@@ -50,6 +52,7 @@ start_service() {
 	fi
 	if [ $merge_config ]; then merge_config="--merge-config $merge_config"; fi
 	if [ $test_config ]; then test_config="--test-config $test_config"; fi
+	if [ $test_retries ]; then test_retries="--test-retries $test_retries"; fi
 	if [ $test_script ]; then test_script="--test-script $test_script"; fi
 	if [ $connect_timeout ]; then connect_timeout="--connect-timeout $connect_timeout"; fi
 	if [ $max_time ]; then max_time="--max-time $max_time"; fi
@@ -60,6 +63,7 @@ start_service() {
 	if [ $default_hostname ]; then default_hostname="--default-hostname $default_hostname"; fi
 	if [ $pre_reload_hook ]; then pre_reload_hook="--pre-reload-hook $pre_reload_hook"; fi
 	if [ $post_reload_hook ]; then post_reload_hook="--post-reload-hook $post_reload_hook"; fi
+	if [ $post_reload_delay ]; then post_reload_delay="--post-reload-delay $post_reload_delay"; fi
 	if [ $post_registration_hook ]; then post_registration_hook="--post-registration-hook $post_registration_hook"; fi
 
 	if [ -z "$url" ]; then
@@ -80,9 +84,10 @@ start_service() {
 	procd_set_param command $PROG $url $interval $verify_ssl $uuid $key $shared_secret \
 	                        $consistent_key $hardware_id_script $hardware_id_key \
 	                        $bootup_delay $unmanaged $merge_config $test_config \
-	                        $test_script $connect_timeout $max_time $capath $cacert \
-	                        $mac_interface $management_interface $default_hostname \
-	                        $pre_reload_hook $post_reload_hook $post_registration_hook
+	                        $test_retries $test_script $connect_timeout $max_time $capath \
+	                        $cacert $mac_interface $management_interface $default_hostname \
+	                        $pre_reload_hook $post_reload_hook $post_reload_delay \
+	                        $post_registration_hook
 	procd_set_param respawn
 	procd_close_instance
 	logger -s "$PROG_NAME started" \

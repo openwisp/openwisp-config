@@ -17,6 +17,7 @@ while [ -n "$1" ]; do
 		--merge-config) export MERGE_CONFIG="$2"; shift;;
 		--unmanaged) export UNMANAGED="$2"; shift;;
 		--test-config) export TEST_CONFIG="$2"; shift;;
+		--test-retries) export TEST_RETRIES="$2"; shift;;
 		--test-script) export TEST_SCRIPT="$2"; shift;;
 		--connect-timeout) export CONNECT_TIMEOUT="$2"; shift;;
 		--max-time) export MAX_TIME="$2"; shift;;
@@ -27,6 +28,7 @@ while [ -n "$1" ]; do
 		--default-hostname) export DEFAULT_HOSTNAME="$2"; shift;;
 		--pre-reload-hook) export PRE_RELOAD_HOOK="$2"; shift;;
 		--post-reload-hook) export POST_RELOAD_HOOK="$2"; shift;;
+		--post-reload-delay) export POST_RELOAD_DELAY="$2"; shift;;
 		--post-registration-hook) export POST_REGISTRATION_HOOK="$2"; shift;;
 		-*)
 			echo "Invalid option: $1"
@@ -61,6 +63,7 @@ INTERVAL=${INTERVAL:-120}
 VERIFY_SSL=${VERIFY_SSL:-1}
 MERGE_CONFIG=${MERGE_CONFIG:-1}
 TEST_CONFIG=${TEST_CONFIG:-1}
+TEST_RETRIES=${TEST_RETRIES:-3}
 CONSISTENT_KEY=${CONSISTENT_KEY:-1}
 HARDWARE_ID_KEY=${HARDWARE_ID_KEY:-1}
 BOOTUP_DELAY=${BOOTUP_DELAY:-0}
@@ -72,6 +75,7 @@ MAC_INTERFACE=${MAC_INTERFACE:-eth0}
 DEFAULT_HOSTNAME=${DEFAULT_HOSTNAME:-"LEDE"}
 PRE_RELOAD_HOOK=${PRE_RELOAD_HOOK:-/etc/openwisp/pre-reload-hook}
 POST_RELOAD_HOOK=${POST_RELOAD_HOOK:-/etc/openwisp/post-reload-hook}
+POST_RELOAD_DELAY=${POST_RELOAD_DELAY:-5}
 POST_REGISTRATION_HOOK=${POST_REGISTRATION_HOOK:-/etc/openwisp/post-registration-hook}
 WORKING_DIR="/tmp/openwisp"
 BASEURL="$URL/controller"
@@ -323,7 +327,6 @@ post_registration_hook() {
 
 # applies a specified configuration archive
 apply_configuration() {
-	local sleep_time=${2-5}
 	# store unmanaged config (if enabled)
 	call_store_unmanaged
 	# update local configuration
@@ -342,9 +345,9 @@ apply_configuration() {
 	fi
 	# call pre-reload-hook
 	pre_reload_hook
-	# reload changes and wait $sleep_time
+	# reload changes and wait $POST_RELOAD_DELAY
 	/usr/sbin/openwisp-reload-config
-	sleep $sleep_time
+	sleep $POST_RELOAD_DELAY
 	# call post-reload-hook
 	post_reload_hook
 }
@@ -460,11 +463,14 @@ test_configuration() {
 }
 
 perform_default_test() {
-	# max 3 attempts to get checksum
-	for i in $(seq 1 3); do
+	# the default test is performed several times, as indicated by $TEST_RETRIES
+	for i in $(seq 1 $TEST_RETRIES); do
 		$($FETCH_COMMAND -i --connect-timeout 5 --max-time 5 $CHECKSUM_URL > $TEST_CHECKSUM)
 		local result=$?
 		if [ $result -gt 0 ]; then
+			logger "Configuration test try $i failed" \
+			       -t openwisp \
+			       -p daemon.warning
 			sleep 5
 		else
 			break
@@ -575,7 +581,7 @@ restore_backup() {
 	sysupgrade -r $CONFIGURATION_BACKUP
 	pre_reload_hook
 	/usr/sbin/openwisp-reload-config
-	sleep 2
+	sleep $POST_RELOAD_DELAY
 	post_reload_hook
 	logger -s "The most recent configuration backup was restored" \
 	       -t openwisp \
