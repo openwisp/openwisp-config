@@ -69,7 +69,7 @@ function TestUtils.test_write_uci_section_duplicate_list()
         ifname = "eth0",
         proto = "static",
         ipaddr = {"10.0.0.1/24", "10.0.0.1/24"}
-    })
+    }, true)
     u:commit('network')
     local file = io.open(write_dir .. '/network')
     luaunit.assertNotNil(file)
@@ -213,7 +213,7 @@ function TestUtils.test_merge_uci_list()
         ipaddr = {"172.27.254.252/16"},
         proto = "static",
         ifname = "wlan1"
-    })
+    }, true)
     u:commit('network')
     -- add one option
     utils.write_uci_section(u, 'network', {
@@ -222,7 +222,7 @@ function TestUtils.test_merge_uci_list()
         [".anonymous"] = false,
         [".index"] = 5,
         ipaddr = {"172.27.254.253/16"},
-    })
+    }, true)
     u:commit('network')
     local file = io.open(write_dir..'/network')
     luaunit.assertNotNil(file)

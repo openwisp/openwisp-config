@@ -131,6 +131,16 @@ By default the remote configuration is merged with the local one. This has sever
 
 It is possible to turn this feature off by setting ``merge_config`` to ``0`` in ``/etc/config/openwisp``.
 
+**Details about the merging behavior**:
+
+* if a configuration option or list is present both in the remote configuration
+  and in the local configuration, the remote configurations will overwrite the local ones
+* configuration options that are present in the local configuration but are not present
+  in the remote configuration will be retained
+* configuration files that were present in the local configuration and are replaced
+  by the remote configuration are backed up and eventually restored if the modifications
+  are removed from the controller
+
 Configuration test
 ------------------
 

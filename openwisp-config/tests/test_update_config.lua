@@ -9,6 +9,10 @@ local config_dir = write_dir .. 'etc/config/'
 local openwisp_dir = './openwisp/'
 local remote_config_dir = openwisp_dir .. 'remote/etc/config'
 
+local function string_count(base, pattern)
+    return select(2, string.gsub(base, pattern, ""))
+end
+
 TestUpdateConfig = {
     setUp = function()
         os.execute('mkdir -p ' .. config_dir)
@@ -17,6 +21,7 @@ TestUpdateConfig = {
         os.execute('cp good-config.tar.gz configuration.tar.gz')
         -- this file is pre-existing on the device
         os.execute('cp ./update/system '..config_dir..'system')
+        os.execute('cp ./update/network '..config_dir..'network')
         -- we expect these UCI files to be removed
         os.execute('cp ./wifi/wireless '..remote_config_dir..'/wireless')
         os.execute('cp ./wifi/wireless '..config_dir..'/wireless')
@@ -58,7 +63,7 @@ function TestUpdateConfig.test_update()
     luaunit.assertNotNil(string.find(systemContents, "config timeserver 'ntp'"))
     luaunit.assertNotNil(string.find(systemContents, "list server '3.openwrt.pool.ntp.org'"))
     -- ensure test file is present
-    local testFile = io.open('./update-test/etc/test')
+    local testFile = io.open(write_dir .. 'etc/test')
     luaunit.assertNotNil(testFile)
     local testContents = testFile:read('*all')
     luaunit.assertEquals(testContents, 'test\n')
@@ -108,6 +113,48 @@ function TestUpdateConfig.test_update_conf_arg()
     luaunit.assertNotNil(string.find(systemContents, "option hostname 'confarg'"))
     luaunit.assertNotNil(string.find(systemContents, "config new 'new'"))
     luaunit.assertNotNil(string.find(systemContents, "option test 'test'"))
+end
+
+function TestUpdateConfig.test_duplicate_list_options()
+    update_config('--test=1', '--conf=./test-duplicate-list.tar.gz')
+    -- check network
+    local networkFile = io.open(config_dir .. 'network')
+    luaunit.assertNotNil(networkFile)
+    local networkContents = networkFile:read('*all')
+    luaunit.assertEquals(string_count(networkContents, "list ipaddr '192.168.10.1/24'"), 1)
+    luaunit.assertEquals(string_count(networkContents, "list ipaddr '192.168.10.2/24'"), 1)
+    luaunit.assertEquals(string_count(networkContents, "list ipaddr '192.168.10.3/24'"), 1)
+    luaunit.assertEquals(string_count(networkContents, "list addresses '10.0.0.2'"), 1)
+    luaunit.assertEquals(string_count(networkContents, "list addresses '10.0.0.3'"), 1)
+    luaunit.assertEquals(string_count(networkContents, "list addresses '10.0.0.4'"), 1)
+    luaunit.assertNotNil(string.find(networkContents, "option test_restore '2'"))
+    -- repeating the operation has the same result
+    update_config('--test=1', '--conf=./test-duplicate-list.tar.gz')
+    networkFile = io.open(config_dir .. 'network')
+    luaunit.assertNotNil(networkFile)
+    networkContents = networkFile:read('*all')
+    luaunit.assertEquals(string_count(networkContents, "list ipaddr '192.168.10.1/24'"), 1)
+    luaunit.assertEquals(string_count(networkContents, "list ipaddr '192.168.10.2/24'"), 1)
+    luaunit.assertEquals(string_count(networkContents, "list ipaddr '192.168.10.3/24'"), 1)
+    luaunit.assertEquals(string_count(networkContents, "list addresses '10.0.0.2'"), 1)
+    luaunit.assertEquals(string_count(networkContents, "list addresses '10.0.0.3'"), 1)
+    luaunit.assertEquals(string_count(networkContents, "list addresses '10.0.0.4'"), 1)
+    luaunit.assertNotNil(string.find(networkContents, "option test_restore '2'"))
+end
+
+function TestUpdateConfig.test_removal_list_options()
+    update_config('--test=1', '--conf=./test-list-removal.tar.gz')
+    -- -- check network
+    local networkFile = io.open(config_dir .. 'network')
+    luaunit.assertNotNil(networkFile)
+    local networkContents = networkFile:read('*all')
+    luaunit.assertEquals(string_count(networkContents, "list ipaddr '192.168.10.1/24'"), 0)
+    luaunit.assertEquals(string_count(networkContents, "list ipaddr '192.168.10.2/24'"), 1)
+    luaunit.assertEquals(string_count(networkContents, "list ipaddr '192.168.10.3/24'"), 1)
+    luaunit.assertEquals(string_count(networkContents, "list addresses '10.0.0.2'"), 0)
+    luaunit.assertEquals(string_count(networkContents, "list addresses '10.0.0.3'"), 1)
+    luaunit.assertEquals(string_count(networkContents, "list addresses '10.0.0.4'"), 1)
+    luaunit.assertNotNil(string.find(networkContents, "option test_restore '2'"))
 end
 
 os.exit(luaunit.LuaUnit.run())

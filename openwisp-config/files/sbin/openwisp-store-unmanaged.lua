@@ -90,11 +90,11 @@ for config_name, config_values in pairs(unmanaged_map) do
             if element.name then
                 local section = uci_table[element.name]
                 if section then
-                    utils.write_uci_section(unmanaged, config_name, section)
+                    utils.write_uci_section(unmanaged, config_name, section, true)
                 end
             else
                 standard:foreach(config_name, element.type, function(section)
-                    utils.write_uci_section(unmanaged, config_name, section)
+                    utils.write_uci_section(unmanaged, config_name, section, true)
                 end)
             end
         end

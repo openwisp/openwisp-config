@@ -55,7 +55,7 @@ end
 --     [".anonymous"] = false,
 --     proto = "none",
 --     ifname = "eth0.2",
--- }
+-- })
 --
 -- will write to "network" the following:
 --
@@ -63,7 +63,7 @@ end
 --         option proto 'none'
 --         option ifname 'eth0.2'
 --
-function utils.write_uci_section(cursor, config, section)
+function utils.write_uci_section(cursor, config, section, merge_list)
     local name
     -- add named section
     if not section['.anonymous'] then
@@ -75,18 +75,18 @@ function utils.write_uci_section(cursor, config, section)
     end
     -- write options for section
     for key, value in utils.sorted_pairs(section) do
-        utils.write_uci_option(cursor, config, name, key, value)
+        utils.write_uci_option(cursor, config, name, key, value, merge_list)
     end
 end
 
 -- abstraction for "uci set" which handles corner cases
-function utils.write_uci_option(cursor, config, name, key, value)
+function utils.write_uci_option(cursor, config, name, key, value, merge_list)
     -- ignore properties starting with .
     if utils.starts_with_dot(key) then
         return
     end
     -- avoid duplicate list settings
-    if type(value) == 'table' then
+    if type(value) == 'table' and merge_list then
         -- create set with unique values
         local set = {}
         -- read existing value

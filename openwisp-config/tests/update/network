@@ -1,0 +1,10 @@
+config interface 'wan'
+	option ifname 'eth0.2'
+	option proto 'static'
+	list ipaddr '192.168.10.1/24'
+	list ipaddr '192.168.10.2/24'
+	option test_restore '1'
+
+config interface 'wg0'
+	list addresses '10.0.0.2'
+	list addresses '10.0.0.3'

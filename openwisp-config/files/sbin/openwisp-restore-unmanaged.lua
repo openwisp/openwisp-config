@@ -27,7 +27,7 @@ for file in lfs.dir(unmanaged_path) do
     if file ~= '.' and file ~= '..' then
         for key, section in pairs(unmanaged:get_all(file)) do
             standard:delete(file, key)
-            utils.write_uci_section(standard, file, section)
+            utils.write_uci_section(standard, file, section, true)
         end
         standard:commit(file)
     end
