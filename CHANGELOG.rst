@@ -1,7 +1,7 @@
 Change log
 ^^^^^^^^^^
 
-0.4.6 [unreleased]
+0.5.0 [unreleased]
 ==================
 
 WIP
