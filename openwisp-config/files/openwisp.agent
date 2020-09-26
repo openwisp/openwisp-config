@@ -392,7 +392,7 @@ update_info() {
 	rm $UPDATE_INFO
 }
 
-# report configuration status: "running" or "error"
+# report configuration status: "applied" or "error"
 report_status() {
 	# retry several times
 	for i in $(seq 1 10); do
@@ -554,7 +554,7 @@ update_configuration() {
 		logger "Configuration applied successfully" \
 		       -t openwisp \
 		       -p daemon.info
-		report_status "running"
+		report_status "applied"
 	else
 		report_status "error"
 	fi
