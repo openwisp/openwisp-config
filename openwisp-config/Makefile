@@ -18,7 +18,7 @@ define Package/openwisp-config/default
 	CATEGORY:=Administration
 	SECTION:=admin
 	SUBMENU:=openwisp
-	DEPENDS:=+curl +lua +libuci-lua +luafilesystem $(3)
+	DEPENDS:=+curl +lua +libuci-lua +luafilesystem +luci-lib-nixio $(3)
 	VARIANT:=$(1)
 	PKGARCH:=all
 	MAINTAINER:=Federico Capoano <federico.capoano@gmail.com>
