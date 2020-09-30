@@ -2,8 +2,16 @@
 openwisp-config
 ===============
 
+.. image:: https://api.travis-ci.org/openwisp/openwisp-config.svg?branch=master
+    :target: https://travis-ci.org/github/openwisp/openwisp-config
+    :alt: ci build
+
 .. image:: http://img.shields.io/github/release/openwisp/openwisp-config.svg
    :target: https://github.com/openwisp/openwisp-config/releases
+
+.. image:: https://img.shields.io/gitter/room/nwjs/nw.js.svg?style=flat-square
+   :target: https://gitter.im/openwisp/general
+   :alt: support chat
 
 ------------
 
