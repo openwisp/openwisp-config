@@ -74,6 +74,7 @@ UCI configuration options must go in ``/etc/config/openwisp``.
 - ``consistent_key``: whether `Consistent key generation`_ is enabled or not, defaults to ``1``
 - ``merge_config``: whether `Merge configuration`_ is enabled or not, defaults to ``1``
 - ``test_config``: whether a new configuration must be tested before being considered applied, defaults to ``1``
+- ``test_retries``: maximum number of retries when doing the default configuration test, defaults to ``3``
 - ``test_script``: custom test script, read more about this feature in `Configuration test`_
 - ``uuid``: unique identifier of the router configuration in the controller application
 - ``key``: key required to download the configuration
@@ -93,6 +94,7 @@ UCI configuration options must go in ``/etc/config/openwisp``.
   (new device will be named after its mac address, to avoid having many new devices with the same name)
 - ``pre_reload_hook``: path to custom executable script, see `pre-reload-hook`_
 - ``post_reload_hook``: path to custom executable script, see `post-reload-hook`_
+- ``post_reload_delay``: delay in seconds to wait before the post-reload-hook and any configuration test, defaults to ``0``
 - ``post_registration_hook``: path to custom executable script, see `post-registration-hook`_
 
 Automatic registration
