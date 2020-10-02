@@ -468,7 +468,7 @@ perform_default_test() {
 		$($FETCH_COMMAND -i --connect-timeout 5 --max-time 5 $CHECKSUM_URL > $TEST_CHECKSUM)
 		local result=$?
 		if [ $result -gt 0 ]; then
-			logger "Configuration test try $i failed" \
+			logger "Configuration test failed (attempt $i)" \
 			       -t openwisp \
 			       -p daemon.warning
 			sleep 5
