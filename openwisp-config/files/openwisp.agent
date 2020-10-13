@@ -358,6 +358,7 @@ update_info() {
 	local model=$(get_model)
 	local os=$(get_os)
 	local system=$(get_system)
+	local hostname=$(uci get system.@system[0].hostname)
 	# retry several times
 	for i in $(seq 1 10); do
 		$FETCH_COMMAND -i \
@@ -365,6 +366,7 @@ update_info() {
 			 --data-urlencode model="$model" \
 			 --data-urlencode os="$os" \
 			 --data-urlencode system="$system" \
+			 --data-urlencode name="$hostname" \
 		"$UPDATE_INFO_URL" > $UPDATE_INFO
 		local exit_code=$?
 		if [ "$exit_code" = "0" ]; then
@@ -564,6 +566,9 @@ update_configuration() {
 	else
 		report_status "error"
 	fi
+
+	# send up to date device info
+	update_info
 }
 
 backup_configuration() {
