@@ -34,7 +34,7 @@ define Build/Compile
 endef
 
 define Package/openwisp-config-$(BUILD_VARIANT)/conffiles
-    /etc/config/openwisp
+/etc/config/openwisp
 endef
 
 CONFIG_OPENWISP_UCI:=ssl
