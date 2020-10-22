@@ -350,7 +350,7 @@ each new device, you should switch to using a custom OpenWRT firmware image that
   hence saving extra time and effort to register each device on the controller app
 * if you happen to reset the firmware to initial settings, these precompiled settings will be restored as well
 
-The following procedure illustrates how to compile a custom `OpenWRT 18.06.1 <https://openwrt.org/>`_
+The following procedure illustrates how to compile a custom `OpenWRT 19.07 <https://openwrt.org/>`_
 image with a precompiled minimal ``/etc/config/openwisp`` configuration file:
 
 .. code-block:: shell
