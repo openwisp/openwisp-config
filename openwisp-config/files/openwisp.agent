@@ -465,7 +465,7 @@ test_configuration() {
 perform_default_test() {
 	# the default test is performed several times, as indicated by $TEST_RETRIES
 	for i in $(seq 1 $TEST_RETRIES); do
-		$($FETCH_COMMAND -i --connect-timeout 5 --max-time 5 $CHECKSUM_URL > $TEST_CHECKSUM)
+		$($FETCH_COMMAND -i $CHECKSUM_URL > $TEST_CHECKSUM)
 		local result=$?
 		if [ $result -gt 0 ]; then
 			logger "Configuration test failed (attempt $i)" \
