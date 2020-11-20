@@ -7,7 +7,7 @@ before_install:
   - sudo ./install-dev.sh
 
 install:
-  - pip install openwisp-utils[qa]>=0.6
+  - pip install openwisp-utils[qa]>=0.7
 
 script:
   - openwisp-qa-check --skip-checkmigrations --skip-isort --skip-flake8 --skip-black
