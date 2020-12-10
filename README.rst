@@ -73,6 +73,8 @@ UCI configuration options must go in ``/etc/config/openwisp``.
 - ``shared_secret``: shared secret, needed for `Automatic registration`_
 - ``consistent_key``: whether `Consistent key generation`_ is enabled or not, defaults to ``1``
 - ``merge_config``: whether `Merge configuration`_ is enabled or not, defaults to ``1``
+- ``tags``: template tags to use during registration, multiple tags separated by space can be used,
+  for more information see `Template Tags <https://openwisp.io/docs/user/templates.html#template-tags>`_
 - ``test_config``: whether a new configuration must be tested before being considered applied, defaults to ``1``
 - ``test_retries``: maximum number of retries when doing the default configuration test, defaults to ``3``
 - ``test_script``: custom test script, read more about this feature in `Configuration test`_
