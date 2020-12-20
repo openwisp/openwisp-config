@@ -16,7 +16,7 @@ openwisp-config
 ------------
 
 `OpenWRT <https://openwrt.org/>`_ configuration agent for the new
-`OpenWISP 2 Controller <https://github.com/openwisp/ansible-openwisp2>`_.
+`OpenWISP Controller <https://github.com/openwisp/ansible-openwisp2>`_.
 
 **Want to help OpenWISP?** `Find out how to help us grow here
 <http://openwisp.io/docs/general/help-us.html>`_.
@@ -190,7 +190,8 @@ If the above configuration option is set then the hardware id will also be used 
 instead of the mac address. If you use a hardware id script but prefer to use the mac address for key
 generation then set ``hardware_id_key`` to ``0``.
 
-For settings in ``django-netjsonconfig`` related to the hardware id, take a look at the `README <https://github.com/openwisp/django-netjsonconfig/#netjsonconfig-hardware-id-enabled>`_
+See also the `related hardware ID settings in OpenWISP Controller
+<https://github.com/openwisp/openwisp-controller/#openwisp-controller-hardware-id-enabled>`_.
 
 Bootup Delay
 ------------

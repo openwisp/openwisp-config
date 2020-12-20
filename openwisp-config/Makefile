@@ -21,7 +21,7 @@ define Package/openwisp-config/default
 	DEPENDS:=+curl +lua +libuci-lua +luafilesystem +luci-lib-nixio $(3)
 	VARIANT:=$(1)
 	PKGARCH:=all
-	MAINTAINER:=Federico Capoano <federico.capoano@gmail.com>
+	MAINTAINER:=Federico Capoano <f.capoano@openwisp.io>
 	URL:=http://openwisp.org
 endef
 
