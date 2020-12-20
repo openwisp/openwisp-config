@@ -294,7 +294,7 @@ There are 4 variants of *openwisp-config*:
 
 - **openwisp-config-openssl**: depends on *ca-certificates* and *libopenssl*
 - **openwisp-config-mbedtls**: depends on *ca-certificates* and *libmbedtls*
-- **openwisp-config-cyassl**: depends on *ca-certificates* and *libcyassl*
+- **openwisp-config-wolfssl**: depends on *ca-certificates* and *libwolfssl*
 - **openwisp-config-nossl**: doesn't depend on any SSL library and doesn't install trusted CA certificates
 
 The following procedure illustrates how to compile all the *openwisp-config* variants and their dependencies:
@@ -315,7 +315,7 @@ The following procedure illustrates how to compile all the *openwisp-config* var
     echo "CONFIG_TARGET_$arch=y" > .config;
     echo "CONFIG_PACKAGE_openwisp-config-openssl=y" >> .config
     echo "CONFIG_PACKAGE_openwisp-config-mbedtls=y" >> .config
-    echo "CONFIG_PACKAGE_openwisp-config-cyassl=y" >> .config
+    echo "CONFIG_PACKAGE_openwisp-config-wolfssl=y" >> .config
     echo "CONFIG_PACKAGE_openwisp-config-nossl=y" >> .config
     make defconfig
     make tools/install

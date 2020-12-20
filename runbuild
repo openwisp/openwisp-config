@@ -43,7 +43,7 @@ arch="ar71xx"
 echo "CONFIG_TARGET_$arch=y" > .config;
 echo "CONFIG_PACKAGE_openwisp-config-openssl=y" >> .config
 echo "CONFIG_PACKAGE_openwisp-config-mbedtls=y" >> .config
-echo "CONFIG_PACKAGE_openwisp-config-cyassl=y" >> .config
+echo "CONFIG_PACKAGE_openwisp-config-wolfssl=y" >> .config
 echo "CONFIG_PACKAGE_openwisp-config-nossl=y" >> .config
 make defconfig
 make -j$CORES tools/install
