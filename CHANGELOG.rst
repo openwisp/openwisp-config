@@ -1,10 +1,60 @@
 Change log
 ^^^^^^^^^^
 
-0.5.0 [unreleased]
+0.5.0 [2020-12-20]
 ==================
 
-WIP
+Features
+~~~~~~~~
+
+- Added support for
+  `Template Tags <https://openwisp.io/docs/user/templates.html#template-tags>`_
+- Send hardware and software information (hardware model, operating system, soc) during registration
+  and boot (too keep it up to date)
+- Added `post-reload-hook <https://github.com/openwisp/openwisp-config/#post-reload-hook>`_ and
+  `post-registration-hook <https://github.com/openwisp/openwisp-config/#post-registration-hook>`_
+- Added ``management_interface``
+  `config option <https://github.com/openwisp/openwisp-config/#configuration-options>`_,
+  which allows sending the IP of the management interface
+  to OpenWISP, a pre-requisite for enabling features of OpenWISP as
+  `push updates <https://openwisp.io/docs/user/configure-push-updates.html>`_,
+  `firmware upgrades <https://github.com/openwisp/openwisp-firmware-upgrader#openwisp-firmware-upgrader>`_
+  and `fping <https://github.com/openwisp/openwisp-monitoring/#ping>`_
+  health checks
+- Added support for
+  `hardware ID / serial number <https://github.com/openwisp/openwisp-config/#hardware-id>`_
+- Added random
+  `bootup delay <https://github.com/openwisp/openwisp-config/#bootup-delay>`_
+- Added ``default_hostname``
+  `config option <https://github.com/openwisp/openwisp-config/#configuration-options>`_
+- Improved automatic recovery of previous backups when configuration updates fail
+- Added ``post_reload_delay`` and ``test_retries``
+  `config options <https://github.com/openwisp/openwisp-config/#configuration-options>`_
+
+Changes
+~~~~~~~
+
+- **Backward incompatible change**: list options are now overwritten
+  to prevent duplication
+- Improved log message in case of registration failure
+- Allow ``$MAC_ADDRESS`` to be bridge
+- Removed polarssl
+- Check sanity of downloaded UCI files before applying them
+- Give up with registration only when 403 is returned by the server
+- Show entire registration error message in logs
+- Updated examples and precompiled packages to use OpenWRT 19.07
+- Made check of OpenWISP Controller header case insensitve
+
+Bugfixes
+~~~~~~~~
+
+- Ensured order of UCI sections is preserved during config write operations,
+  handle special section types
+- Ensure anonymous UCI config sections are handled well
+- Ensure removal of files only includes items which are not in the new
+  downloaded configuration
+- Fixed duplication of list options
+- Fixed a bug that caused ``/etc/config/openwisp`` to be overwritten
 
 0.4.5 [2017-03-03]
 ==================
