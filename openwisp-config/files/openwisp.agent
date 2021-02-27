@@ -519,7 +519,7 @@ update_configuration() {
 		   -p daemon.info
 
 	# download configuration
-	$($FETCH_COMMAND $CONFIGURATION_URL -o $CONFIGURATION_ARCHIVE)
+	$($FETCH_COMMAND --fail $CONFIGURATION_URL -o $CONFIGURATION_ARCHIVE)
 	local exit_code=$?
 
 	if [ "$exit_code" != "0" ]; then
