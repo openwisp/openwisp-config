@@ -498,16 +498,29 @@ call_restore_unmanaged() {
 	/usr/sbin/openwisp-restore-unmanaged
 }
 
-# 1. removes default wifi-ifaces directive (LEDE or OpenWrt SSID)
-# 2. ensures there are no anonymous UCI blocks
+# 1. ensures there are no anonymous UCI blocks
+# 2. re-generate the md5 checksums
+# 3. removes default wifi-ifaces directive (LEDE or OpenWrt SSID)
 fix_uci_config() {
-	/usr/sbin/openwisp-remove-default-wifi
 	output=$(/usr/sbin/openwisp-uci-autoname)
 	if [ -n "$output" ]; then
 		logger "The following uci configs have been renamed: $output" \
 		       -t openwisp \
 		       -p daemon.info
 	fi
+
+	# Re-generate the md5 checksums to avoid reloading services which had
+	# anonymous UCI sections which were removed.
+	rm -rf /var/run/config.check
+	mkdir -p /var/run/config.check
+	for config in /etc/config/*; do
+	file=${config##*/}
+		uci show "${file##*/}" > /var/run/config.check/$file
+	done
+	md5sum /var/run/config.check/* > /var/run/config.md5
+	rm -rf /var/run/config.check
+
+	/usr/sbin/openwisp-remove-default-wifi
 }
 
 # downloads configuration from controller
