@@ -318,7 +318,7 @@ post_registration_hook() {
 	if [ -x "$POST_REGISTRATION_HOOK" ]; then
 		$POST_REGISTRATION_HOOK
 		local exit_code=$?
-		logger "Called post-reload-hook: $POST_REGISTRATION_HOOK - exit code: $exit_code" \
+		logger "Called post-registration-hook: $POST_REGISTRATION_HOOK - exit code: $exit_code" \
 		       -t openwisp \
 		       -p daemon.info
 		return $exit_code
