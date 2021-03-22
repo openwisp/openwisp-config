@@ -81,6 +81,7 @@ WORKING_DIR="/tmp/openwisp"
 BASEURL="$URL/controller"
 CONFIGURATION_ARCHIVE="$WORKING_DIR/configuration.tar.gz"
 CONFIGURATION_CHECKSUM="$WORKING_DIR/checksum"
+PERSISTENT_CHECKSUM="/etc/openwisp/checksum"
 CONFIGURATION_BACKUP="$WORKING_DIR/backup.tar.gz"
 BACKUP_FILE_LIST="$WORKING_DIR/backup_file_list.conf"
 REGISTRATION_PARAMETERS="$WORKING_DIR/registration_parameters"
@@ -94,6 +95,11 @@ UNMANAGED_DIR="$WORKING_DIR/unmanaged"
 FETCH_COMMAND="curl -s --connect-timeout $CONNECT_TIMEOUT --max-time $MAX_TIME"
 mkdir -p $WORKING_DIR
 mkdir -p $UNMANAGED_DIR
+
+# restore last known checksum
+if [ -f "$PERSISTENT_CHECKSUM" ]; then
+	cp "$PERSISTENT_CHECKSUM" "$CONFIGURATION_CHECKSUM"
+fi
 
 if [ "$VERIFY_SSL" == "0" ]; then
 	FETCH_COMMAND="$FETCH_COMMAND -k"
@@ -274,6 +280,10 @@ configuration_changed() {
 	local exit_code=$?
 
 	if [ "$exit_code" != "0" ]; then
+		# restore last known checksum if get_checksum failed
+		if [ -f "$PERSISTENT_CHECKSUM" ]; then
+			cp "$PERSISTENT_CHECKSUM" "$CONFIGURATION_CHECKSUM"
+		fi
 		return $exit_code
 	fi
 
@@ -560,6 +570,8 @@ update_configuration() {
 		logger "Configuration applied successfully" \
 		       -t openwisp \
 		       -p daemon.info
+		# store the new checksum as last known checksum
+		cp "$CONFIGURATION_CHECKSUM" "$PERSISTENT_CHECKSUM"
 		report_status "applied"
 	else
 		report_status "error"
