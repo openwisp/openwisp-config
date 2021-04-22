@@ -34,6 +34,9 @@ start_service() {
 	post_reload_hook=$(config_get http post_reload_hook)
 	post_reload_delay=$(config_get http post_reload_delay)
 	post_registration_hook=$(config_get http post_registration_hook)
+	respawn_threshold=$(config_get http respawn_threshold)
+	respawn_timeout=$(config_get http respawn_timeout)
+	respawn_retry=$(config_get http respawn_retry)
 	if [ $url ]; then url="--url $url"; fi
 	if [ $interval ]; then interval="--interval $interval"; fi
 	if [ $verify_ssl ]; then verify_ssl="--verify-ssl $verify_ssl"; fi
@@ -88,7 +91,7 @@ start_service() {
 	                        $cacert $mac_interface $management_interface $default_hostname \
 	                        $pre_reload_hook $post_reload_hook $post_reload_delay \
 	                        $post_registration_hook
-	procd_set_param respawn
+	procd_set_param respawn ${respawn_threshold:-3600} ${respawn_timeout:-5} ${respawn_retry:-5}
 	procd_close_instance
 	logger -s "$PROG_NAME started" \
 	       -t openwisp \
