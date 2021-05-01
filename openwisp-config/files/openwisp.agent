@@ -658,6 +658,12 @@ discover_management_ip(){
 	fi
 }
 
+handle_sigusr1() {
+	logger -s "Received SIGUSR1: interrupting interval sleep..." \
+		 -t openwisp \
+		 -p daemon.info
+}
+
 # ensure both UUID and KEY are defined
 # otherwise perform registration
 if [ -z "$UUID" ] || [ -z "$KEY" ]; then
@@ -707,5 +713,10 @@ do
 		update_configuration
 	fi
 
-	sleep $INTERVAL
+	# handle SIGUSR1 to interrupt sleep
+	trap handle_sigusr1 USR1
+	sleep $INTERVAL &
+	wait $!
+	# ignore SIGUSR1 signals again
+	trap "" USR1
 done
