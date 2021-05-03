@@ -22,8 +22,11 @@ TestUpdateConfig = {
         -- this file is pre-existing on the device
         os.execute('cp ./update/system '..config_dir..'system')
         os.execute('cp ./update/network '..config_dir..'network')
+        os.execute('cp ./update/wireless '..config_dir..'wireless')
         -- we expect these UCI files to be removed
+        os.execute('cp ./config/wireless-autoname '..remote_config_dir..'/wireless-autoname')
         os.execute('cp ./wifi/wireless '..remote_config_dir..'/wireless')
+        -- this file will be overwrited by stored configuration and new configuration
         os.execute('cp ./wifi/wireless '..config_dir..'/wireless')
         -- we expect this file to be stored
         os.execute('echo original > '..write_dir..'/etc/existing')
@@ -34,6 +37,9 @@ TestUpdateConfig = {
         os.execute('mkdir -p ' .. openwisp_dir .. 'stored/etc/')
         os.execute('echo restore-me > '..openwisp_dir..'/stored/etc/restore-me')
         os.execute('echo /etc/restore-me > '..openwisp_dir..'/modified.list')
+        -- this file is stored in the backup
+        os.execute('mkdir -p ' .. openwisp_dir ..'etc/config/')
+        os.execute("cp ./update/stored_wireless " ..openwisp_dir.. '/etc/config/wireless')
     end,
     tearDown = function()
         os.execute('rm -rf ' .. write_dir)
@@ -74,8 +80,30 @@ function TestUpdateConfig.test_update()
     local addedListContents = addedListFile:read('*all')
     luaunit.assertEquals(addedListContents, '/etc/test\n')
     -- ensure files are removed
-    luaunit.assertNil(io.open(config_dir..'/wireless'))
-    luaunit.assertNil(io.open(remote_config_dir..'/wireless'))
+    luaunit.assertNil(io.open(config_dir..'/wireless-autoname'))
+    luaunit.assertNil(io.open(remote_config_dir..'/wireless-autoname'))
+    -- ensure file is not removed
+    luaunit.assertNotNil(io.open(remote_config_dir..'/wireless'))
+    -- ensure configuration is restored
+    local wirelessFile = io.open(config_dir..'/wireless')
+    luaunit.assertNotNil(wirelessFile)
+    local wirelessContents = wirelessFile:read('*all')
+    -- ensure device radio0 is stored from backup
+    luaunit.assertNotNil(string.find(wirelessContents, "config wifi-device 'radio0'", 1, true))
+    luaunit.assertNotNil(string.find(wirelessContents, "option path 'platform/ar934x_wmac'"))
+    luaunit.assertNotNil(string.find(wirelessContents, "option channel '9'"))
+    -- ensure device radio1 is removed as it is neither in backup nor in new configuration
+    luaunit.assertNil(string.find(wirelessContents, "config wifi-device 'radio1'"))
+    -- ensure device radio3 options are updated
+    luaunit.assertNotNil(string.find(wirelessContents, "config wifi-device 'radio3'", 1, true))
+    -- ensure channel is stored from backup
+    luaunit.assertNotNil(string.find(wirelessContents, "option channel '14'"))
+    -- ensure country value is used from new configuration
+    luaunit.assertNotNil(string.find(wirelessContents, "option country 'IT'"))
+    -- ensure hwmode is not stored as not available in remote config
+    luaunit.assertNil(string.find(wirelessContents, "option hwmode '11h'"))
+    -- ensure path has been removed
+    luaunit.assertNil(string.find(wirelessContents, "option path 'pci0000:00/0000:00:1c.2/0000:05:00.0'"))
     -- ensure existing original file has been stored
     local modifiedListFile = io.open(openwisp_dir .. '/modified.list')
     luaunit.assertNotNil(modifiedListFile)
@@ -94,6 +122,16 @@ function TestUpdateConfig.test_update()
     luaunit.assertNotNil(restoreFile)
     luaunit.assertEquals(restoreFile:read('*all'), 'restore-me\n')
     luaunit.assertNil(io.open(openwisp_dir..'/stored/etc/restore-me'))
+    -- ensure network configuration file is backed up
+    local storedNetworkFile = io.open(openwisp_dir .. '/etc/config/network')
+    luaunit.assertNotNil(storedNetworkFile)
+    local initialNetworkFile = io.open('update/network')
+    luaunit.assertEquals(storedNetworkFile:read('*all'), initialNetworkFile:read('*all'))
+    -- ensure system configuration file is backed up
+    local storedSystemFile = io.open(openwisp_dir .. '/etc/config/system')
+    luaunit.assertNotNil(storedSystemFile)
+    local initialSystemFile = io.open('update/system')
+    luaunit.assertEquals(storedSystemFile:read('*all'), initialSystemFile:read('*all'))
 end
 
 function TestUpdateConfig.test_update_conf_arg()

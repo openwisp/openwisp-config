@@ -18,6 +18,9 @@ config wifi-device 'radio1'
 	option type 'mac80211'
 	option htmode 'HT20'
 
+config wifi-device 'radio3'
+    option channel '13'
+
 config wifi-iface
 	option ssid 'LEDE'
 	option encryption 'none'
