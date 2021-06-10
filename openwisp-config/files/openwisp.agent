@@ -577,8 +577,6 @@ update_configuration() {
 		result=$?
 	fi
 
-	rm $APPLYING_CONF
-
 	if [ "$result" == "0" ]; then
 		logger "Configuration applied successfully" \
 		       -t openwisp \
@@ -589,6 +587,8 @@ update_configuration() {
 	else
 		report_status "error"
 	fi
+
+	rm $APPLYING_CONF
 }
 
 backup_configuration() {
