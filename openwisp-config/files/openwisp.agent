@@ -628,8 +628,10 @@ discover_management_ip(){
 	fi
 	MANAGEMENT_IP=$(/usr/sbin/openwisp-get-address $MANAGEMENT_INTERFACE)
 	# if management interface is defined but its ip could not be determined
+	# and the shared secret is not present anymore
+	# (which means the device has been already registered)
 	# try waiting for the management interface to be ready
-	if [ -z "$MANAGEMENT_IP" ]; then
+	if [ -z "$MANAGEMENT_IP" ] && [ -z "$SHARED_SECRET" ]; then
 		MAX_ATTEMPTS=3
 		for attempt in `seq $MAX_ATTEMPTS`; do
 			MANAGEMENT_IP=$(/usr/sbin/openwisp-get-address $MANAGEMENT_INTERFACE)
