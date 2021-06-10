@@ -408,7 +408,7 @@ update_info() {
 # report configuration status: "applied" or "error"
 report_status() {
 	# retry several times
-	for i in $(seq 1 10); do
+	for i in $(seq 1 30); do
 		$($FETCH_COMMAND -i --data "key=$KEY&status=$1" $REPORT_URL > $STATUS_REPORT)
 		local exit_code=$?
 		if [ "$exit_code" == "0" ]; then
