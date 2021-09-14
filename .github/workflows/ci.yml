@@ -63,6 +63,7 @@ jobs:
       - name: Run Build
         run: ./runbuild
         env:
+          CI: 1
           CI_CACHE: ${{ steps.cache.outputs.cache-hit }}
 
       - name: Setup Google Cloud

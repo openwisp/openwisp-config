@@ -8,7 +8,9 @@
 # - $COMPILE_TARGET (defaults to mips_24kc)
 set -e
 
-./runtests
+CI=${CI:-0}
+
+[ "$CI" -eq "1" ] || ./runtests
 
 BUILD_DIR=${BUILD_DIR-./build}
 DOWNLOADS_DIR=${DOWNLOADS_DIR-./downloads}
@@ -25,7 +27,7 @@ mkdir -p "$DOWNLOADS_DIR"
 cd "$BUILD_DIR"
 
 if ! [ -d "openwrt" ]; then
-  git clone https://github.com/openwrt/openwrt.git openwrt
+  git clone https://github.com/openwrt/openwrt.git
 fi
 cd openwrt
 git reset --hard HEAD
@@ -33,8 +35,8 @@ git checkout $OPENWRT_BRANCH
 git pull origin $OPENWRT_BRANCH
 
 # configure feeds
-echo "src-link openwisp $CURRENT_DIR" > feeds.conf
-cat feeds.conf.default >> feeds.conf
+echo "src-link openwisp $CURRENT_DIR" >feeds.conf
+cat feeds.conf.default >>feeds.conf
 # remove unneeded feeds
 sed -i '/telephony/d' feeds.conf
 sed -i '/routing/d' feeds.conf
@@ -47,7 +49,6 @@ sed -i '/routing/d' feeds.conf
   echo "CONFIG_PACKAGE_openwisp-config-wolfssl=y"
   echo "CONFIG_PACKAGE_openwisp-config-nossl=y"
 } >>.config
-
 make defconfig
 
 if [ ! "$CI_CACHE" ]; then
@@ -56,6 +57,8 @@ if [ ! "$CI_CACHE" ]; then
 fi
 
 make -j"$CORES" package/openwisp-config/compile || exit 1
+ls
+cd ..
 
 mv "$BUILD_DIR"/openwrt/bin/packages/"$COMPILE_TARGET"/openwisp "$VERSIONED_DIR"
 
