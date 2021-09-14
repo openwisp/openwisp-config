@@ -5,22 +5,24 @@
 # - $BUILD_DIR
 # - $DOWNLOADS_DIR
 # - $CORES (defaults to 1)
+# - $COMPILE_TARGET (defaults to mips_24kc)
 set -e
 
 ./runtests
 
 BUILD_DIR=${BUILD_DIR-./build}
 DOWNLOADS_DIR=${DOWNLOADS_DIR-./downloads}
-START_TIME=$(date +"%Y-%m-%d-%H%M%S")
+START_TIME=${START_TIME-$(date +"%Y-%m-%d-%H%M%S")}
 VERSIONED_DIR="$DOWNLOADS_DIR/$START_TIME"
 LATEST_LINK="$DOWNLOADS_DIR/latest"
 CORES=${CORES:-1}
 CURRENT_DIR=$(pwd)
+COMPILE_TARGET=${COMPILE_TARGET-mips_24kc}
 OPENWRT_BRANCH="openwrt-19.07"
 
-mkdir -p $BUILD_DIR
-mkdir -p $DOWNLOADS_DIR
-cd $BUILD_DIR
+mkdir -p "$BUILD_DIR"
+mkdir -p "$DOWNLOADS_DIR"
+cd "$BUILD_DIR"
 
 if ! [ -d "openwrt" ]; then
   git clone https://github.com/openwrt/openwrt.git openwrt
@@ -38,19 +40,24 @@ sed -i '/telephony/d' feeds.conf
 sed -i '/routing/d' feeds.conf
 ./scripts/feeds update -a
 ./scripts/feeds install -a
-# any arch/target is fine because the package is architecture indipendent
-arch="ar71xx"
-echo "CONFIG_TARGET_$arch=y" > .config;
-echo "CONFIG_PACKAGE_openwisp-config-openssl=y" >> .config
-echo "CONFIG_PACKAGE_openwisp-config-mbedtls=y" >> .config
-echo "CONFIG_PACKAGE_openwisp-config-wolfssl=y" >> .config
-echo "CONFIG_PACKAGE_openwisp-config-nossl=y" >> .config
+
+{
+  echo "CONFIG_PACKAGE_openwisp-config-openssl=y"
+  echo "CONFIG_PACKAGE_openwisp-config-mbedtls=y"
+  echo "CONFIG_PACKAGE_openwisp-config-wolfssl=y"
+  echo "CONFIG_PACKAGE_openwisp-config-nossl=y"
+} >>.config
+
 make defconfig
-make -j$CORES tools/install
-make -j$CORES toolchain/install
-make -j$CORES package/openwisp-config/compile || exit 1
 
-mv $BUILD_DIR/openwrt/bin/packages/mips_24kc/openwisp $VERSIONED_DIR
+if [ ! "$CI_CACHE" ]; then
+  make -j"$CORES" tools/install
+  make -j"$CORES" toolchain/install
+fi
 
-rm $LATEST_LINK || true
-ln -s $VERSIONED_DIR $LATEST_LINK
+make -j"$CORES" package/openwisp-config/compile || exit 1
+
+mv "$BUILD_DIR"/openwrt/bin/packages/"$COMPILE_TARGET"/openwisp "$VERSIONED_DIR"
+
+rm "$LATEST_LINK" || true
+ln -s "$VERSIONED_DIR" "$LATEST_LINK"
