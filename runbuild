@@ -20,14 +20,14 @@ LATEST_LINK="$DOWNLOADS_DIR/latest"
 CORES=${CORES:-1}
 CURRENT_DIR=$(pwd)
 COMPILE_TARGET=${COMPILE_TARGET-mips_24kc}
-OPENWRT_BRANCH="openwrt-19.07"
+OPENWRT_BRANCH="openwrt-21.02"
 
 mkdir -p "$BUILD_DIR"
-mkdir -p "$DOWNLOADS_DIR"
+mkdir -p "$VERSIONED_DIR"
 cd "$BUILD_DIR"
 
 if ! [ -d "openwrt" ]; then
-  git clone https://github.com/openwrt/openwrt.git
+  git clone https://git.openwrt.org/openwrt/openwrt.git
 fi
 cd openwrt
 git reset --hard HEAD
@@ -57,8 +57,6 @@ if [ ! "$CI_CACHE" ]; then
 fi
 
 make -j"$CORES" package/openwisp-config/compile || exit 1
-ls
-cd ..
 
 mv "$BUILD_DIR"/openwrt/bin/packages/"$COMPILE_TARGET"/openwisp "$VERSIONED_DIR"
 
