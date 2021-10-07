@@ -40,6 +40,10 @@ jobs:
     name: Build and Upload Packages
     needs: tests
     runs-on: ubuntu-20.04
+    env:
+      BUILD_DIR: '/home/runner/work/build'
+      DOWNLOADS_DIR: '/home/runner/work/downloads'
+      CORES: 2
 
     steps:
       - uses: actions/checkout@v2
