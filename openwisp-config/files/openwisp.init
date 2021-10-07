@@ -1,9 +1,9 @@
 #!/bin/sh /etc/rc.common
 
 START=99
-
 USE_PROCD=1
 PROG="/usr/sbin/openwisp_config"
+PROG_NAME="OpenWISP config agent"
 CONTROL_FILE=/tmp/openwisp/applying_conf
 
 add_option() {
@@ -12,14 +12,12 @@ add_option() {
 	local option="$3"
 	local default="$4"
 	local value
-
 	config_get value "$cfg" "$option" "$default"
 	[ -n "$value" ] && procd_append_param command "$flag" "$value"
 }
 
 parse_config() {
 	local cfg="$1"
-
 	add_option "$cfg" "--url" url
 	add_option "$cfg" "--interval" interval
 	add_option "$cfg" "--verify-ssl" verify_ssl
@@ -49,11 +47,9 @@ parse_config() {
 
 start_service() {
 	config_load openwisp
-
 	respawn_threshold=$(config_get http respawn_threshold)
 	respawn_timeout=$(config_get http respawn_timeout)
 	respawn_retry=$(config_get http respawn_retry)
-
 	# @todo This should be changed to a list element.
 	# So that we no longer need this workaround. And so we could also use
 	# the new add_option function. However, the agent must also be changed!
@@ -64,21 +60,24 @@ start_service() {
 		unmanaged=$(echo $unmanaged | tr ' ' ',')
 		unmanaged="--unmanaged $unmanaged";
 	fi
-
 	procd_open_instance
 	procd_set_param command $PROG $unmanaged
-
 	config_foreach parse_config controller
-
 	procd_set_param respawn ${respawn_threshold:-3600} ${respawn_timeout:-5} ${respawn_retry:-5}
 	procd_close_instance
+	logger -s "$PROG_NAME started" -t openwisp -p daemon.info
 }
 
 service_triggers() {
 	procd_add_reload_trigger openwisp
 }
 
+stop_service() {
+	logger -s "$PROG_NAME stopping" -t openwisp -p daemon.info
+}
+
 reload_service() {
+	logger -s "$PROG_NAME received reload trigger" -t openwisp -p daemon.info
 	# avoid reloading while configuration is being applied
 	# will wait for a maximum of 30 seconds
 	for i in $(seq 1 30); do
@@ -88,8 +87,6 @@ reload_service() {
 			break
 		fi
 	done
-
 	rm -f "$CONTROL_FILE"
-
 	start
 }
