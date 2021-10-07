@@ -23,7 +23,7 @@ CURRENT_DIR=$(pwd)
 OPENWRT_BRANCH="openwrt-21.02"
 
 mkdir -p "$BUILD_DIR"
-mkdir -p "$VERSIONED_DIR/$COMPILE_TARGET"
+mkdir -p "$VERSIONED_DIR"
 cd "$BUILD_DIR"
 
 if ! [ -d "openwrt" ]; then

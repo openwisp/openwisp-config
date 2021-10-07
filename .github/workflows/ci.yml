@@ -87,5 +87,5 @@ jobs:
         # if: ${{ github.event_name=='push' }}
         run: gsutil -m rsync -r ${{ env.SRC_URL }} ${{ env.DST_URL }}
         env:
-          SRC_URL: ${{ env.DOWNLOADS_DIR }}/${{ env.START_TIME }}/openwisp
+          SRC_URL: ${{ env.DOWNLOADS_DIR }}/${{ env.START_TIME }}
           DST_URL: gs://${{ secrets.GCS_DOWNLOADS_BUCKET_NAME }}/openwisp-config/${{ env.START_TIME }}-${{ env.COMMIT_SHA }}
