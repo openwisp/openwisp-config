@@ -70,6 +70,12 @@ jobs:
           CI: 1
           CI_CACHE: ${{ steps.cache.outputs.cache-hit }}
 
+      - name: Upload packages as artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: Packages
+          path: "${{ env.DOWNLOADS_DIR }}/${{ env.START_TIME }}"
+
       - name: Setup Google Cloud
         uses: google-github-actions/setup-gcloud@master
         with:
@@ -78,6 +84,7 @@ jobs:
           export_default_credentials: true
 
       - name: Upload compiled packages to downloads.openwisp.io
+        if: ${{ github.event_name=='push' }}
         run: gsutil -m rsync -r ${{ env.SRC_URL }} ${{ env.DST_URL }}
         env:
           SRC_URL: ${{ env.DOWNLOADS_DIR }}/${{ env.START_TIME }}/openwisp
