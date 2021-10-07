@@ -23,7 +23,7 @@ CURRENT_DIR=$(pwd)
 OPENWRT_BRANCH="openwrt-21.02"
 
 mkdir -p "$BUILD_DIR"
-mkdir -p "$VERSIONED_DIR"
+mkdir -p "$VERSIONED_DIR/$COMPILE_TARGET"
 cd "$BUILD_DIR"
 
 if ! [ -d "openwrt" ]; then
@@ -58,7 +58,7 @@ fi
 
 make -j"$CORES" package/openwisp-config/compile || exit 1
 
-mv "$BUILD_DIR"/openwrt/bin/packages/"$COMPILE_TARGET"/openwisp "$VERSIONED_DIR"
+mv "$BUILD_DIR"/openwrt/bin/packages/"$COMPILE_TARGET"/openwisp "$VERSIONED_DIR/$COMPILE_TARGET"
 
 rm "$LATEST_LINK" || true
 ln -s "$VERSIONED_DIR" "$LATEST_LINK"
