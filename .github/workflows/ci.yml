@@ -10,7 +10,7 @@ on:
   
 jobs:
 
-  build:
+  tests:
     name: QA-Checks and Tests
     runs-on: ubuntu-20.04
 
@@ -35,3 +35,57 @@ jobs:
 
     - name: Tests
       run: ./runtests
+
+  build:
+    name: Build and Upload Packages
+    needs: tests
+    runs-on: ubuntu-20.04
+    env:
+      BUILD_DIR: '/home/runner/work/build'
+      DOWNLOADS_DIR: '/home/runner/work/downloads'
+      CORES: 2
+
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+
+      - name: Cache OpenWRT dependencies
+        id: cache
+        uses: actions/cache@v2
+        env:
+          cache-name: cache-openwisp-config-dependencies
+        with:
+          path: '/home/runner/work/build'
+          key: ${{ runner.os }}-build-${{ env.cache-name }}
+
+      - name: Set Environment
+        run: |
+          echo "START_TIME=$(date +"%Y-%m-%d-%H%M%S")" >> $GITHUB_ENV
+          echo "COMMIT_SHA=$(git log --pretty=format:'%h' -n 1)" >> $GITHUB_ENV
+
+      - name: Run Build
+        run: ./runbuild
+        env:
+          CI: 1
+          CI_CACHE: ${{ steps.cache.outputs.cache-hit }}
+
+      - name: Upload packages as artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: Packages
+          path: "${{ env.DOWNLOADS_DIR }}/${{ env.START_TIME }}"
+
+      - name: Setup Google Cloud
+        uses: google-github-actions/setup-gcloud@master
+        with:
+          service_account_key: ${{ secrets.GCS_DOWNLOADS_SERVICE_ACCOUNT_JSON }}
+          project_id: ${{ secrets.GCS_PROJECT_ID }}
+          export_default_credentials: true
+
+      - name: Upload compiled packages to downloads.openwisp.io
+        if: ${{ github.event_name=='push' }}
+        run: gsutil -m rsync -r ${{ env.SRC_URL }} ${{ env.DST_URL }}
+        env:
+          SRC_URL: ${{ env.DOWNLOADS_DIR }}/${{ env.START_TIME }}
+          DST_URL: gs://${{ secrets.GCS_DOWNLOADS_BUCKET_NAME }}/openwisp-config/${{ env.START_TIME }}-${{ env.COMMIT_SHA }}
