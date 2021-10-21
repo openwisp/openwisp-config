@@ -20,6 +20,8 @@ parse_config() {
 	local cfg="$1"
 	add_option "$cfg" "--url" url
 	add_option "$cfg" "--interval" interval
+	add_option "$cfg" "--management_interval" management_interval
+	add_option "$cfg" "--registration_interval" registration_interval
 	add_option "$cfg" "--verify-ssl" verify_ssl
 	add_option "$cfg" "--uuid" uuid
 	add_option "$cfg" "--key" key
