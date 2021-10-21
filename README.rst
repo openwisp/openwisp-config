@@ -69,7 +69,7 @@ UCI configuration options must go in ``/etc/config/openwisp``.
 
 - ``url``: url of controller, eg: ``https://controller.openwisp.org``
 - ``interval``: time in seconds between checks for changes to the configuration, defaults to ``120``
-- ``management_interval``: time in seconds between the management ip discover attempts, defaults to ``$interval/12``
+- ``management_interval``: time in seconds between the management ip discovery attempts, defaults to ``$interval/12``
 - ``registration_interval``: time in seconds between the registration attempts, defaults to ``$interval/4``
 - ``verify_ssl``: whether SSL verification must be performed or not, defaults to ``1``
 - ``shared_secret``: shared secret, needed for `Automatic registration`_
