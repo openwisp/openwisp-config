@@ -96,7 +96,7 @@ APPLYING_CONF="$WORKING_DIR/applying_conf"
 BOOTUP="$WORKING_DIR/bootup"
 REGISTRATION_URL="$URL/controller/register/"
 UNMANAGED_DIR="$WORKING_DIR/unmanaged"
-FETCH_COMMAND="curl -s --connect-timeout $CONNECT_TIMEOUT --max-time $MAX_TIME"
+FETCH_COMMAND="curl -s --connect-timeout $CONNECT_TIMEOUT --max-time $MAX_TIME --interface $MAC_INTERFACE"
 mkdir -p $WORKING_DIR
 mkdir -p $UNMANAGED_DIR
 
