@@ -10,40 +10,28 @@ PKG_VERSION:=$(shell cat ../VERSION)
 PKG_RELEASE:=1
 PKG_BUILD_DIR:=$(BUILD_DIR)/$(PKG_NAME)-$(BUILD_VARIANT)/$(PKG_SOURCE_SUBDIR)
 PKG_LICENSE:=GPL-3.0
+PKG_MAINTAINER:=Federico Capoano <f.capoano@openwisp.io>
 
 include $(INCLUDE_DIR)/package.mk
 
-define Package/openwisp-config/default
-	TITLE:=Remote configuration management agent ($(2) variant)
+define Package/openwisp-config
+	TITLE:=Remote configuration management agent
 	CATEGORY:=Administration
 	SECTION:=admin
 	SUBMENU:=openwisp
-	DEPENDS:=+curl +lua +libuci-lua +luafilesystem +luci-lib-nixio $(3)
-	VARIANT:=$(1)
+	DEPENDS:=+curl +lua +libuci-lua +luafilesystem +luci-lib-nixio +ca-certificates
 	PKGARCH:=all
-	MAINTAINER:=Federico Capoano <f.capoano@openwisp.io>
 	URL:=http://openwisp.org
 endef
-
-Package/openwisp-config-openssl=$(call Package/openwisp-config/default,openssl,OpenSSL,+ca-certificates +libopenssl)
-Package/openwisp-config-mbedtls=$(call Package/openwisp-config/default,mbedtls,mbedTLS,+ca-certificates +libmbedtls)
-Package/openwisp-config-wolfssl=$(call Package/openwisp-config/default,wolfssl,WolfSSL,+ca-certificates +libwolfssl)
-Package/openwisp-config-nossl=$(call Package/openwisp-config/default,nossl,No SSL)
 
 define Build/Compile
 endef
 
-define Package/openwisp-config-$(BUILD_VARIANT)/conffiles
+define Package/openwisp-config/conffiles
 /etc/config/openwisp
 endef
 
-CONFIG_OPENWISP_UCI:=ssl
-
-ifeq ($(BUILD_VARIANT),nossl)
-    CONFIG_OPENWISP_UCI:=nossl
-endif
-
-define Package/openwisp-config-$(BUILD_VARIANT)/install
+define Package/openwisp-config/install
 	$(INSTALL_DIR) \
 		$(1)/usr/sbin \
 		$(1)/etc/init.d \
@@ -59,7 +47,7 @@ define Package/openwisp-config-$(BUILD_VARIANT)/install
 		files/openwisp.init \
 		$(1)/etc/init.d/openwisp_config
 
-	$(INSTALL_CONF) files/openwisp-$(CONFIG_OPENWISP_UCI).config \
+	$(INSTALL_CONF) files/openwisp.config \
 		$(1)/etc/config/openwisp
 
 	$(INSTALL_BIN) \
@@ -101,7 +89,4 @@ define Package/openwisp-config-$(BUILD_VARIANT)/install
 	$(CP) ../VERSION $(1)/etc/openwisp/
 endef
 
-$(eval $(call BuildPackage,openwisp-config-openssl))
-$(eval $(call BuildPackage,openwisp-config-mbedtls))
-$(eval $(call BuildPackage,openwisp-config-wolfssl))
-$(eval $(call BuildPackage,openwisp-config-nossl))
+$(eval $(call BuildPackage,openwisp-config))

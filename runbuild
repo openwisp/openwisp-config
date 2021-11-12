@@ -42,13 +42,7 @@ sed -i '/telephony/d' feeds.conf
 sed -i '/routing/d' feeds.conf
 ./scripts/feeds update -a
 ./scripts/feeds install -a
-
-{
-  echo "CONFIG_PACKAGE_openwisp-config-openssl=y"
-  echo "CONFIG_PACKAGE_openwisp-config-mbedtls=y"
-  echo "CONFIG_PACKAGE_openwisp-config-wolfssl=y"
-  echo "CONFIG_PACKAGE_openwisp-config-nossl=y"
-} >>.config
+echo "CONFIG_PACKAGE_openwisp-config=y" >>.config
 make defconfig
 
 if [ ! "$CI_CACHE" ]; then
