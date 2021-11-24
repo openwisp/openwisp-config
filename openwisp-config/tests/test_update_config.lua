@@ -123,16 +123,11 @@ function TestUpdateConfig.test_update()
     luaunit.assertNotNil(restoreFile)
     luaunit.assertEquals(restoreFile:read('*all'), 'restore-me\n')
     luaunit.assertNil(io.open(openwisp_dir..'/stored/etc/restore-me'))
-    -- ensure network configuration file is backed up
-    local storedNetworkFile = io.open(stored_dir .. '/etc/config/network')
-    luaunit.assertNotNil(storedNetworkFile)
-    local initialNetworkFile = io.open('update/network')
-    luaunit.assertEquals(storedNetworkFile:read('*all'), initialNetworkFile:read('*all'))
-    -- ensure system configuration file is backed up
+    -- ensure network  and configuration file is not backed up as it is overwritten by remote
+    local storedNetworkFile = io.open(openwisp_dir .. '/etc/config/network')
+    luaunit.assertNil(storedNetworkFile)
     local storedSystemFile = io.open(stored_dir .. '/etc/config/system')
-    luaunit.assertNotNil(storedSystemFile)
-    local initialSystemFile = io.open('update/system')
-    luaunit.assertEquals(storedSystemFile:read('*all'), initialSystemFile:read('*all'))
+    luaunit.assertNil(storedSystemFile)
 end
 
 function TestUpdateConfig.test_update_conf_arg()

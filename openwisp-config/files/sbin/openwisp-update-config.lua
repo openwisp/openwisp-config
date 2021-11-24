@@ -148,7 +148,7 @@ if lfs.attributes(remote_config_dir, 'mode') == 'directory' then
         -- ensure we are acting on a file
         if lfs.attributes(remote_path, 'mode') == 'file' then
             -- if there's no backup of the file yet, create one
-            if not utils.file_exists(stored_path) then
+            if (not utils.file_exists(stored_path) and not utils.file_exists(remote_path)) then
                 os.execute('cp '..standard_path..' '..stored_path)
             end
             -- MERGE mode
