@@ -32,7 +32,7 @@ local test_root_dir = working_dir .. '/update-test'
 local remote_dir = openwisp_dir .. '/remote'
 local remote_config_dir = remote_dir .. '/etc/config'
 local stored_dir = openwisp_dir .. '/stored'
-local stored_config_dir = openwisp_dir .. '/etc/config'
+local stored_config_dir = stored_dir .. '/etc/config'
 local added_file = openwisp_dir .. '/added.list'
 local modified_file = openwisp_dir .. '/modified.list'
 local get_standard = function() return uci.cursor(standard_config_dir) end
@@ -84,8 +84,8 @@ if lfs.attributes(remote_config_dir, 'mode') == 'directory' then
                     if section_stored == nil then
                         utils.remove_uci_options(standard, file, section)
                     -- section is in the backup configuration -> restore
-                    -- delete all options first
                     else
+                        -- delete all options first
                         for option, value in pairs(section) do
                             if not utils.starts_with_dot(option) then
                                 standard:delete(file, section['.name'], option)

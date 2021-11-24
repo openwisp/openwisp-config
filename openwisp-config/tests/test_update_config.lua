@@ -7,6 +7,7 @@ local update_config = assert(loadfile("../files/sbin/openwisp-update-config.lua"
 local write_dir = './update-test/'
 local config_dir = write_dir .. 'etc/config/'
 local openwisp_dir = './openwisp/'
+local stored_dir = openwisp_dir .. '/stored/'
 local remote_config_dir = openwisp_dir .. 'remote/etc/config'
 
 local function string_count(base, pattern)
@@ -38,8 +39,8 @@ TestUpdateConfig = {
         os.execute('echo restore-me > '..openwisp_dir..'/stored/etc/restore-me')
         os.execute('echo /etc/restore-me > '..openwisp_dir..'/modified.list')
         -- this file is stored in the backup
-        os.execute('mkdir -p ' .. openwisp_dir ..'etc/config/')
-        os.execute("cp ./update/stored_wireless " ..openwisp_dir.. '/etc/config/wireless')
+        os.execute('mkdir -p ' .. stored_dir ..'etc/config/')
+        os.execute("cp ./update/stored_wireless " ..stored_dir.. '/etc/config/wireless')
     end,
     tearDown = function()
         os.execute('rm -rf ' .. write_dir)
@@ -123,12 +124,12 @@ function TestUpdateConfig.test_update()
     luaunit.assertEquals(restoreFile:read('*all'), 'restore-me\n')
     luaunit.assertNil(io.open(openwisp_dir..'/stored/etc/restore-me'))
     -- ensure network configuration file is backed up
-    local storedNetworkFile = io.open(openwisp_dir .. '/etc/config/network')
+    local storedNetworkFile = io.open(stored_dir .. '/etc/config/network')
     luaunit.assertNotNil(storedNetworkFile)
     local initialNetworkFile = io.open('update/network')
     luaunit.assertEquals(storedNetworkFile:read('*all'), initialNetworkFile:read('*all'))
     -- ensure system configuration file is backed up
-    local storedSystemFile = io.open(openwisp_dir .. '/etc/config/system')
+    local storedSystemFile = io.open(stored_dir .. '/etc/config/system')
     luaunit.assertNotNil(storedSystemFile)
     local initialSystemFile = io.open('update/system')
     luaunit.assertEquals(storedSystemFile:read('*all'), initialSystemFile:read('*all'))
