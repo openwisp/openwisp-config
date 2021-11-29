@@ -112,11 +112,6 @@ if lfs.attributes(remote_config_dir, 'mode') == 'directory' then
                             end
                         end
                     end
-                    -- remove entire section if empty
-                    local result = standard:get_all(file, section['.name'])
-                    if result and utils.is_uci_empty(result) then
-                        standard:delete(file, section['.name'])
-                    end
                 end
             end
             standard:commit(file)
@@ -148,8 +143,32 @@ if lfs.attributes(remote_config_dir, 'mode') == 'directory' then
         -- ensure we are acting on a file
         if lfs.attributes(remote_path, 'mode') == 'file' then
             -- if there's no backup of the file yet, create one
-            if (not utils.file_exists(stored_path) and not utils.file_exists(remote_path)) then
+            if (not utils.file_exists(stored_path)) then
                 os.execute('cp '..standard_path..' '..stored_path)
+                if (utils.file_exists(remote_path)) then
+                    for key, section in pairs(stored:get_all(file)) do
+                        -- check if section is in remote configuration
+                        local section_check = check:get(file, section['.name'])
+                        if section_check ~= nil then
+                            -- check if options is in remote configuration
+                            for option, value in pairs(section) do
+                                if not utils.starts_with_dot(option) then
+                                    local option_check = check:get(file, section['.name'], option)
+                                    if option_check ~= nil then
+                                        -- if option is in remote configuration, remove it
+                                        stored:delete(file, section['.name'], option)
+                                    end
+                                end
+                            end
+                        end
+                    end
+                    stored:commit(file)
+                    -- remove uci file if empty
+                    local uci_file = stored:get_all(file)
+                    if uci_file and utils.is_table_empty(uci_file) then
+                        os.remove(stored_path)
+                    end
+                end
             end
             -- MERGE mode
             if MERGE then

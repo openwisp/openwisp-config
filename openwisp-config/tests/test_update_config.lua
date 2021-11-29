@@ -126,7 +126,7 @@ function TestUpdateConfig.test_update()
     -- ensure network  and configuration file is not backed up as it is overwritten by remote
     local storedNetworkFile = io.open(openwisp_dir .. '/etc/config/network')
     luaunit.assertNil(storedNetworkFile)
-    local storedSystemFile = io.open(stored_dir .. '/etc/config/system')
+    local storedSystemFile = io.open(openwisp_dir .. '/etc/config/system')
     luaunit.assertNil(storedSystemFile)
 end
 
