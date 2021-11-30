@@ -5,25 +5,25 @@ rm -rf /var/run/config.check
 mkdir -p /var/run/config.check
 for config in /etc/config/*; do
 	file=${config##*/}
-	uci show "${file##*/}" > /var/run/config.check/$file
+	uci show "${file##*/}" >/var/run/config.check/"$file"
 done
 MD5FILE=/var/run/config.md5
 if [ -f $MD5FILE ]; then
-	for c in $(md5sum -c $MD5FILE 2>/dev/null| grep FAILED | cut -d: -f1); do
-		service="$(basename $c)"
+	for c in $(md5sum -c $MD5FILE 2>/dev/null | grep FAILED | cut -d: -f1); do
+		service="$(basename "$c")"
 		initd="/etc/init.d/$service"
 		service_triggers=$(grep -c "service_triggers()" "$initd")
 		# try reloading service via ubus
 		ubus call service event "{ \"type\": \"config.change\", \"data\": { \"package\": \"$service\" }}"
 		logger_msg="Service $service has been reloaded via procd/ubus"
 		# if service is not managed via procd, do explicit reload
-		if [ -f $initd ] && [ $service_triggers -lt 1 ]; then
+		if [ -f "$initd" ] && [ "$service_triggers" -lt 1 ]; then
 			$initd reload
 			logger_msg="Service $service has been reloaded via init.d script"
 		fi
 		# log which service has been reloaded and how
-		logger $logger_msg -t openwisp -p daemon.info
+		logger "$logger_msg" -t openwisp -p daemon.info
 	done
 fi
-md5sum /var/run/config.check/* > $MD5FILE
+md5sum /var/run/config.check/* >$MD5FILE
 rm -rf /var/run/config.check

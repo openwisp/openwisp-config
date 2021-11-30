@@ -416,6 +416,23 @@ You can inspect the version of openwisp-config currently installed with::
 
     openwisp_config --version
 
+Quality Assurance Checks
+------------------------
+
+We use `LuaFormatter <https://luarocks.org/modules/tammela/luaformatter>`_ and `shfmt <https://github.com/mvdan/sh#shfmt>`_ to format lua files and shell scripts respectively.
+
+Once they are installed, you can format all files by::
+
+    ./qa-format
+
+Run quality assurance tests with::
+
+    #install openwisp-utils QA tools first
+    pip install openwisp-utils[qa]
+
+    #run QA checks before committing code
+    ./run-qa-checks
+
 Run tests
 ---------
 

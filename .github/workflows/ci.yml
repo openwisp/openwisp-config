@@ -31,7 +31,16 @@ jobs:
       run: pip install openwisp-utils[qa]>=0.7
 
     - name: QA-Checks
-      run: openwisp-qa-check --skip-checkmigrations --skip-isort --skip-flake8 --skip-black
+      run: ./run-qa-checks
+      env:
+        CI: 1
+    
+    - name: Run sh-checker
+      uses: luizm/action-sh-checker@master
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        sh_checker_comment: true
 
     - name: Tests
       run: ./runtests

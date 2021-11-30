@@ -1,0 +1,14 @@
+#!/bin/bash
+set -e
+
+# format shell scripts
+shfmt -w -l .
+shfmt -w -l openwisp-config/files/openwisp.agent
+shfmt -w -l openwisp-config/files/openwisp.init
+
+# format lua files
+cd openwisp-config
+lua-format -i --config=luaformat.config \
+	files/sbin/*.lua \
+	files/lib/openwisp/*.lua \
+	tests/*.lua

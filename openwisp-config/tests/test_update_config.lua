@@ -11,7 +11,7 @@ local stored_dir = openwisp_dir .. '/stored/'
 local remote_config_dir = openwisp_dir .. 'remote/etc/config'
 
 local function string_count(base, pattern)
-    return select(2, string.gsub(base, pattern, ""))
+  return select(2, string.gsub(base, pattern, ""))
 end
 
 TestUpdateConfig = {
@@ -149,22 +149,22 @@ function TestUpdateConfig.test_update()
 end
 
 function TestUpdateConfig.test_update_conf_arg()
-    update_config('--test=1', '--conf=./test-conf-arg.tar.gz')
-    -- check network
-    local networkFile = io.open(config_dir .. 'network')
-    luaunit.assertNotNil(networkFile)
-    local networkContents = networkFile:read('*all')
-    luaunit.assertNotNil(string.find(networkContents, "config interface 'added'"))
-    luaunit.assertNotNil(string.find(networkContents, "option ifname 'added1'"))
-    -- check system
-    local systemFile = io.open(config_dir .. 'system')
-    luaunit.assertNotNil(systemFile)
-    local systemContents = systemFile:read('*all')
-    luaunit.assertNotNil(string.find(systemContents, "config system 'system'"))
-    luaunit.assertNil(string.find(systemContents, "option custom 'custom'"))
-    luaunit.assertNotNil(string.find(systemContents, "option hostname 'confarg'"))
-    luaunit.assertNotNil(string.find(systemContents, "config new 'new'"))
-    luaunit.assertNotNil(string.find(systemContents, "option test 'test'"))
+  update_config('--test=1', '--conf=./test-conf-arg.tar.gz')
+  -- check network
+  local networkFile = io.open(config_dir .. 'network')
+  luaunit.assertNotNil(networkFile)
+  local networkContents = networkFile:read('*all')
+  luaunit.assertNotNil(string.find(networkContents, "config interface 'added'"))
+  luaunit.assertNotNil(string.find(networkContents, "option ifname 'added1'"))
+  -- check system
+  local systemFile = io.open(config_dir .. 'system')
+  luaunit.assertNotNil(systemFile)
+  local systemContents = systemFile:read('*all')
+  luaunit.assertNotNil(string.find(systemContents, "config system 'system'"))
+  luaunit.assertNil(string.find(systemContents, "option custom 'custom'"))
+  luaunit.assertNotNil(string.find(systemContents, "option hostname 'confarg'"))
+  luaunit.assertNotNil(string.find(systemContents, "config new 'new'"))
+  luaunit.assertNotNil(string.find(systemContents, "option test 'test'"))
 end
 
 function TestUpdateConfig.test_duplicate_list_options()

@@ -27,7 +27,7 @@ mkdir -p "$VERSIONED_DIR"
 cd "$BUILD_DIR"
 
 if ! [ -d "openwrt" ]; then
-  git clone https://git.openwrt.org/openwrt/openwrt.git
+	git clone https://git.openwrt.org/openwrt/openwrt.git
 fi
 cd openwrt
 git reset --hard HEAD
@@ -46,8 +46,8 @@ echo "CONFIG_PACKAGE_openwisp-config=y" >>.config
 make defconfig
 
 if [ ! "$CI_CACHE" ]; then
-  make -j"$CORES" tools/install
-  make -j"$CORES" toolchain/install
+	make -j"$CORES" tools/install
+	make -j"$CORES" toolchain/install
 fi
 
 make -j"$CORES" package/openwisp-config/compile || exit 1
