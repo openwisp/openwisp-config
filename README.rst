@@ -45,8 +45,7 @@ Then install one of the `latest builds <http://downloads.openwisp.io/openwisp-co
 
     opkg install <URL>
 
-Where ``<URL>`` is the URL of the image that is suitable for your case
-(we suggest ``openssl`` or alternatively ``mbedtls``).
+Where ``<URL>`` is the URL of the precompiled openwisp-config package.
 
 For a list of the latest built images, take a look at `downloads.openwisp.io/openwisp-config/
 <http://downloads.openwisp.io/openwisp-config/>`_.
@@ -296,20 +295,13 @@ Path to an executable script that will be called after the registration is compl
 Compiling openwisp-config
 -------------------------
 
-There are 4 variants of *openwisp-config*:
-
-- **openwisp-config-openssl**: depends on *ca-certificates* and *libopenssl*
-- **openwisp-config-mbedtls**: depends on *ca-certificates* and *libmbedtls*
-- **openwisp-config-wolfssl**: depends on *ca-certificates* and *libwolfssl*
-- **openwisp-config-nossl**: doesn't depend on any SSL library and doesn't install trusted CA certificates
-
-The following procedure illustrates how to compile all the *openwisp-config* variants and their dependencies:
+The following procedure illustrates how to compile *openwisp-config* and its dependencies:
 
 .. code-block:: shell
 
     git clone https://github.com/openwrt/openwrt.git openwrt
     cd openwrt
-    git checkout openwrt-19.07
+    git checkout <openwrt-branch>
 
     # configure feeds
     echo "src-git openwisp https://github.com/openwisp/openwisp-config.git" > feeds.conf
@@ -319,23 +311,20 @@ The following procedure illustrates how to compile all the *openwisp-config* var
     # any arch/target is fine because the package is architecture indipendent
     arch="ar71xx"
     echo "CONFIG_TARGET_$arch=y" > .config;
-    echo "CONFIG_PACKAGE_openwisp-config-openssl=y" >> .config
-    echo "CONFIG_PACKAGE_openwisp-config-mbedtls=y" >> .config
-    echo "CONFIG_PACKAGE_openwisp-config-wolfssl=y" >> .config
-    echo "CONFIG_PACKAGE_openwisp-config-nossl=y" >> .config
+    echo "CONFIG_PACKAGE_openwisp-config=y" >> .config
     make defconfig
     make tools/install
     make toolchain/install
     make package/openwisp-config/compile
 
 Alternatively, you can configure your build interactively with ``make menuconfig``, in this case
-you will need to select the *openwisp-config* variant by going to ``Administration > openwisp``:
+you will need to select *openwisp-config* by going to ``Administration > openwisp``:
 
 .. code-block:: shell
 
     git clone https://github.com/openwrt/openwrt.git openwrt
     cd openwrt
-    git checkout openwrt-19.07
+    git checkout <openwrt-branch>
 
     # configure feeds
     echo "src-git openwisp https://github.com/openwisp/openwisp-config.git" > feeds.conf
@@ -358,14 +347,14 @@ each new device, you should switch to using a custom OpenWRT firmware image that
   hence saving extra time and effort to register each device on the controller app
 * if you happen to reset the firmware to initial settings, these precompiled settings will be restored as well
 
-The following procedure illustrates how to compile a custom `OpenWRT 19.07 <https://openwrt.org/>`_
+The following procedure illustrates how to compile a custom `OpenWRT <https://openwrt.org/>`_
 image with a precompiled minimal ``/etc/config/openwisp`` configuration file:
 
 .. code-block:: shell
 
     git clone https://github.com/openwrt/openwrt.git openwrt
     cd openwrt
-    git checkout openwrt-19.07
+    git checkout <openwrt-branch>
 
     # include precompiled file
     mkdir -p files/etc/config
@@ -384,8 +373,7 @@ image with a precompiled minimal ``/etc/config/openwisp`` configuration file:
     # replace with your desired arch target
     arch="ar71xx"
     echo "CONFIG_TARGET_$arch=y" > .config
-    echo "CONFIG_PACKAGE_openwisp-config-openssl=y" >> .config
-    echo "CONFIG_LIBCURL_OPENSSL=y" >> .config
+    echo "CONFIG_PACKAGE_openwisp-config=y" >> .config
     make defconfig
     # compile with verbose output
     make -j1 V=s
