@@ -560,6 +560,16 @@ update_configuration() {
 		return 3
 	fi
 
+	ARCHIVE_CHECKSUM=$(md5sum $CONFIGURATION_ARCHIVE | cut -d ' ' -f 1)
+	REMOTE_CHECKSUM=$(tail -n 1 $CONFIGURATION_CHECKSUM 2> /dev/null)
+
+	if [ "$ARCHIVE_CHECKSUM" != "$REMOTE_CHECKSUM" ]; then
+		logger -s "Failed to download configuration: checksum mismatch" \
+		       -t openwisp \
+		       -p daemon.err
+		return 4
+	fi
+
 	logger "Configuration downloaded, now applying it..." \
 		   -t openwisp \
 		   -p daemon.info
