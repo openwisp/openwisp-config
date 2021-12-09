@@ -216,14 +216,14 @@ register() {
 	fi
 	# exit if response does not seem to come from openwisp controller
 	check_header $REGISTRATION_PARAMETERS
-	if [ ! is_http_status $REGISTRATION_PARAMETERS 201 ]; then
+	if ! is_http_status $REGISTRATION_PARAMETERS 201; then
 		# get body of failure response, seperated from header by a blank line (CRLF-ended)
 		local message=$(awk 'BEGIN{RS="\r\n\r\n"}{if(NR>1)print $0}' $REGISTRATION_PARAMETERS)
 		logger -s "Registration failed! $message" \
 			   -t openwisp \
 			   -p daemon.err
 		# if controller returns 403, stop retrying because it's useless
-		if [ is_http_status $REGISTRATION_PARAMETERS 403 ]; then
+		if is_http_status $REGISTRATION_PARAMETERS 403; then
 			exit 5
 		# in all other cases, keep re-trying because the problem can be fixed
 		# on the server (eg: self creation disabled and device needs to be created
@@ -271,7 +271,7 @@ get_checksum() {
 		return 2
 	fi
 
-	if [ ! is_http_status $1 200 ]; then
+	if ! is_http_status $1 200; then
 		local status=$(head -n 1 $1)
 		logger -s "Failed to retrieve checksum: $status" \
 			   -t openwisp \
@@ -402,7 +402,7 @@ update_info() {
 		return 2
 	fi
 
-	if [ ! is_http_status $UPDATE_INFO 200 ]; then
+	if ! is_http_status $UPDATE_INFO 200; then
 		local status=$(head -n 1 $UPDATE_INFO)
 		logger -s "Failed to update device info: $status" \
 		       -t openwisp \
@@ -433,7 +433,7 @@ report_status() {
 		return 2
 	fi
 
-	if [ ! is_http_status $STATUS_REPORT 200 ]; then
+	if ! is_http_status $STATUS_REPORT 200; then
 		local status=$(head -n 1 $STATUS_REPORT)
 		logger -s "Failed to report status: $status" \
 		       -t openwisp \
