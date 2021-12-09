@@ -557,16 +557,20 @@ update_configuration() {
 		logger -s "Failed to connect to controller while downloading new config: curl exit code $exit_code" \
 		       -t openwisp \
 		       -p daemon.err
+		# remove any stored checksum to ensure update is tried again later
+		rm -f $CONFIGURATION_CHECKSUM $PERSISTENT_CHECKSUM
 		return 3
 	fi
 
-	ARCHIVE_CHECKSUM=$(md5sum $CONFIGURATION_ARCHIVE | cut -d ' ' -f 1)
-	REMOTE_CHECKSUM=$(tail -n 1 $CONFIGURATION_CHECKSUM 2> /dev/null)
+	local LOCAL_CHECKSUM=$(md5sum $CONFIGURATION_ARCHIVE | cut -d ' ' -f 1)
+	local REMOTE_CHECKSUM=$(tail -n 1 $CONFIGURATION_CHECKSUM 2> /dev/null)
 
-	if [ "$ARCHIVE_CHECKSUM" != "$REMOTE_CHECKSUM" ]; then
+	if [ "$LOCAL_CHECKSUM" != "$REMOTE_CHECKSUM" ]; then
 		logger -s "Failed to download configuration: checksum mismatch" \
 		       -t openwisp \
 		       -p daemon.err
+		# remove any stored checksum to ensure update is tried again later
+		rm -f $CONFIGURATION_CHECKSUM $PERSISTENT_CHECKSUM
 		return 4
 	fi
 
