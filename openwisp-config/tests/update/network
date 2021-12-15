@@ -8,3 +8,8 @@ config interface 'wan'
 config interface 'wg0'
 	list addresses '10.0.0.2'
 	list addresses '10.0.0.3'
+
+config interface 'wg1'
+	option proto 'static'
+	list addresses '10.0.0.4'
+	list addresses '10.0.0.5'

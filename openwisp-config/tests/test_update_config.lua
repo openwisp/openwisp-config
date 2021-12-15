@@ -7,6 +7,7 @@ local update_config = assert(loadfile("../files/sbin/openwisp-update-config.lua"
 local write_dir = './update-test/'
 local config_dir = write_dir .. 'etc/config/'
 local openwisp_dir = './openwisp/'
+local stored_dir = openwisp_dir .. '/stored/'
 local remote_config_dir = openwisp_dir .. 'remote/etc/config'
 
 local function string_count(base, pattern)
@@ -38,8 +39,8 @@ TestUpdateConfig = {
         os.execute('echo restore-me > '..openwisp_dir..'/stored/etc/restore-me')
         os.execute('echo /etc/restore-me > '..openwisp_dir..'/modified.list')
         -- this file is stored in the backup
-        os.execute('mkdir -p ' .. openwisp_dir ..'etc/config/')
-        os.execute("cp ./update/stored_wireless " ..openwisp_dir.. '/etc/config/wireless')
+        os.execute('mkdir -p ' .. stored_dir ..'etc/config/')
+        os.execute("cp ./update/stored_wireless " ..stored_dir.. '/etc/config/wireless')
     end,
     tearDown = function()
         os.execute('rm -rf ' .. write_dir)
@@ -54,8 +55,21 @@ function TestUpdateConfig.test_update()
     local networkFile = io.open(config_dir .. 'network')
     luaunit.assertNotNil(networkFile)
     local networkContents = networkFile:read('*all')
+    -- ensure interface added is present
     luaunit.assertNotNil(string.find(networkContents, "config interface 'added'"))
     luaunit.assertNotNil(string.find(networkContents, "option ifname 'added0'"))
+    -- ensure wg1 added via remote previously is present
+    luaunit.assertNotNil(string.find(networkContents, "config interface 'wg1'"))
+    luaunit.assertNotNil(string.find(networkContents, "option proto 'static'"))
+    -- ensure network file is stored for backup
+    local storedNetworkFile = io.open(stored_dir .. '/etc/config/network')
+    luaunit.assertNotNil(storedNetworkFile)
+    local storedNetworkContents = storedNetworkFile:read('*all')
+    -- ensure wg1 is not added that is downloaded from remote
+    luaunit.assertNil(string.find(storedNetworkContents, "config interface 'wg1'"))
+    -- ensure wan and wg0 are present
+    luaunit.assertNotNil(string.find(storedNetworkContents, "config interface 'wan'"))
+    luaunit.assertNotNil(string.find(storedNetworkContents, "config interface 'wg0'"))
     -- check system
     local systemFile = io.open(config_dir .. 'system')
     luaunit.assertNotNil(systemFile)
@@ -68,6 +82,16 @@ function TestUpdateConfig.test_update()
     -- ensure rest of config options are present
     luaunit.assertNotNil(string.find(systemContents, "config timeserver 'ntp'"))
     luaunit.assertNotNil(string.find(systemContents, "list server '3.openwrt.pool.ntp.org'"))
+    -- ensure system file is stored for backup
+    local storedSystemFile = io.open(stored_dir .. '/etc/config/network')
+    luaunit.assertNotNil(storedSystemFile)
+    local storedSystemContents = storedSystemFile:read('*all')
+    -- ensure hostname is not added that is updated from remote
+    luaunit.assertNil(string.find(storedSystemContents, "option hostname"))
+    -- ensure custom is not added that is downloaded from remote
+    luaunit.assertNil(string.find(storedSystemContents, "option custom 'custom'"))
+    -- ensure new is not added that is downloaded from remote
+    luaunit.assertNil(string.find(storedSystemContents, "config new 'new'"))
     -- ensure test file is present
     local testFile = io.open(write_dir .. 'etc/test')
     luaunit.assertNotNil(testFile)
@@ -108,7 +132,7 @@ function TestUpdateConfig.test_update()
     local modifiedListFile = io.open(openwisp_dir .. '/modified.list')
     luaunit.assertNotNil(modifiedListFile)
     luaunit.assertEquals(modifiedListFile:read('*all'), '/etc/existing\n')
-    local storedExisitngFile = io.open(openwisp_dir .. '/stored/etc/existing')
+    local storedExisitngFile = io.open(stored_dir .. '/etc/existing')
     luaunit.assertNotNil(storedExisitngFile)
     luaunit.assertEquals(storedExisitngFile:read('*all'), 'original\n')
     -- ensure it has been modified
@@ -121,17 +145,7 @@ function TestUpdateConfig.test_update()
     local restoreFile = io.open(write_dir..'/etc/restore-me')
     luaunit.assertNotNil(restoreFile)
     luaunit.assertEquals(restoreFile:read('*all'), 'restore-me\n')
-    luaunit.assertNil(io.open(openwisp_dir..'/stored/etc/restore-me'))
-    -- ensure network configuration file is backed up
-    local storedNetworkFile = io.open(openwisp_dir .. '/etc/config/network')
-    luaunit.assertNotNil(storedNetworkFile)
-    local initialNetworkFile = io.open('update/network')
-    luaunit.assertEquals(storedNetworkFile:read('*all'), initialNetworkFile:read('*all'))
-    -- ensure system configuration file is backed up
-    local storedSystemFile = io.open(openwisp_dir .. '/etc/config/system')
-    luaunit.assertNotNil(storedSystemFile)
-    local initialSystemFile = io.open('update/system')
-    luaunit.assertEquals(storedSystemFile:read('*all'), initialSystemFile:read('*all'))
+    luaunit.assertNil(io.open(stored_dir .. '/etc/restore-me'))
 end
 
 function TestUpdateConfig.test_update_conf_arg()
@@ -164,7 +178,7 @@ function TestUpdateConfig.test_duplicate_list_options()
     luaunit.assertEquals(string_count(networkContents, "list ipaddr '192.168.10.3/24'"), 1)
     luaunit.assertEquals(string_count(networkContents, "list addresses '10.0.0.2'"), 1)
     luaunit.assertEquals(string_count(networkContents, "list addresses '10.0.0.3'"), 1)
-    luaunit.assertEquals(string_count(networkContents, "list addresses '10.0.0.4'"), 1)
+    luaunit.assertEquals(string_count(networkContents, "list addresses '10.0.0.4'"), 2)
     luaunit.assertNotNil(string.find(networkContents, "option test_restore '2'"))
     -- repeating the operation has the same result
     update_config('--test=1', '--conf=./test-duplicate-list.tar.gz')
@@ -176,7 +190,7 @@ function TestUpdateConfig.test_duplicate_list_options()
     luaunit.assertEquals(string_count(networkContents, "list ipaddr '192.168.10.3/24'"), 1)
     luaunit.assertEquals(string_count(networkContents, "list addresses '10.0.0.2'"), 1)
     luaunit.assertEquals(string_count(networkContents, "list addresses '10.0.0.3'"), 1)
-    luaunit.assertEquals(string_count(networkContents, "list addresses '10.0.0.4'"), 1)
+    luaunit.assertEquals(string_count(networkContents, "list addresses '10.0.0.4'"), 2)
     luaunit.assertNotNil(string.find(networkContents, "option test_restore '2'"))
 end
 
@@ -191,7 +205,7 @@ function TestUpdateConfig.test_removal_list_options()
     luaunit.assertEquals(string_count(networkContents, "list ipaddr '192.168.10.3/24'"), 1)
     luaunit.assertEquals(string_count(networkContents, "list addresses '10.0.0.2'"), 0)
     luaunit.assertEquals(string_count(networkContents, "list addresses '10.0.0.3'"), 1)
-    luaunit.assertEquals(string_count(networkContents, "list addresses '10.0.0.4'"), 1)
+    luaunit.assertEquals(string_count(networkContents, "list addresses '10.0.0.4'"), 2)
     luaunit.assertNotNil(string.find(networkContents, "option test_restore '2'"))
 end
 
