@@ -246,8 +246,8 @@ register() {
 		-t openwisp \
 		-p daemon.info
 
-	local hostname, raw, macaddr, name, backend, tags, model, os, system, hardware_id \
-		params, keybase, consistent_key, exit_code, message, new, prefix
+	local hostname raw macaddr name backend tags model os system hardware_id \
+		params keybase consistent_key exit_code message new prefix
 	hostname=$(uci get system.@system[0].hostname)
 	# use macaddr of interface specified in $MAC_INTERFACE
 	raw=$(ifconfig "$MAC_INTERFACE" 2 >/dev/null 2>&1)
@@ -360,7 +360,7 @@ register() {
 # gets checksum from controller
 get_checksum() {
 	$FETCH_COMMAND -i "$CHECKSUM_URL" >"$1"
-	local exit_code, status
+	local exit_code status
 	exit_code=$?
 
 	if [ "$exit_code" -ne "0" ]; then
@@ -383,7 +383,7 @@ get_checksum() {
 
 # returns 1 if configuration in controller has changed
 configuration_changed() {
-	local CURRENT_CHECKSUM, exit_code, REMOTE_CHECKSUM
+	local CURRENT_CHECKSUM exit_code REMOTE_CHECKSUM
 	CURRENT_CHECKSUM=$(tail -n 1 $CONFIGURATION_CHECKSUM 2>/dev/null)
 	get_checksum $CONFIGURATION_CHECKSUM
 	exit_code=$?
@@ -475,7 +475,7 @@ apply_configuration() {
 # send up to date device info to the controller
 update_info() {
 	# get device model, OS identifier and SOC info
-	local model, os, system, exit_code, status
+	local model os system exit_code status
 	model=$(get_model)
 	os=$(get_os)
 	system=$(get_system)
@@ -519,7 +519,7 @@ update_info() {
 
 # report configuration status: "applied" or "error"
 report_status() {
-	local exit_code, status
+	local exit_code status
 	# retry several times
 	for i in $(seq 1 30); do
 		$FETCH_COMMAND -i --data "key=$KEY&status=$1" "$REPORT_URL" >$STATUS_REPORT
