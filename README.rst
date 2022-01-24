@@ -421,16 +421,16 @@ Quality Assurance Checks
 
 We use `LuaFormatter <https://luarocks.org/modules/tammela/luaformatter>`_ and `shfmt <https://github.com/mvdan/sh#shfmt>`_ to format lua files and shell scripts respectively.
 
-Once they are installed, you can format all files by::
+First of all, you will need install the lua packages mentioned above, then you can format all files with::
 
     ./qa-format
 
-Run quality assurance tests with::
+To run quality assurance checks you can use the ``run-qa-checks`` script::
 
-    #install openwisp-utils QA tools first
+    # install openwisp-utils QA tools first
     pip install openwisp-utils[qa]
 
-    #run QA checks before committing code
+    # run QA checks before committing code
     ./run-qa-checks
 
 Run tests
