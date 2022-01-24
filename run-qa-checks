@@ -5,7 +5,8 @@ set -e
 CI=${CI:-0}
 
 if [ "$CI" -eq 1 ]; then
-	# copy files in github actions so that they can be formatted
+	# during github actions CI, copy these files so that they can be checked by
+	# the github action step "action-sh-checker" (see .github/workflows/ci.yml)
 	cp openwisp-config/files/openwisp.agent openwisp_agent
 	cp openwisp-config/files/openwisp.init openwisp_init
 else
