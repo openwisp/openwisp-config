@@ -1,0 +1,28 @@
+#!/bin/bash
+set -e
+
+# will be 1 by default when run through github actions
+CI=${CI:-0}
+
+if [ "$CI" -eq 1 ]; then
+	# copy files in github actions so that they can be formatted
+	cp openwisp-config/files/openwisp.agent openwisp_agent
+	cp openwisp-config/files/openwisp.init openwisp_init
+else
+	# check shell scripts formatting
+	sh_files=$(shfmt -f .)
+	# shellcheck disable=SC2086
+	shellcheck $sh_files \
+		openwisp-config/files/openwisp.agent \
+		openwisp-config/files/openwisp.init
+
+	shfmt -d .
+	shfmt -d openwisp-config/files/openwisp.agent
+	shfmt -d openwisp-config/files/openwisp.init
+fi
+
+openwisp-qa-check \
+	--skip-checkmigrations \
+	--skip-isort \
+	--skip-flake8 \
+	--skip-black

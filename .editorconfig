@@ -1,0 +1,10 @@
+# config file for shell formatter
+
+[*]
+binary_next_line = true
+switch_case_indent = true
+
+# Ignore scripts in the openwrt/ directory
+# (used in compilation testing and CI builds).
+[openwrt/**]
+ignore = true

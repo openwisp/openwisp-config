@@ -1,4 +1,5 @@
 #!/usr/bin/env lua
+
 -- gets the first useful address of the specified interface
 -- usage:
 --   * openwisp-get-address <ifname>
@@ -9,7 +10,7 @@ local name = arg[1]
 local interface = net.get_interface(name)
 
 if interface then
-    print(interface.addr)
+  print(interface.addr)
 else
-    os.exit(1)
+  os.exit(1)
 end

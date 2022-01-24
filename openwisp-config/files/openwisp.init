@@ -1,7 +1,12 @@
 #!/bin/sh /etc/rc.common
+# shellcheck disable=SC2039
+# shellcheck disable=SC3043
 
-START=99
-USE_PROCD=1
+# shellcheck disable=SC2034
+{
+	START=99
+	USE_PROCD=1
+}
 PROG="/usr/sbin/openwisp_config"
 PROG_NAME="OpenWISP config agent"
 CONTROL_FILE=/tmp/openwisp/applying_conf
@@ -59,13 +64,14 @@ start_service() {
 	if [ -n "$unmanaged" ]; then
 		# replace spaces with commas to avoid problems when
 		# passing this arg to procd_set_param command
-		unmanaged=$(echo $unmanaged | tr ' ' ',')
-		unmanaged="--unmanaged $unmanaged";
+		unmanaged=$(echo "$unmanaged" | tr ' ' ',')
+		unmanaged="--unmanaged $unmanaged"
 	fi
 	procd_open_instance
+	# shellcheck disable=SC2086
 	procd_set_param command $PROG $unmanaged
 	config_foreach parse_config controller
-	procd_set_param respawn ${respawn_threshold:-3600} ${respawn_timeout:-5} ${respawn_retry:-5}
+	procd_set_param respawn "${respawn_threshold:-3600}" "${respawn_timeout:-5}" "${respawn_retry:-5}"
 	procd_close_instance
 	logger -s "$PROG_NAME started" -t openwisp -p daemon.info
 }
@@ -82,7 +88,7 @@ reload_service() {
 	logger -s "$PROG_NAME received reload trigger" -t openwisp -p daemon.info
 	# avoid reloading while configuration is being applied
 	# will wait for a maximum of 30 seconds
-	for i in $(seq 1 30); do
+	for _ in $(seq 1 30); do
 		if [ -f "$CONTROL_FILE" ]; then
 			sleep 1
 		else
