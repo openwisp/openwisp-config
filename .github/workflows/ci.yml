@@ -7,51 +7,50 @@ on:
   pull_request:
     branches:
       - master
-  
-jobs:
 
+jobs:
   tests:
     name: QA-Checks and Tests
     runs-on: ubuntu-20.04
 
     steps:
-    - uses: actions/checkout@v2
-      with:
-        ref: ${{ github.event.pull_request.head.sha }}
+      - uses: actions/checkout@v2
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
 
-    - name: Set up Python
-      uses: actions/setup-python@v2
-      with:
-        python-version: 3.7
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.7
 
-    - name: Install OpenWISP Config
-      run: sudo ./install-dev.sh
+      - name: Install OpenWISP Config
+        run: sudo ./install-dev.sh
 
-    - name: Install Python dependencies
-      run: pip install openwisp-utils[qa]>=0.7
+      - name: Install Python dependencies
+        run: pip install openwisp-utils[qa]>=0.7
 
-    - name: QA-Checks
-      run: ./run-qa-checks
-      env:
-        CI: 1
-    
-    - name: Run sh-checker
-      uses: luizm/action-sh-checker@master
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        sh_checker_comment: true
+      - name: QA-Checks
+        run: ./run-qa-checks
+        env:
+          CI: 1
 
-    - name: Tests
-      run: ./runtests
+      - name: Run sh-checker
+        uses: luizm/action-sh-checker@master
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          sh_checker_comment: true
+
+      - name: Tests
+        run: ./runtests
 
   build:
     name: Build and Upload Packages
     needs: tests
     runs-on: ubuntu-20.04
     env:
-      BUILD_DIR: '/home/runner/work/build'
-      DOWNLOADS_DIR: '/home/runner/work/downloads'
+      BUILD_DIR: "/home/runner/work/build"
+      DOWNLOADS_DIR: "/home/runner/work/downloads"
       CORES: 2
 
     steps:
@@ -65,12 +64,12 @@ jobs:
         env:
           cache-name: cache-openwisp-config-dependencies
         with:
-          path: '/home/runner/work/build'
+          path: "/home/runner/work/build"
           key: ${{ runner.os }}-build-${{ env.cache-name }}
 
       - name: Set Environment
         run: |
-          echo "START_TIME=$(date +"%Y-%m-%d-%H%M%S")" >> $GITHUB_ENV
+          echo "START_TIME=$(date +"%Y-%m-%d")" >> $GITHUB_ENV
           echo "COMMIT_SHA=$(git log --pretty=format:'%h' -n 1)" >> $GITHUB_ENV
 
       - name: Run Build
@@ -94,7 +93,10 @@ jobs:
 
       - name: Upload compiled packages to downloads.openwisp.io
         if: ${{ github.event_name=='push' }}
-        run: gsutil -m rsync -r ${{ env.SRC_URL }} ${{ env.DST_URL }}
+        run: |
+          gsutil -m rsync -r ${{ env.SRC_URL }} ${{ env.DST_URL }}
+          gsutil -m rsync -r -d ${{ env.SRC_URL }} ${{ env.LATEST_URL }}
         env:
-          SRC_URL: ${{ env.DOWNLOADS_DIR }}/${{ env.START_TIME }}
+          SRC_URL: ${{ env.DOWNLOADS_DIR }}/${{ env.START_TIME }}/openwisp
           DST_URL: gs://${{ secrets.GCS_DOWNLOADS_BUCKET_NAME }}/openwisp-config/${{ env.START_TIME }}-${{ env.COMMIT_SHA }}
+          LATEST_URL: gs://${{ secrets.GCS_DOWNLOADS_BUCKET_NAME }}/openwisp-config/latest

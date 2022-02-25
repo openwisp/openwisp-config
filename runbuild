@@ -52,7 +52,7 @@ fi
 
 make -j"$CORES" package/openwisp-config/compile || exit 1
 
-mv "$BUILD_DIR"/openwrt/bin/packages/"$COMPILE_TARGET"/openwisp "$VERSIONED_DIR/$COMPILE_TARGET"
+mv "$BUILD_DIR"/openwrt/bin/packages/"$COMPILE_TARGET"/openwisp "$VERSIONED_DIR"
 
 rm "$LATEST_LINK" || true
 ln -s "$VERSIONED_DIR" "$LATEST_LINK"
