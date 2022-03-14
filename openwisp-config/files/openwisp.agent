@@ -186,6 +186,8 @@ BOOTUP="$WORKING_DIR/bootup"
 REGISTRATION_URL="$URL/controller/register/"
 UNMANAGED_DIR="$WORKING_DIR/unmanaged"
 FETCH_COMMAND="curl -s --connect-timeout $CONNECT_TIMEOUT --max-time $MAX_TIME"
+MAX_RETRIES=${MAX_RETRIES:-10}
+RETRY_DELAY=${RETRY_DELAY:-6}
 mkdir -p $WORKING_DIR
 mkdir -p $UNMANAGED_DIR
 
@@ -370,6 +372,25 @@ get_checksum() {
 		return 2
 	fi
 
+	if is_http_status "$1" 404; then
+		for attempt_no in $(seq 1 "$MAX_RETRIES"); do
+			sleep "$RETRY_DELAY"
+			$FETCH_COMMAND -i "$CHECKSUM_URL" >"$1"
+			if is_http_status "$1" 404; then
+				if [ "$attempt_no" -eq "$MAX_RETRIES" ]; then
+					local status
+					status=$(head -n 1 "$1")
+					logger -s "Checksum not found $status" \
+						-t openwisp \
+						-p daemon.err
+					exit 1
+				fi
+				continue
+			else
+				break
+			fi
+		done
+	fi
 	if ! is_http_status "$1" 200; then
 		local status
 		status=$(head -n 1 "$1")
