@@ -121,6 +121,14 @@ while [ -n "$1" ]; do
 			export POST_REGISTRATION_HOOK="$2"
 			shift
 			;;
+		--max-retries)
+			export MAX_RETRIES="$2"
+			shift
+			;;
+		--retry-delay)
+			export RETRY_DELAY="$2"
+			shift
+			;;
 		-*)
 			echo "Invalid option: $1"
 			exit 1
@@ -378,14 +386,13 @@ get_checksum() {
 			$FETCH_COMMAND -i "$CHECKSUM_URL" >"$1"
 			if is_http_status "$1" 404; then
 				if [ "$attempt_no" -eq "$MAX_RETRIES" ]; then
-					local status
-					status=$(head -n 1 "$1")
-					logger -s "Checksum not found $status" \
+					logger -s "The device with this ID has been deleted, \
+					no need to continue asking for the checksum, shutting down." \
 						-t openwisp \
 						-p daemon.err
-					exit 1
+					exit 0
 				fi
-				continue
+				continue # try again
 			else
 				break
 			fi
