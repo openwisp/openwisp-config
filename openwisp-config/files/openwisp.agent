@@ -121,12 +121,12 @@ while [ -n "$1" ]; do
 			export POST_REGISTRATION_HOOK="$2"
 			shift
 			;;
-		--max-retries)
-			export MAX_RETRIES="$2"
+		--checksum-max-retries)
+			export CHECKSUM_MAX_RETRIES="$2"
 			shift
 			;;
-		--retry-delay)
-			export RETRY_DELAY="$2"
+		--checksum-retry-delay)
+			export CHECKSUM_RETRY_DELAY="$2"
 			shift
 			;;
 		-*)
@@ -194,8 +194,8 @@ BOOTUP="$WORKING_DIR/bootup"
 REGISTRATION_URL="$URL/controller/register/"
 UNMANAGED_DIR="$WORKING_DIR/unmanaged"
 FETCH_COMMAND="curl -s --connect-timeout $CONNECT_TIMEOUT --max-time $MAX_TIME"
-MAX_RETRIES=${MAX_RETRIES:-10}
-RETRY_DELAY=${RETRY_DELAY:-6}
+CHECKSUM_MAX_RETRIES=${CHECKSUM_MAX_RETRIES:-10}
+CHECKSUM_RETRY_DELAY=${CHECKSUM_RETRY_DELAY:-6}
 mkdir -p $WORKING_DIR
 mkdir -p $UNMANAGED_DIR
 
@@ -381,11 +381,11 @@ get_checksum() {
 	fi
 
 	if is_http_status "$1" 404; then
-		for attempt_no in $(seq 1 "$MAX_RETRIES"); do
-			sleep "$RETRY_DELAY"
+		for attempt_no in $(seq 1 "$CHECKSUM_MAX_RETRIES"); do
+			sleep "$CHECKSUM_RETRY_DELAY"
 			$FETCH_COMMAND -i "$CHECKSUM_URL" >"$1"
 			if is_http_status "$1" 404; then
-				if [ "$attempt_no" -eq "$MAX_RETRIES" ]; then
+				if [ "$attempt_no" -eq "$CHECKSUM_MAX_RETRIES" ]; then
 					logger -s "The device with this ID has been deleted, \
 					no need to continue asking for the checksum, shutting down." \
 						-t openwisp \
