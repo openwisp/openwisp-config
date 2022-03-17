@@ -121,11 +121,11 @@ while [ -n "$1" ]; do
 			export POST_REGISTRATION_HOOK="$2"
 			shift
 			;;
-		--checksum-max-retries)
+		--checksum_max_retries)
 			export CHECKSUM_MAX_RETRIES="$2"
 			shift
 			;;
-		--checksum-retry-delay)
+		--checksum_retry_delay)
 			export CHECKSUM_RETRY_DELAY="$2"
 			shift
 			;;
