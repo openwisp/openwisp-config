@@ -381,23 +381,27 @@ get_checksum() {
 	fi
 
 	if is_http_status "$1" 404; then
-		for attempt_no in $(seq 1 "$CHECKSUM_MAX_RETRIES"); do
+		for attempt_no in $(seq 0 "$CHECKSUM_MAX_RETRIES"); do
 			sleep "$CHECKSUM_RETRY_DELAY"
 			$FETCH_COMMAND -i "$CHECKSUM_URL" >"$1"
 			if is_http_status "$1" 404; then
 				if [ "$attempt_no" -eq "$CHECKSUM_MAX_RETRIES" ]; then
-					logger -s "The device with this ID has been deleted, \
-					no need to continue asking for the checksum, shutting down." \
+					logger -s "Giving up and shutting down (device may have been deleted from controller)." \
 						-t openwisp \
 						-p daemon.err
 					exit 0
 				fi
-				continue # try again
+				logger -s "Checksum returned 404!" \
+					-t openwisp \
+					-p daemon.warning
+				# try again
+				continue
 			else
 				break
 			fi
 		done
 	fi
+
 	if ! is_http_status "$1" 200; then
 		local status
 		status=$(head -n 1 "$1")
