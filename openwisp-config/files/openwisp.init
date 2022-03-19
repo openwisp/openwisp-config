@@ -50,8 +50,8 @@ parse_config() {
 	add_option "$cfg" "--post-reload-hook" post_reload_hook
 	add_option "$cfg" "--post-reload-delay" post_reload_delay
 	add_option "$cfg" "--post-registration-hook" post_registration_hook
-	add_option "$cfg" "--checksum_max_retries" checksum_max_retries
-	add_option "$cfg" "--checksum_retry_delay" checksum_retry_delay
+	add_option "$cfg" "--checksum-max-retries" checksum_max_retries
+	add_option "$cfg" "--checksum-retry-delay" checksum_retry_delay
 }
 
 start_service() {
