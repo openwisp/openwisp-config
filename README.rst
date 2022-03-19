@@ -102,8 +102,11 @@ UCI configuration options must go in ``/etc/config/openwisp``.
 - ``respawn_threshold``: time in seconds used as procd respawn threshold, defaults to ``3600``
 - ``respawn_timeout``: time in seconds used as procd respawn timeout, defaults to ``5``
 - ``respawn_retry``: number of procd respawn retries (use ``0`` for infinity), defaults to ``5``
-- ``checksum_max_retries``: maximum number of retries for checksum requests which fail with 404, defaults to ``10``,
-  after these failures the agent will assume the device has been deleted from OpenWISP Controller and will exit
+- ``checksum_max_retries``: maximum number of retries for checksum requests which fail with 404, defaults to ``5``,
+  after these failures the agent will assume the device has been deleted from OpenWISP Controller and will exit;
+  please keep in mind that due to ``respawn_retry``, procd will try to respawn the agent after it exits, so the
+  total number of attempts which will be tried has to be calculated as:
+  ``checksum_max_retries * respawn_retry``
 - ``checksum_retry_delay``: time in seconds between retries, defaults to ``6``
 
 Automatic registration
