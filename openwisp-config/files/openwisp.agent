@@ -368,48 +368,52 @@ register() {
 }
 
 # gets checksum from controller
+# - 404 trigger retries and if the 404 persists the agent
+#   quits assuming the device is deleted from OpenWISP Controller
+# - any other error is logged but the agent continues execution
+#   and will eventually try again at the next cycle
 get_checksum() {
-	$FETCH_COMMAND -i "$CHECKSUM_URL" >"$1"
 	local exit_code status
-	exit_code=$?
 
-	if [ "$exit_code" -ne "0" ]; then
-		logger -s "Failed to connect to controller while getting checksum: curl exit code $exit_code" \
-			-t openwisp \
-			-p daemon.err
-		return 2
-	fi
+	for attempt_no in $(seq 1 "$CHECKSUM_MAX_RETRIES"); do
+		$FETCH_COMMAND -i "$CHECKSUM_URL" >"$1"
+		exit_code=$?
 
-	if is_http_status "$1" 404; then
-		for attempt_no in $(seq 0 "$CHECKSUM_MAX_RETRIES"); do
-			sleep "$CHECKSUM_RETRY_DELAY"
-			$FETCH_COMMAND -i "$CHECKSUM_URL" >"$1"
-			if is_http_status "$1" 404; then
-				if [ "$attempt_no" -eq "$CHECKSUM_MAX_RETRIES" ]; then
-					logger -s "Giving up and shutting down (device may have been deleted from controller)." \
-						-t openwisp \
-						-p daemon.err
-					exit 0
-				fi
-				logger -s "Checksum returned 404!" \
+		if [ "$exit_code" -ne "0" ]; then
+			logger -s "Failed to connect to controller while getting checksum: curl exit code $exit_code" \
+				-t openwisp \
+				-p daemon.err
+			return 2
+		fi
+
+		if is_http_status "$1" 404; then
+			logger -s "Failed to retrieve checksum: 404 Not Found" \
+				-t openwisp \
+				-p daemon.warning
+
+			if [ "$attempt_no" -eq "$CHECKSUM_MAX_RETRIES" ]; then
+				logger -s "Giving up and shutting down: the device may have been deleted from OpenWISP Controller" \
 					-t openwisp \
-					-p daemon.warning
-				# try again
-				continue
-			else
-				break
+					-p daemon.err
+				exit 0
 			fi
-		done
-	fi
+
+			sleep "$CHECKSUM_RETRY_DELAY"
+			# try again
+			continue
+		else
+			break
+		fi
+	done
 
 	if ! is_http_status "$1" 200; then
-		local status
 		status=$(head -n 1 "$1")
 		logger -s "Failed to retrieve checksum: $status" \
 			-t openwisp \
 			-p daemon.err
 		return 3
 	fi
+
 	check_header "$1"
 }
 
