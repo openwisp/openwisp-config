@@ -85,6 +85,7 @@ jobs:
           path: "${{ env.DOWNLOADS_DIR }}/${{ env.START_TIME }}"
 
       - name: Setup Google Cloud
+        if: ${{ github.event_name=='push' }}
         uses: google-github-actions/setup-gcloud@master
         with:
           service_account_key: ${{ secrets.GCS_DOWNLOADS_SERVICE_ACCOUNT_JSON }}

@@ -121,6 +121,14 @@ while [ -n "$1" ]; do
 			export POST_REGISTRATION_HOOK="$2"
 			shift
 			;;
+		--checksum-max-retries)
+			export CHECKSUM_MAX_RETRIES="$2"
+			shift
+			;;
+		--checksum-retry-delay)
+			export CHECKSUM_RETRY_DELAY="$2"
+			shift
+			;;
 		-*)
 			echo "Invalid option: $1"
 			exit 1
@@ -186,6 +194,8 @@ BOOTUP="$WORKING_DIR/bootup"
 REGISTRATION_URL="$URL/controller/register/"
 UNMANAGED_DIR="$WORKING_DIR/unmanaged"
 FETCH_COMMAND="curl -s --connect-timeout $CONNECT_TIMEOUT --max-time $MAX_TIME"
+CHECKSUM_MAX_RETRIES=${CHECKSUM_MAX_RETRIES:-5}
+CHECKSUM_RETRY_DELAY=${CHECKSUM_RETRY_DELAY:-6}
 mkdir -p $WORKING_DIR
 mkdir -p $UNMANAGED_DIR
 
@@ -358,26 +368,52 @@ register() {
 }
 
 # gets checksum from controller
+# - 404 trigger retries and if the 404 persists the agent
+#   quits assuming the device is deleted from OpenWISP Controller
+# - any other error is logged but the agent continues execution
+#   and will eventually try again at the next cycle
 get_checksum() {
-	$FETCH_COMMAND -i "$CHECKSUM_URL" >"$1"
 	local exit_code status
-	exit_code=$?
 
-	if [ "$exit_code" -ne "0" ]; then
-		logger -s "Failed to connect to controller while getting checksum: curl exit code $exit_code" \
-			-t openwisp \
-			-p daemon.err
-		return 2
-	fi
+	for attempt_no in $(seq 1 "$CHECKSUM_MAX_RETRIES"); do
+		$FETCH_COMMAND -i "$CHECKSUM_URL" >"$1"
+		exit_code=$?
+
+		if [ "$exit_code" -ne "0" ]; then
+			logger -s "Failed to connect to controller while getting checksum: curl exit code $exit_code" \
+				-t openwisp \
+				-p daemon.err
+			return 2
+		fi
+
+		if is_http_status "$1" 404; then
+			logger -s "Failed to retrieve checksum: 404 Not Found" \
+				-t openwisp \
+				-p daemon.warning
+
+			if [ "$attempt_no" -eq "$CHECKSUM_MAX_RETRIES" ]; then
+				logger -s "Giving up and shutting down: the device may have been deleted from OpenWISP Controller" \
+					-t openwisp \
+					-p daemon.err
+				exit 0
+			fi
+
+			sleep "$CHECKSUM_RETRY_DELAY"
+			# try again
+			continue
+		else
+			break
+		fi
+	done
 
 	if ! is_http_status "$1" 200; then
-		local status
 		status=$(head -n 1 "$1")
 		logger -s "Failed to retrieve checksum: $status" \
 			-t openwisp \
 			-p daemon.err
 		return 3
 	fi
+
 	check_header "$1"
 }
 
