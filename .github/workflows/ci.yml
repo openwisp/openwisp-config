@@ -86,7 +86,7 @@ jobs:
 
       - name: Setup Google Cloud
         if: ${{ github.event_name=='push' }}
-        uses: google-github-actions/setup-gcloud@master
+        uses: google-github-actions/setup-gcloud@v0
         with:
           service_account_key: ${{ secrets.GCS_DOWNLOADS_SERVICE_ACCOUNT_JSON }}
           project_id: ${{ secrets.GCS_PROJECT_ID }}
