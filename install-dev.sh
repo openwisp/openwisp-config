@@ -10,7 +10,7 @@ apt-get install -y cmake git-core
 apt-get install -y lua5.1 liblua5.1-0-dev luarocks
 # install json-c
 apt-get install -y dh-autoreconf
-git clone https://github.com/json-c/json-c.git --depth=1
+git clone --depth 1 --branch json-c-0.15-20200726 https://github.com/json-c/json-c.git
 { cd json-c && cmake . && make install && cd ..; } || { echo 'Installing json-c failed!' && exit 1; }
 # install openwrt libubox and uci
 git clone https://git.openwrt.org/project/libubox.git --depth=1
