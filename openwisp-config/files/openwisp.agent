@@ -260,7 +260,7 @@ register() {
 		params keybase consistent_key exit_code message new prefix
 	hostname=$(uci get system.@system[0].hostname)
 	# use macaddr of interface specified in $MAC_INTERFACE
-	raw=$(ifconfig "$MAC_INTERFACE" 2 >/dev/null 2>&1)
+	raw=$(ifconfig "$MAC_INTERFACE" 2>/dev/null 2>&1)
 	# if previous command fails, fallback to first non-loopback interface
 	if [ -z "$raw" ]; then raw=$(ifconfig); fi
 	macaddr=$(echo "$raw " | grep -E -v "^(lo|tap[0-9]+)" | awk '/HWaddr/ { print $5 }' | head -n 1)
@@ -271,7 +271,7 @@ register() {
 		hostname="$macaddr"
 	fi
 	backend="netjsonconfig.OpenWrt"
-	tags=$(uci get openwisp.http.tags 2 >/dev/null 2>&1)
+	tags=$(uci get openwisp.http.tags 2>/dev/null 2>&1)
 	# get device model, OS identifier and SOC info
 	model=$(get_model)
 	os=$(get_os)
