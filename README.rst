@@ -39,7 +39,7 @@ First run:
 
     opkg update
 
-Then install one of the `latest builds <http://downloads.openwisp.io/openwisp-config/>`_:
+Then install one of the `latest builds <https://downloads.openwisp.io/?prefix=openwisp-config/latest/>`_:
 
 .. code-block:: shell
 
@@ -47,8 +47,8 @@ Then install one of the `latest builds <http://downloads.openwisp.io/openwisp-co
 
 Where ``<URL>`` is the URL of the precompiled openwisp-config package.
 
-For a list of the latest built images, take a look at `downloads.openwisp.io/openwisp-config/
-<http://downloads.openwisp.io/openwisp-config/>`_.
+For a list of the latest built images, take a look at `downloads.openwisp.io/?prefix=openwisp-config/
+<https://downloads.openwisp.io/?prefix=openwisp-config/>`_.
 
 **If you need to compile the package yourself**, see `Compiling openwisp-config`_
 and `Compiling a custom OpenWRT image`_.
