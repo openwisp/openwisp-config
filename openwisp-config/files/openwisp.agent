@@ -854,6 +854,8 @@ if [ ! -f "$BOOTUP" ]; then
 	# actions to do only after agent start, not after registration or agent restart
 	if [ "$BOOTUP_DELAY" -ne "0" ]; then
 		# random bootup delay between 0..300 seconds
+		SEED=$(head /dev/urandom | tr -dc "0123456789" | head -c9)
+		RANDOM=$(/usr/sbin/openwisp-get-random-num "$SEED")
 		# shellcheck disable=SC3028
 		DELAY="$((RANDOM % BOOTUP_DELAY))"
 		logger "Delaying startup for $DELAY seconds..." \
