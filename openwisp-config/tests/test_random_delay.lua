@@ -15,9 +15,10 @@ function TestRandomDelay.test_default()
     get_random_delay, "--test=1", seed, "delay")
   -- testing random value must be in range 0 to delay
   luaunit.assertTrue(get_random_delay('--test=1', seed, delay) <= delay)
-  luaunit.assertTrue(get_random_delay('--test=1', seed, delay) > 0)
+  luaunit.assertTrue(get_random_delay('--test=1', seed, delay) >= 0)
   -- testing delay changes on changing seed value
-  local first_device_delay = get_random_delay('--test=1', seed, delay)
+  local device_1_seed = 987654321
+  local first_device_delay = get_random_delay('--test=1', device_1_seed, delay)
   local device_2_seed = 123456789
   local second_device_delay = get_random_delay('--test=1', device_2_seed, delay)
   luaunit.assertNotEquals(first_device_delay, second_device_delay)
