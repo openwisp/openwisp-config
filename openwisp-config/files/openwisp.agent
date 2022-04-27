@@ -853,9 +853,8 @@ REPORT_URL="$BASEURL/report-status/$UUID/"
 if [ ! -f "$BOOTUP" ]; then
 	# actions to do only after agent start, not after registration or agent restart
 	if [ "$BOOTUP_DELAY" -ne "0" ]; then
-		# random bootup delay between 0..300 seconds
-		SEED=$(head /dev/urandom | tr -dc "0123456789" | head -c9)
-		DELAY=$(/usr/sbin/openwisp-get-random-delay "$SEED" "$BOOTUP_DELAY")
+		# get a random number between zero and $BOOTUP_DELAY
+		DELAY=$(/usr/sbin/openwisp-get-random-number 0 "$BOOTUP_DELAY")
 		logger "Delaying startup for $DELAY seconds..." \
 			-t openwisp \
 			-p daemon.info

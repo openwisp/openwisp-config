@@ -9,4 +9,4 @@ lua test_uci_autoname.lua -v
 lua test_update_bad_config.lua -v
 lua test_update_config.lua -v
 lua test_utils.lua -v
-lua test_random_delay.lua -v
+lua test_random_number.lua -v

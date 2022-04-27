@@ -87,8 +87,8 @@ define Package/openwisp-config/install
 		$(1)/usr/sbin/openwisp-get-address
 
 	$(INSTALL_BIN) \
-		files/sbin/openwisp-get-random-delay.lua \
-		$(1)/usr/sbin/openwisp-get-random-delay
+		files/sbin/openwisp-get-random-number.lua \
+		$(1)/usr/sbin/openwisp-get-random-number
 
 	$(CP) ../VERSION $(1)/etc/openwisp/
 endef
