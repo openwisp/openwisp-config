@@ -853,13 +853,12 @@ REPORT_URL="$BASEURL/report-status/$UUID/"
 if [ ! -f "$BOOTUP" ]; then
 	# actions to do only after agent start, not after registration or agent restart
 	if [ "$BOOTUP_DELAY" -ne "0" ]; then
-		# random bootup delay between 0..300 seconds
-		# shellcheck disable=SC3028
-		DELAY="$((RANDOM % BOOTUP_DELAY))"
+		# get a random number between zero and $BOOTUP_DELAY
+		DELAY=$(/usr/sbin/openwisp-get-random-number 0 "$BOOTUP_DELAY")
 		logger "Delaying startup for $DELAY seconds..." \
 			-t openwisp \
 			-p daemon.info
-		sleep $DELAY
+		sleep "$DELAY"
 	fi
 	# send up to date device info
 	update_info

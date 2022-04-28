@@ -86,6 +86,10 @@ define Package/openwisp-config/install
 		files/sbin/openwisp-get-address.lua \
 		$(1)/usr/sbin/openwisp-get-address
 
+	$(INSTALL_BIN) \
+		files/sbin/openwisp-get-random-number.lua \
+		$(1)/usr/sbin/openwisp-get-random-number
+
 	$(CP) ../VERSION $(1)/etc/openwisp/
 endef
 
