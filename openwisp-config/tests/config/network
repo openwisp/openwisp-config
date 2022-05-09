@@ -50,7 +50,7 @@ config switch_port
 	option device 'switch0'
 	option port '1'
 
-config route
+config route 'route1'
   option test '1'
 
 config route
