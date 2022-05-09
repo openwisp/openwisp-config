@@ -35,7 +35,8 @@ jobs:
           CI: 1
 
       - name: Run sh-checker
-        uses: luizm/action-sh-checker@master
+        # version 0.3.0
+        uses: luizm/action-sh-checker@v1cfdaba1035d3a44c939d115358a44d5df818b7c
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
