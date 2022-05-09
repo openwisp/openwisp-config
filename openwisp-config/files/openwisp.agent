@@ -10,11 +10,11 @@ while [ -n "$1" ]; do
 			break
 			;;
 		--url)
-			export URL=${2%/}
+			export URL="${2%/}"
 			shift
 			;; # strip trailing slash
 		--interval)
-			export INTERVAL=$2
+			export INTERVAL="$2"
 			shift
 			;;
 		--management_interval)
@@ -26,7 +26,7 @@ while [ -n "$1" ]; do
 			shift
 			;;
 		--verify-ssl)
-			export VERIFY_SSL=$2
+			export VERIFY_SSL="$2"
 			shift
 			;;
 		--uuid)
