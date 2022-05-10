@@ -8,7 +8,7 @@ include $(TOPDIR)/rules.mk
 PKG_NAME:=openwisp-config
 PKG_VERSION:=$(shell cat ../VERSION)
 PKG_RELEASE:=1
-PKG_BUILD_DIR:=$(BUILD_DIR)/$(PKG_NAME)-$(BUILD_VARIANT)/$(PKG_SOURCE_SUBDIR)
+PKG_BUILD_DIR:=$(BUILD_DIR)/$(PKG_NAME)/$(PKG_SOURCE_SUBDIR)
 PKG_LICENSE:=GPL-3.0
 PKG_MAINTAINER:=Federico Capoano <f.capoano@openwisp.io>
 
