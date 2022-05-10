@@ -1,11 +1,96 @@
 Change log
 ^^^^^^^^^^
 
-0.6.0 [unreleased]
+1.0.0 [2022-05-10]
 ==================
 
-WIP.
+Features
+~~~~~~~~
 
+- The SIGUSR1 signal can be now used to interrupt the interval sleep
+  and check for configuration changes again
+- Made the procd respawn parameters configurable
+- The agent now stores the any UCI configuration which is overwritten
+  by OpenWISP with the goal of restoring it if the piece of configuration
+  overwritten by OpenWISP is removed
+- Added ``management_interval`` and ``registration_interval`` options
+
+Changes
+~~~~~~~
+
+Backward incompatible changes
+#############################
+
+- Remove unneeded SSL package implementation definitions
+
+Other changes
+#############
+
+- Made configuration checksum persistent to fix 2 problems:
+
+  1. If the openwisp-config daemon is restarted (e.g. by the openwisp-
+     controller via ssh) after it already downloaded the latest checksum
+     but before it has applied the configuration, all further calls of
+     configuration_changed() (until CONFIGURATION_CHECKSUM is deleted,
+     e.g. by a reboot) will imply that everything is already up-to-date,
+     although the configuration was never applied
+  2. prevents the configuration from being downloaded and written again
+     after a reboot
+- Do not wait for management interface during registration:
+  If openwisp-config is not registered yet, do not wait
+  for the management interface to be ready because
+  we can assume the management interface configuration
+  is not present yet
+- Increased report status retries:
+  in some cases the report status operation may fail because
+  the network reload could take a few minutes to complete
+  (eg: in mesh networks scenarios)
+  and therefore the agent must be a bit more patient
+  before giving up
+- Refactored init script to make it more consistent with
+  the best practices used in the OpenWrt community
+- If the agent receives 404 response from the server when
+  downloading the configuration checksum, after the number
+  of attempts specified in ``checksum_max_retries`` fail,
+  the agent assumes the device has been deleted from OpenWISP
+  and exits
+
+Bugfixes
+~~~~~~~~
+
+- Use configured curl timeout values in default configuration test;
+  Without this fix, it's possible that the configuration test fails
+  while the regular checksum fetch succeeds
+- Ensured config download error is detected:
+  adding the ``--fail`` flag to curl makes it exit with a non zero
+  exit code in case the server respond with an HTTP status code
+  which is not 200 OK, without this fix, a bad response is interpreted as
+  a valid configuration and the agent removes the old configuration,
+  then installs the new configuration,
+  which fails and the router remains with an empty configuration,
+  effectively causing a disruption of service
+- Fixed post-registration-hook logging line which was mistakenly mentioning
+  ``post-reload-hook`` instead of ``post-registration-hook``
+- Fixed service reload handling for unnamed uci sections:
+  the openwisp agent modifies the configuration on first contact by
+  rewriting all anonymous UCI sections into named UCI sections. This
+  causes almost all services to be restarted even though the configuration
+  has not really changed. To prevent this from happening, the md5sums are
+  rewritten after calling ``openwisp-uci-autoname``; this will reload only
+  those services whose configuration has actually been changed
+- Remove ``applying_conf`` control file after status report:
+  without this fix, the agent may be reloaded before the
+  status is reported to OpenWISP Controller, leaving the
+  device in "modified" config status even though the configuration
+  has been already applied
+- Fixed HTTP response codes on newer cURL versions
+- Handled agent crashes when registration is not successful
+- Verify downloaded tarball against the configuration checksum
+- Fixed a bug in the ``bootup_delay`` feature which caused it to not work
+  unless an extra dependency was being used; the need on the extra undocumented
+  dependency has been eliminated
+- Fixed unhandled naming conflicts when anonymous configuration are renamed
+  via the ``openwisp-uci-autoname`` script
 
 0.5.0 [2020-12-20]
 ==================
