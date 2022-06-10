@@ -267,7 +267,8 @@ register() {
 	# convert hostname to lowercase for case insensitive check
 	name=$(echo "$hostname" | awk '{print tolower($0)}')
 	# use mac address if hostname is the default one or empty
-	if [ "$name" = "openwrt" ] || [ "$hostname" = "$DEFAULT_HOSTNAME" ] || [ -z "$name" ]; then
+	if [ "$DEFAULT_HOSTNAME" = "*" ] || [ "$name" = "openwrt" ] \
+		|| [ "$hostname" = "$DEFAULT_HOSTNAME" ] || [ -z "$name" ]; then
 		hostname="$macaddr"
 	fi
 	backend="netjsonconfig.OpenWrt"

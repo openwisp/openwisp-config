@@ -94,7 +94,11 @@ UCI configuration options must go in ``/etc/config/openwisp``.
   linux interface names are supported), it's used to collect the management interface ip address
 - ``default_hostname``: if your firmware has a custom default hostname, you can use this configuration
   option so the agent can recognize it during registration and replicate the standard behavior
-  (new device will be named after its mac address, to avoid having many new devices with the same name)
+  (new device will be named after its mac address, to avoid having many new devices with the same name),
+  the possible options are to either set this to the value of the default hostname used by your firmware,
+  or set it to ``*`` to always force to register new devices using their mac address as their name
+  (this last option is useful if you have a firmware which can work on different hardware models
+  and each model has a different default hostname)
 - ``pre_reload_hook``: path to custom executable script, see `pre-reload-hook`_
 - ``post_reload_hook``: path to custom executable script, see `post-reload-hook`_
 - ``post_reload_delay``: delay in seconds to wait before the post-reload-hook and any configuration test, defaults to ``5``
