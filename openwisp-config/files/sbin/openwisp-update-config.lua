@@ -154,7 +154,8 @@ if lfs.attributes(remote_config_dir, 'mode') == 'directory' then
       -- if there's no backup of the file yet, create one
       if not utils.file_exists(stored_path) then
         os.execute('cp ' .. standard_path .. ' ' .. stored_path)
-        for key, section in pairs(stored:get_all(file)) do
+        local uci_sections = stored:get_all(file) or {}
+        for key, section in pairs(uci_sections) do
           -- check if section is in remote configuration
           local section_check = check:get(file, section['.name'])
           if section_check then
