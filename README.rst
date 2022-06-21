@@ -305,6 +305,36 @@ Defaults to ``/etc/openwisp/post-registration-hook``;
 
 Path to an executable script that will be called after the registration is completed.
 
+`Hotplug Events <https://openwrt.org/docs/guide-user/base-system/hotplug>`_
+---------------------------------------------------------------------------
+
+*openwisp-config* will send hotplug events in the following situations:
+
+- After the registration is successfully completed: ``post-registration``
+- After the registration failed: ``registration-failed``
+- After the configuration has been successfully applied: ``config-applied``
+- After the previous configuration has been restored: ``config-restored``
+- Before services are reloaded: ``pre-reload``
+- After services have been reloaded: ``post-reload``
+
+If a hotplug event is sent by *openwisp-config* then all scripts existing in
+``/etc/hotplug.d/openwisp/`` will be executed. In scripts the type of event
+is visible in the variable ``$ACTION``. For example, a script to log the hotplug
+events, ``/etc/hotplug.d/openwisp/01_log_events``, could look like this:
+
+.. code-block:: shell
+
+    #!/bin/sh
+
+    logger "openwisp-config sent a hotplug event. Action: $ACTION"
+
+It will create log entries like this::
+
+    Wed Jun 22 06:15:17 2022 user.notice root: openwisp-config sent a hotplug event. Action: registration-failed
+
+For more information on using these events refer to the
+`Hotplug Events OpenWrt Documentation <https://openwrt.org/docs/guide-user/base-system/hotplug>`_.
+
 Compiling openwisp-config
 -------------------------
 

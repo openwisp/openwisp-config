@@ -327,6 +327,8 @@ register() {
 		logger -s "Registration failed! $message" \
 			-t openwisp \
 			-p daemon.err
+		# send registration-failed hotplug event
+		env -i ACTION="registration-failed" /sbin/hotplug-call openwisp
 		# if controller returns 403, stop retrying because it's useless
 		if is_http_status $REGISTRATION_PARAMETERS 403; then
 			exit 5
@@ -364,6 +366,8 @@ register() {
 	# indicates this function has been called
 	# (used by `discover_management_ip`)
 	export REGISTER_CALLED=1
+	# send post-registration hotplug event
+	env -i ACTION="post-registration" /sbin/hotplug-call openwisp
 	# call post registration hook
 	post_registration_hook
 }
@@ -500,11 +504,15 @@ apply_configuration() {
 		restore_backup
 		return 1
 	fi
+	# send pre-reload hotplug event
+	env -i ACTION="pre-reload" /sbin/hotplug-call openwisp
 	# call pre-reload-hook
 	pre_reload_hook
 	# reload changes and wait $POST_RELOAD_DELAY
 	/usr/sbin/openwisp-reload-config
 	sleep "$POST_RELOAD_DELAY"
+	# send post-reload hotplug event
+	env -i ACTION="post-reload" /sbin/hotplug-call openwisp
 	# call post-reload-hook
 	post_reload_hook
 }
@@ -747,6 +755,8 @@ update_configuration() {
 		logger "Configuration applied successfully" \
 			-t openwisp \
 			-p daemon.info
+		# send config-applied hotplug event
+		env -i ACTION="config-applied" /sbin/hotplug-call openwisp
 		# store the new checksum as last known checksum
 		cp "$CONFIGURATION_CHECKSUM" "$PERSISTENT_CHECKSUM"
 		report_status "applied"
@@ -777,6 +787,8 @@ restore_backup() {
 	logger -s "The most recent configuration backup was restored" \
 		-t openwisp \
 		-p daemon.info
+	# send config-restored hotplug event
+	env -i ACTION="config-restored" /sbin/hotplug-call openwisp
 }
 
 discover_management_ip() {
