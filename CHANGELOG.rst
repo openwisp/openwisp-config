@@ -1,6 +1,12 @@
 Change log
 ^^^^^^^^^^
 
+1.0.1 [2022-06-20]
+==================
+
+- Fixed addition of new UCI files which were not previously already present
+  on the file system
+
 1.0.0 [2022-05-10]
 ==================
 
