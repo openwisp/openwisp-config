@@ -305,10 +305,11 @@ Defaults to ``/etc/openwisp/post-registration-hook``;
 
 Path to an executable script that will be called after the registration is completed.
 
-`Hotplug Events <https://openwrt.org/docs/guide-user/base-system/hotplug>`_
----------------------------------------------------------------------------
+Hotplug Events
+--------------
 
-*openwisp-config* will send hotplug events in the following situations:
+The agent sends the following
+`Hotplug events <https://openwrt.org/docs/guide-user/base-system/hotplug>`_:
 
 - After the registration is successfully completed: ``post-registration``
 - After the registration failed: ``registration-failed``
