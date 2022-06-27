@@ -313,6 +313,8 @@ The agent sends the following
 
 - After the registration is successfully completed: ``post-registration``
 - After the registration failed: ``registration-failed``
+- When the agent first starts after the bootup of the device: ``bootup``
+- After any subsequent restart: ``restart``
 - After the configuration has been successfully applied: ``config-applied``
 - After the previous configuration has been restored: ``config-restored``
 - Before services are reloaded: ``pre-reload``

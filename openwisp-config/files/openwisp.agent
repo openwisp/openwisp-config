@@ -852,6 +852,8 @@ if [ -z "$UUID" ] || [ -z "$KEY" ]; then
 	until register; do
 		sleep "$REGISTRATION_INTERVAL"
 	done
+	# send bootup hotplug event
+	env -i ACTION="bootup" /sbin/hotplug-call openwisp
 	touch "$BOOTUP"
 fi
 
@@ -873,9 +875,14 @@ if [ ! -f "$BOOTUP" ]; then
 			-p daemon.info
 		sleep "$DELAY"
 	fi
+	# send bootup hotplug event
+	env -i ACTION="bootup" /sbin/hotplug-call openwisp
 	# send up to date device info
 	update_info
 	touch "$BOOTUP"
+else
+	# send restart hotplug event
+	env -i ACTION="restart" /sbin/hotplug-call openwisp
 fi
 
 while true; do
