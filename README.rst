@@ -92,6 +92,9 @@ UCI configuration options must go in ``/etc/config/openwisp``.
 - ``mac_interface``: the interface from which the MAC address is taken when performing automatic registration, defaults to ``eth0``
 - ``management_interface``: management interface name (both openwrt UCI names and
   linux interface names are supported), it's used to collect the management interface ip address
+  and send this information to the OpenWISP server, for more information please read
+  `how to make sure OpenWISP can reach your devices
+  <https://openwisp.io/docs/user/monitoring.html#openwisp-reach-devices>`_
 - ``default_hostname``: if your firmware has a custom default hostname, you can use this configuration
   option so the agent can recognize it during registration and replicate the standard behavior
   (new device will be named after its mac address, to avoid having many new devices with the same name),
