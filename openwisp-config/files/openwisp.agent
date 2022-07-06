@@ -193,6 +193,7 @@ APPLYING_CONF="$WORKING_DIR/applying_conf"
 BOOTUP="$WORKING_DIR/bootup"
 REGISTRATION_URL="$URL/controller/register/"
 UNMANAGED_DIR="$WORKING_DIR/unmanaged"
+TEMP_ERROR_LOG="$WORKING_DIR/error-log.tmp"
 FETCH_COMMAND="curl -s --connect-timeout $CONNECT_TIMEOUT --max-time $MAX_TIME"
 CHECKSUM_MAX_RETRIES=${CHECKSUM_MAX_RETRIES:-5}
 CHECKSUM_RETRY_DELAY=${CHECKSUM_RETRY_DELAY:-6}
@@ -562,12 +563,34 @@ update_info() {
 	rm $UPDATE_INFO
 }
 
+collect_error_logs() {
+	local last_update_line_no
+	# Save openwisp_config related logs to a temporary file
+	logread -e openwisp >"$TEMP_ERROR_LOG"
+	# Get the line number of the last configuration update
+	last_update_line_no=$(
+		grep "Local configuration outdated" -n \
+			"$TEMP_ERROR_LOG" \
+			| tail -1 \
+			| cut -d : -f 1
+	)
+	# Print all logs since the last configuration update to stdout
+	# after replacing new lines with "\n"
+	tail "$TEMP_ERROR_LOG" -n +"$last_update_line_no" | sed 's/\n/\\n/g'
+	rm $TEMP_ERROR_LOG
+}
+
 # report configuration status: "applied" or "error"
 report_status() {
-	local exit_code status
+	local exit_code status payload error_log
+	payload="key=$KEY&status=$1"
+	if [ "$1" = "error" ]; then
+		error_log=$(collect_error_logs)
+		payload="$payload&error_log=$error_log"
+	fi
 	# retry several times
 	for i in $(seq 1 30); do
-		$FETCH_COMMAND -i --data "key=$KEY&status=$1" "$REPORT_URL" >$STATUS_REPORT
+		$FETCH_COMMAND --data "$payload" "$REPORT_URL" >$STATUS_REPORT
 		exit_code=$?
 		if [ "$exit_code" -eq "0" ]; then
 			break
