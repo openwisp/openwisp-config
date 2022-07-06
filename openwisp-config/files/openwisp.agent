@@ -491,7 +491,7 @@ apply_configuration() {
 	# store unmanaged config (if enabled)
 	call_store_unmanaged
 	# update local configuration
-	/usr/sbin/openwisp-update-config --conf="$1" --merge="$MERGE_CONFIG"
+	/usr/sbin/openwisp-update-config --conf="$1" --merge="$MERGE_CONFIG" 2>&1 | logger -t openwisp -p daemon.err -s
 	local exit_code=$?
 	# restore unmanaged configurations
 	call_restore_unmanaged
