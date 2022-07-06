@@ -718,7 +718,7 @@ update_configuration() {
 	REMOTE_CHECKSUM=$(tail -n 1 $CONFIGURATION_CHECKSUM 2>/dev/null)
 
 	if [ "$LOCAL_CHECKSUM" != "$REMOTE_CHECKSUM" ]; then
-		logger -s "Configuration checksum mismatch! Local: $LOCAL_CHECKSUM, Remote: $REMOTE_CHECKSUM"  \
+		logger -s "Configuration checksum mismatch! Local: $LOCAL_CHECKSUM, Remote: $REMOTE_CHECKSUM" \
 			-t openwisp \
 			-p daemon.err
 		# remove the checksum to ensure update is tried again at the next run
