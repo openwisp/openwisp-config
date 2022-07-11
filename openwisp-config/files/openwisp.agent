@@ -565,7 +565,10 @@ update_info() {
 
 print_error_logs() {
 	local last_update_line_no logs log_bytes max_log_bytes
-	max_log_bytes=1024
+	# The log text is limited to 1011 byte because
+	# "\n[truncated]" is appended to the logs which adds
+	# another 13 bytes.
+	max_log_bytes=1011
 	# Save openwisp_config related logs to a temporary file
 	logread -e openwisp >"$CONFIG_ERROR_LOG"
 	# Get the line number of the last configuration update
@@ -591,15 +594,16 @@ print_error_logs() {
 
 # report configuration status: "applied" or "error"
 report_status() {
-	local exit_code status payload error_log
-	payload="key=$KEY&status=$1"
+	local exit_code status error_reason_payload error_log
 	if [ "$1" = "error" ]; then
 		error_log=$(print_error_logs)
-		payload="$payload&error_reason=$error_log"
+		error_reason_payload="error_reason=$error_log"
 	fi
 	# retry several times
 	for i in $(seq 1 30); do
-		$FETCH_COMMAND -i --data "$payload" "$REPORT_URL" >$STATUS_REPORT
+		$FETCH_COMMAND -i --data "key=$KEY&status=$1" \
+			--data-urlencode "$error_reason_payload" \
+			"$REPORT_URL" >$STATUS_REPORT
 		exit_code=$?
 		if [ "$exit_code" -eq "0" ]; then
 			break
