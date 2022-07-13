@@ -190,6 +190,7 @@ TEST_CHECKSUM="$WORKING_DIR/test_checksum"
 UPDATE_INFO="$WORKING_DIR/update_info"
 STATUS_REPORT="$WORKING_DIR/status_report"
 APPLYING_CONF="$WORKING_DIR/applying_conf"
+UPDATE_CONFIG_LOG="$WORKING_DIR/update-config.log"
 BOOTUP="$WORKING_DIR/bootup"
 REGISTRATION_URL="$URL/controller/register/"
 UNMANAGED_DIR="$WORKING_DIR/unmanaged"
@@ -491,7 +492,7 @@ apply_configuration() {
 	# store unmanaged config (if enabled)
 	call_store_unmanaged
 	# update local configuration
-	/usr/sbin/openwisp-update-config --conf="$1" --merge="$MERGE_CONFIG"
+	/usr/sbin/openwisp-update-config --conf="$1" --merge="$MERGE_CONFIG" >"$UPDATE_CONFIG_LOG" 2>&1
 	local exit_code=$?
 	# restore unmanaged configurations
 	call_restore_unmanaged
@@ -501,6 +502,8 @@ apply_configuration() {
 		logger -s "Could not apply configuration, openwisp-update-config exit code was $exit_code" \
 			-t openwisp \
 			-p daemon.crit
+		logger -t openwisp -p daemon.crit -s <"$UPDATE_CONFIG_LOG"
+		rm "$UPDATE_CONFIG_LOG"
 		restore_backup
 		return 1
 	fi
@@ -515,6 +518,7 @@ apply_configuration() {
 	env -i ACTION="post-reload" /sbin/hotplug-call openwisp
 	# call post-reload-hook
 	post_reload_hook
+	rm "$UPDATE_CONFIG_LOG"
 }
 
 # send up to date device info to the controller
