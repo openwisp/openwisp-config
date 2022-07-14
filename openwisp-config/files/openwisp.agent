@@ -573,11 +573,13 @@ print_error_logs() {
 	logread -e openwisp >"$CONFIG_ERROR_LOG"
 	# Get the line number of the last configuration update
 	last_update_line_no=$(
-		grep "Local configuration outdated" -n \
+		grep "Configuration downloaded, now applying it" -n \
 			"$CONFIG_ERROR_LOG" \
 			| tail -1 \
 			| cut -d : -f 1
 	)
+	# Incrementing line number for brief logs
+	last_update_line_no=$((last_update_line_no + 1))
 	# Print all logs since the last configuration update to stdout
 	# after replacing new lines with "\n"
 	logs=$(tail "$CONFIG_ERROR_LOG" -n +"$last_update_line_no" | sed 's/\n/\<br\>/g')
