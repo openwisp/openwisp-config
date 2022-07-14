@@ -194,6 +194,7 @@ UPDATE_CONFIG_LOG="$WORKING_DIR/update-config.log"
 BOOTUP="$WORKING_DIR/bootup"
 REGISTRATION_URL="$URL/controller/register/"
 UNMANAGED_DIR="$WORKING_DIR/unmanaged"
+CONFIG_ERROR_LOG="$WORKING_DIR/config-error.log"
 FETCH_COMMAND="curl -s --connect-timeout $CONNECT_TIMEOUT --max-time $MAX_TIME"
 CHECKSUM_MAX_RETRIES=${CHECKSUM_MAX_RETRIES:-5}
 CHECKSUM_RETRY_DELAY=${CHECKSUM_RETRY_DELAY:-6}
@@ -566,12 +567,49 @@ update_info() {
 	rm $UPDATE_INFO
 }
 
+print_error_logs() {
+	local last_update_line_no logs log_bytes max_log_bytes
+	# The log text is limited to 1011 byte because
+	# "\n[truncated]" is appended to the logs which adds
+	# another 13 bytes.
+	max_log_bytes=1011
+	# Save openwisp_config related logs to a temporary file
+	logread -e openwisp >"$CONFIG_ERROR_LOG"
+	# Get the line number of the last configuration update
+	last_update_line_no=$(
+		grep "Configuration downloaded, now applying it" -n \
+			"$CONFIG_ERROR_LOG" \
+			| tail -1 \
+			| cut -d : -f 1
+	)
+	# Incrementing line number for brief logs
+	last_update_line_no=$((last_update_line_no + 1))
+	# Print all logs since the last configuration update to stdout
+	# after replacing new lines with "\n"
+	logs=$(tail "$CONFIG_ERROR_LOG" -n +"$last_update_line_no" | sed 's/\n/\<br\>/g')
+	# Truncate the logs if it execeeds "max_log_bytes"
+	log_bytes=${#logs}
+	if [ "$log_bytes" -gt "$max_log_bytes" ]; then
+		logs=$(echo "$logs" | head -c "$max_log_bytes")
+		logs="$logs\n[truncated]"
+	fi
+	# Print the logs on the stdout
+	echo "$logs"
+	rm $CONFIG_ERROR_LOG
+}
+
 # report configuration status: "applied" or "error"
 report_status() {
-	local exit_code status
+	local exit_code status error_reason_payload error_log
+	if [ "$1" = "error" ]; then
+		error_log=$(print_error_logs)
+		error_reason_payload="error_reason=$error_log"
+	fi
 	# retry several times
 	for i in $(seq 1 30); do
-		$FETCH_COMMAND -i --data "key=$KEY&status=$1" "$REPORT_URL" >$STATUS_REPORT
+		$FETCH_COMMAND -i --data "key=$KEY&status=$1" \
+			--data-urlencode "$error_reason_payload" \
+			"$REPORT_URL" >$STATUS_REPORT
 		exit_code=$?
 		if [ "$exit_code" -eq "0" ]; then
 			break
