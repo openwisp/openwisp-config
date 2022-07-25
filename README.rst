@@ -15,8 +15,8 @@ openwisp-config
 
 ------------
 
-`OpenWRT <https://openwrt.org/>`_ configuration agent for the new
-`OpenWISP Controller <https://github.com/openwisp/ansible-openwisp2>`_.
+`OpenWISP Controller <https://github.com/openwisp/ansible-openwisp2>`_
+agent for `OpenWrt <https://openwrt.org/>`_.
 
 **Want to help OpenWISP?** `Find out how to help us grow here
 <http://openwisp.io/docs/general/help-us.html>`_.
