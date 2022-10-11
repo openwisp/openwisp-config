@@ -21,6 +21,9 @@ agent for `OpenWrt <https://openwrt.org/>`_.
 **Want to help OpenWISP?** `Find out how to help us grow here
 <http://openwisp.io/docs/general/help-us.html>`_.
 
+**Want a quick overview of OpenWISP?**
+`Try the OpenWISP Demo <https://openwisp.org/demo.html>`_.
+
 .. image:: http://netjsonconfig.openwisp.org/en/latest/_images/openwisp.org.svg
   :target: http://openwisp.org
 
