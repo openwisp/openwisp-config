@@ -86,7 +86,7 @@ UCI configuration options must go in ``/etc/config/openwisp``.
 - ``key``: key required to download the configuration
 - ``hardware_id_script``: custom script to read out a hardware id (e.g. a serial number), read more about this feature in `Hardware ID`_
 - ``hardware_id_key``: whether to use the hardware id for key generation or not, defaults to ``1``
-- ``bootup_delay``: maximum value in seconds of a random delay after bootup, defaults to ``0``, see `Bootup Delay`_
+- ``bootup_delay``: maximum value in seconds of a random delay after bootup, defaults to ``10``, see `Bootup Delay`_
 - ``unmanaged``: list of config sections which won't be overwritten, see `Unmanaged Configurations`_
 - ``capath``: value passed to curl ``--capath`` argument, by default is empty; see also `curl capath argument <https://curl.haxx.se/docs/manpage.html#--capath>`_
 - ``cacert``: value passed to curl ``--cacert`` argument, by default is empty; see also `curl cacert argument <https://curl.haxx.se/docs/manpage.html#--cacert>`_
