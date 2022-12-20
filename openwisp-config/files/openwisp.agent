@@ -201,6 +201,22 @@ CHECKSUM_RETRY_DELAY=${CHECKSUM_RETRY_DELAY:-6}
 mkdir -p $WORKING_DIR
 mkdir -p $UNMANAGED_DIR
 
+retry_with_backoff() {
+	local exit_code command
+	command="$1"
+	shift 1
+	for i in $(seq 1 10); do
+		$command "$@" "$i"
+		exit_code=$?
+		if [ "$exit_code" -eq "0" ]; then
+			break
+		else
+			sleep "$(/usr/sbin/openwisp-get-random-number 2 15)"
+		fi
+	done
+	return "$exit_code"
+}
+
 # restore last known checksum
 if [ -f "$PERSISTENT_CHECKSUM" ]; then
 	cp "$PERSISTENT_CHECKSUM" "$CONFIGURATION_CHECKSUM"
@@ -380,38 +396,33 @@ register() {
 # - any other error is logged but the agent continues execution
 #   and will eventually try again at the next cycle
 get_checksum() {
-	local exit_code status
+	local exit_code status attempt_no
+	# The last argument is the attempt_no of retry_with_backoff
+	for attempt_no; do true; done
 
-	for attempt_no in $(seq 1 "$CHECKSUM_MAX_RETRIES"); do
-		$FETCH_COMMAND -i "$CHECKSUM_URL" >"$1"
-		exit_code=$?
+	$FETCH_COMMAND -i "$CHECKSUM_URL" >"$1"
+	exit_code=$?
 
-		if [ "$exit_code" -ne "0" ]; then
-			logger -s "Failed to connect to controller while getting checksum: curl exit code $exit_code" \
+	if [ "$exit_code" -ne "0" ]; then
+		logger -s "Failed to connect to controller while getting checksum: curl exit code $exit_code" \
+			-t openwisp \
+			-p daemon.err
+		return 2
+	fi
+
+	if is_http_status "$1" 404; then
+		logger -s "Failed to retrieve checksum: 404 Not Found" \
+			-t openwisp \
+			-p daemon.warning
+
+		if [ "$attempt_no" -eq "$CHECKSUM_MAX_RETRIES" ]; then
+			logger -s "Giving up and shutting down: the device may have been deleted from OpenWISP Controller" \
 				-t openwisp \
 				-p daemon.err
-			return 2
+			exit 0
 		fi
-
-		if is_http_status "$1" 404; then
-			logger -s "Failed to retrieve checksum: 404 Not Found" \
-				-t openwisp \
-				-p daemon.warning
-
-			if [ "$attempt_no" -eq "$CHECKSUM_MAX_RETRIES" ]; then
-				logger -s "Giving up and shutting down: the device may have been deleted from OpenWISP Controller" \
-					-t openwisp \
-					-p daemon.err
-				exit 0
-			fi
-
-			sleep "$CHECKSUM_RETRY_DELAY"
-			# try again
-			continue
-		else
-			break
-		fi
-	done
+		sleep "$CHECKSUM_RETRY_DELAY"
+	fi
 
 	if ! is_http_status "$1" 200; then
 		status=$(head -n 1 "$1")
@@ -428,7 +439,7 @@ get_checksum() {
 configuration_changed() {
 	local CURRENT_CHECKSUM exit_code REMOTE_CHECKSUM
 	CURRENT_CHECKSUM=$(tail -n 1 $CONFIGURATION_CHECKSUM 2>/dev/null)
-	get_checksum $CONFIGURATION_CHECKSUM
+	retry_with_backoff get_checksum $CONFIGURATION_CHECKSUM
 	exit_code=$?
 
 	if [ "$exit_code" -ne "0" ]; then
@@ -605,18 +616,10 @@ report_status() {
 		error_log=$(print_error_logs)
 		error_reason_payload="error_reason=$error_log"
 	fi
-	# retry several times
-	for i in $(seq 1 30); do
-		$FETCH_COMMAND -i --data "key=$KEY&status=$1" \
-			--data-urlencode "$error_reason_payload" \
-			"$REPORT_URL" >$STATUS_REPORT
-		exit_code=$?
-		if [ "$exit_code" -eq "0" ]; then
-			break
-		else
-			sleep 2
-		fi
-	done
+	$FETCH_COMMAND -i --data "key=$KEY&status=$1" \
+		--data-urlencode "$error_reason_payload" \
+		"$REPORT_URL" >$STATUS_REPORT
+	exit_code=$?
 
 	if [ "$exit_code" -ne "0" ]; then
 		logger -s "Failed to connect to controller during report-status: curl exit code $exit_code" \
@@ -733,25 +736,34 @@ fix_uci_config() {
 	/usr/sbin/openwisp-remove-default-wifi
 }
 
-# downloads configuration from controller
-# performs test (if testing enabled)
-# and applies it
-update_configuration() {
+download_configuration() {
 	logger "Downloading configuration from controller..." \
 		-t openwisp \
 		-p daemon.info
-
-	# download configuration
-	$FETCH_COMMAND --fail "$CONFIGURATION_URL" -o $CONFIGURATION_ARCHIVE
+	$FETCH_COMMAND --fail "$CONFIGURATION_URL" -o "$CONFIGURATION_ARCHIVE"
 	local exit_code=$?
-
 	if [ "$exit_code" -ne "0" ]; then
 		logger -s "Failed to connect to controller while downloading new config: curl exit code $exit_code" \
 			-t openwisp \
 			-p daemon.err
+	fi
+	return "$exit_code"
+}
+
+# downloads configuration from controller
+# performs test (if testing enabled)
+# and applies it
+update_configuration() {
+	retry_with_backoff download_configuration
+	local exit_code=$?
+
+	if [ "$exit_code" -ne "0" ]; then
+		logger -s "Failed to download configuration from controller, giving up!" \
+			-t openwisp \
+			-p daemon.err
 		# remove the checksum to ensure update is tried again at the next run
 		rm -f $CONFIGURATION_CHECKSUM
-		return 3
+		return $exit_code
 	fi
 
 	local LOCAL_CHECKSUM
@@ -801,9 +813,14 @@ update_configuration() {
 		env -i ACTION="config-applied" /sbin/hotplug-call openwisp
 		# store the new checksum as last known checksum
 		cp "$CONFIGURATION_CHECKSUM" "$PERSISTENT_CHECKSUM"
-		report_status "applied"
+		retry_with_backoff report_status "applied"
 	else
-		report_status "error"
+		retry_with_backoff report_status "error"
+	fi
+	# if reporting of the status fails, let it retry in the next cycle
+	# shellcheck disable=SC2181
+	if [ "$?" -ne "0" ]; then
+		rm -f $CONFIGURATION_CHECKSUM $PERSISTENT_CHECKSUM
 	fi
 
 	rm $APPLYING_CONF
