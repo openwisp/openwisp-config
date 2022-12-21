@@ -216,12 +216,20 @@ See also the `related hardware ID settings in OpenWISP Controller
 Bootup Delay
 ------------
 
-The option ``bootup_delay`` can be used to make the agent wait for a random amount of seconds after the bootup of
-the device. Allowed random values range from 0 up to the value of ``bootup_delay``. The delay is applied only after the
-device has been registered.
+The option ``bootup_delay`` is used to delay the initialization of the agent
+for a random amount of seconds after the device boots.
 
-The random bootup delay reduces the load on the OpenWISP controller when a large amount of devices boot up at the
-same time after a power failure, all trying to connect to the controller.
+The value specified in this option represents the maximum value of the range
+of possible random values, the minimum value being ``0``.
+
+The default value of this option is 10, meaning that the initialization of
+the agent will be delayed for a random number of seconds, this random number
+being comprised between ``0`` and ``10``.
+
+This feature is used to spread the load on the OpenWISP server when a
+large amount of devices boot up at the same time after a blackout.
+
+Large OpenWISP installations may want to increase this value.
 
 Unmanaged Configurations
 ------------------------
