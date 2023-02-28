@@ -36,7 +36,7 @@ define Package/openwisp-config/install
 		$(1)/usr/sbin \
 		$(1)/etc/init.d \
 		$(1)/etc/config \
-		$(1)/etc/openwisp \
+		$(1)/usr/lib/openwisp-config \
 		$(1)/usr/lib/lua/openwisp
 
 	$(INSTALL_BIN) \
@@ -90,7 +90,7 @@ define Package/openwisp-config/install
 		files/sbin/openwisp-get-random-number.lua \
 		$(1)/usr/sbin/openwisp-get-random-number
 
-	$(CP) ../VERSION $(1)/etc/openwisp/
+	$(CP) ../VERSION $(1)/usr/lib/openwisp-config/
 endef
 
 $(eval $(call BuildPackage,openwisp-config))

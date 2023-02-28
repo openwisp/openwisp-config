@@ -139,7 +139,7 @@ while [ -n "$1" ]; do
 done
 
 if [ "$VERSION" -eq "1" ]; then
-	VERSION=$(cat /etc/openwisp/VERSION)
+	VERSION=$(cat /usr/lib/openwisp-config/VERSION)
 	echo "openwisp-config $VERSION"
 	exit 0
 fi
