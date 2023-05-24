@@ -24,6 +24,7 @@ TestUpdateConfig = {
         os.execute('cp ./update/system '..config_dir..'system')
         os.execute('cp ./update/network '..config_dir..'network')
         os.execute('cp ./update/wireless '..config_dir..'wireless')
+        os.execute('cp ./update/firewall '..config_dir..'firewall')
         -- we expect these UCI files to be removed
         os.execute('cp ./config/wireless-autoname '..remote_config_dir..'/wireless-autoname')
         os.execute('cp ./wifi/wireless '..remote_config_dir..'/wireless')
@@ -65,11 +66,16 @@ function TestUpdateConfig.test_update()
     local storedNetworkFile = io.open(stored_dir .. '/etc/config/network')
     luaunit.assertNotNil(storedNetworkFile)
     local storedNetworkContents = storedNetworkFile:read('*all')
-    -- ensure wg1 is not added that is downloaded from remote
-    luaunit.assertNil(string.find(storedNetworkContents, "config interface 'wg1'"))
-    -- ensure wan and wg0 are present
+    -- ensure stored
+    luaunit.assertNotNil(string.find(storedNetworkContents, "config interface 'wg1'"))
     luaunit.assertNotNil(string.find(storedNetworkContents, "config interface 'wan'"))
     luaunit.assertNotNil(string.find(storedNetworkContents, "config interface 'wg0'"))
+    -- ensure only options with differing values are stored
+    local storedFirewallFile = io.open(stored_dir .. '/etc/config/firewall')
+    luaunit.assertNotNil(storedFirewallFile)
+    local storedFirewallContents = storedFirewallFile:read('*all')
+    luaunit.assertNotNil(string.find(storedFirewallContents, "option forward 'REJECT'"))
+    luaunit.assertNotNil(string.find(storedFirewallContents, "option output 'ACCEPT'"))
     -- check system
     local systemFile = io.open(config_dir .. 'system')
     luaunit.assertNotNil(systemFile)

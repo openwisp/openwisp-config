@@ -38,8 +38,9 @@ local get_standard = function() return uci.cursor(standard_config_dir) end
 local get_remote = function()
   return uci.cursor(remote_config_dir, '/tmp/openwisp/.uci')
 end
-local get_check =
-  function() return uci.cursor(check_config_dir, '/tmp/openwisp/.uci') end
+local get_check = function()
+  return uci.cursor(check_config_dir, '/tmp/openwisp/.uci')
+end
 local get_stored = function()
   return uci.cursor(stored_config_dir, '/tmp/openwisp/.uci')
 end
@@ -153,34 +154,9 @@ if lfs.attributes(remote_config_dir, 'mode') == 'directory' then
     if lfs.attributes(remote_path, 'mode') == 'file' then
       -- if there's no backup of the file yet, create one
       if not utils.file_exists(stored_path) then
-        os.execute('cp ' .. standard_path .. ' ' .. stored_path)
-        local uci_sections = stored:get_all(file) or {}
-        for key, section in pairs(uci_sections) do
-          -- check if section is in remote configuration
-          local section_check = check:get(file, section['.name'])
-          if section_check then
-            -- check if options is in remote configuration
-            for option, value in pairs(section) do
-              if not utils.starts_with_dot(option) then
-                local option_check = check:get(file, section['.name'], option)
-                if option_check then
-                  -- if option is in remote configuration, remove it
-                  stored:delete(file, section['.name'], option)
-                end
-              end
-            end
-            -- remove entire section if empty
-            local result = stored:get_all(file, section['.name'])
-            if result and utils.is_uci_empty(result) then
-              stored:delete(file, section['.name'])
-            end
-          end
-        end
-        stored:commit(file)
-        -- remove uci file if empty
-        local uci_file = stored:get_all(file)
-        if uci_file and utils.is_table_empty(uci_file) then
-          os.remove(stored_path)
+        local uci_file = check:get_all(file)
+        if uci_file and not utils.is_table_empty(uci_file) then
+          os.execute('cp ' .. standard_path .. ' ' .. stored_path)
         end
       end
       -- MERGE mode
