@@ -955,6 +955,7 @@ while true; do
 	if [ "$?" -eq "1" ]; then
 		update_configuration
 	fi
+	env -i ACTION="end-of-cycle" /sbin/hotplug-call openwisp
 
 	# handle SIGUSR1 to interrupt sleep
 	trap handle_sigusr1 USR1

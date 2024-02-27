@@ -330,6 +330,7 @@ The agent sends the following
 - After the previous configuration has been restored: ``config-restored``
 - Before services are reloaded: ``pre-reload``
 - After services have been reloaded: ``post-reload``
+- After the agent has finished its check cycle, before going to sleep: ``end-of-cycle``
 
 If a hotplug event is sent by *openwisp-config* then all scripts existing in
 ``/etc/hotplug.d/openwisp/`` will be executed. In scripts the type of event
