@@ -101,3 +101,15 @@ jobs:
           SRC_URL: ${{ env.DOWNLOADS_DIR }}/${{ env.START_TIME }}/openwisp
           DST_URL: gs://${{ secrets.GCS_DOWNLOADS_BUCKET_NAME }}/openwisp-config/${{ env.START_TIME }}-${{ env.COMMIT_SHA }}
           LATEST_URL: gs://${{ secrets.GCS_DOWNLOADS_BUCKET_NAME }}/openwisp-config/latest
+
+      - name: Generate Checksum
+        run: |
+          cd ${{ env.DOWNLOADS_DIR }}/${{ env.START_TIME }}/openwisp
+          for file in *; do 
+            if [ -f "$file" ]; then
+              sha256sum "$file" > "$file.sha256"
+            else
+              echo "No files found for checksum generation."
+              exit 1
+            fi
+          done
