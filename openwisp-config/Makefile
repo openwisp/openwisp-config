@@ -29,6 +29,7 @@ endef
 
 define Package/openwisp-config/conffiles
 /etc/config/openwisp
+/etc/openwisp/
 endef
 
 define Package/openwisp-config/install
