@@ -46,11 +46,11 @@ echo "CONFIG_PACKAGE_openwisp-config=y" >>.config
 make defconfig
 
 if [ ! "$CI_CACHE" ]; then
-	make -j"$CORES" tools/install
-	make -j"$CORES" toolchain/install
+	make -j"$CORES" tools/install || make -j1 V=s tools/install
+	make -j"$CORES" toolchain/install || make -j1 V=s toolchain/install
 fi
 
-make -j"$CORES" package/openwisp-config/compile || exit 1
+make -j"$CORES" package/openwisp-config/compile || make -j1 V=s package/openwisp-config/compile || exit 1
 
 mv "$BUILD_DIR"/openwrt/bin/packages/"$COMPILE_TARGET"/openwisp "$VERSIONED_DIR"
 
