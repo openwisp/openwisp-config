@@ -114,11 +114,7 @@ end
 
 -- returns true if a table is empty
 function utils.is_table_empty(t)
-  if next(t) == nil then
-    return true
-  else
-    return false
-  end
+  return not t or next(t) == nil
 end
 
 -- Code by David Kastrup
