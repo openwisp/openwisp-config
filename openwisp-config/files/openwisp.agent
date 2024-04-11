@@ -830,9 +830,14 @@ backup_configuration() {
 	# save list of files that are going to be changed by openwisp
 	# so that if the changes sent by openwisp cause problems,
 	# the previous version can be rolled back
-	tar -ztf $CONFIGURATION_ARCHIVE | sed 's/^/\//' >$BACKUP_FILE_LIST
+	tar -ztf $CONFIGURATION_ARCHIVE | sed 's/^/\//' >"${BACKUP_FILE_LIST}.tmp"
+	# include all currently modified files because a change might
+	# get removed in the new configuration and then a file would disappear
+	find /etc/openwisp/remote/ -type f | sed 's/^\/etc\/openwisp\/remote//' >>"${BACKUP_FILE_LIST}.tmp"
+	sort -u "${BACKUP_FILE_LIST}.tmp" >$BACKUP_FILE_LIST
 	# backup only those files
 	tar -zcf $CONFIGURATION_BACKUP -T $BACKUP_FILE_LIST
+	rm "${BACKUP_FILE_LIST}.tmp"
 	rm $BACKUP_FILE_LIST
 }
 
