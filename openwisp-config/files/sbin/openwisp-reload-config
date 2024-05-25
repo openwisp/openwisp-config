@@ -1,5 +1,5 @@
 #!/bin/sh
-# openwisp_config variant of /sbin/reload_config
+# openwisp-config variant of /sbin/reload_config
 
 rm -rf /var/run/config.check
 mkdir -p /var/run/config.check

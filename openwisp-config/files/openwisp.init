@@ -7,7 +7,7 @@
 	START=99
 	USE_PROCD=1
 }
-PROG="/usr/sbin/openwisp_config"
+PROG="/usr/sbin/openwisp-config"
 PROG_NAME="OpenWISP config agent"
 CONTROL_FILE=/tmp/openwisp/applying_conf
 

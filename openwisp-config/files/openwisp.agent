@@ -584,7 +584,7 @@ print_error_logs() {
 	# "\n[truncated]" is appended to the logs which adds
 	# another 13 bytes.
 	max_log_bytes=1011
-	# Save openwisp_config related logs to a temporary file
+	# Save openwisp-config related logs to a temporary file
 	logread -e openwisp >"$CONFIG_ERROR_LOG"
 	# Get the line number of the last configuration update
 	last_update_line_no=$(
