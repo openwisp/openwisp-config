@@ -35,6 +35,8 @@ function TestUciAutoname.test_default_behaviour()
   luaunit.assertNotNil(string.find(networkContents,
     "config switch_port 'switch0_port1"))
   luaunit.assertNotNil(string.find(networkContents, "config globals 'globals"))
+  luaunit.assertNotNil(string.find(networkContents,
+    "config device 'device_lan2"))
   luaunit.assertNotNil(string.find(networkContents, "config route 'route1"))
   luaunit.assertNotNil(string.find(networkContents, "config route 'route2"))
   -- ensure rest of config options are present

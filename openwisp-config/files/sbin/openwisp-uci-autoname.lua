@@ -63,6 +63,8 @@ for file in lfs.dir(standard_path) do
           new_name = 'defaults'
         elseif file == 'network' and section['.type'] == 'globals' then
           new_name = 'globals'
+        elseif file == 'network' and section['.type'] == 'device' then
+          new_name = 'device_' .. section['name']:gsub('br%-', '')
         elseif file == 'network' and
           (section['.type'] == 'route' or section['.type'] == 'route6') then
           new_name = nextAvailableName('route')

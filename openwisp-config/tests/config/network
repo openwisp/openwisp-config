@@ -19,6 +19,15 @@ config interface 'wan'
 	option proto 'none'
 	option test_restore '1'
 
+config device
+	option name 'br-lan2'
+	list ports 'lan2'
+	option type 'bridge'
+
+config interface 'lan2'
+	option device 'br-lan2'
+	option proto 'dhcp'
+
 config interface 'wlan0'
 	option ifname 'wlan0'
 	list ipaddr '172.27.254.251/16'
