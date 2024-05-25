@@ -837,8 +837,7 @@ backup_configuration() {
 	sort -u "${BACKUP_FILE_LIST}.tmp" >$BACKUP_FILE_LIST
 	# backup only those files
 	tar -zcf $CONFIGURATION_BACKUP -T $BACKUP_FILE_LIST
-	rm "${BACKUP_FILE_LIST}.tmp"
-	rm $BACKUP_FILE_LIST
+	rm "${BACKUP_FILE_LIST}*"
 }
 
 restore_backup() {
