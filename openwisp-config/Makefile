@@ -42,11 +42,11 @@ define Package/openwisp-config/install
 
 	$(INSTALL_BIN) \
 		files/openwisp.agent \
-		$(1)/usr/sbin/openwisp_config
+		$(1)/usr/sbin/openwisp-config
 
 	$(INSTALL_BIN) \
 		files/openwisp.init \
-		$(1)/etc/init.d/openwisp_config
+		$(1)/etc/init.d/openwisp-config
 
 	$(INSTALL_CONF) files/openwisp.config \
 		$(1)/etc/config/openwisp
@@ -92,6 +92,24 @@ define Package/openwisp-config/install
 		$(1)/usr/sbin/openwisp-get-random-number
 
 	$(CP) ../VERSION $(1)/usr/lib/openwisp-config/
+endef
+
+# for backward compatibility
+define Package/openwisp-config/postinst
+#!/bin/sh
+if [ ! -L /usr/sbin/openwisp_config ]; then
+	ln -s /usr/sbin/openwisp-config /usr/sbin/openwisp_config
+fi
+
+if [ ! -L /etc/init.d/openwisp_config ]; then
+	ln -s /etc/init.d/openwisp-config /etc/init.d/openwisp_config
+fi
+endef
+
+define Package/openwisp-config/postrm
+#!/bin/sh
+rm -f /usr/sbin/openwisp_config
+rm -f /etc/init.d/openwisp_config
 endef
 
 $(eval $(call BuildPackage,openwisp-config))

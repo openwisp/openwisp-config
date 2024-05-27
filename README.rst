@@ -59,7 +59,7 @@ and `Compiling a custom OpenWRT image`_.
 Once installed *openwisp-config* needs to be configured (see `Configuration options`_)
 and then started with::
 
-    /etc/init.d/openwisp_config start
+    /etc/init.d/openwisp-config start
 
 To ensure the agent is working correctly find out how to perform debugging in
 the `Debugging`_ section.
@@ -188,7 +188,7 @@ If the test fails, the backup is restored and the agent will log the failure via
 Disable testing
 ^^^^^^^^^^^^^^^
 
-To disable this feature, set the ``test_config`` option to ``0``, then reload/restart *openwisp_config*.
+To disable this feature, set the ``test_config`` option to ``0``, then reload/restart *openwisp-config*.
 
 Define custom tests
 ^^^^^^^^^^^^^^^^^^^
@@ -238,7 +238,7 @@ In some cases it could be necessary to ensure that some configuration sections w
 overwritten by the controller.
 
 These settings are called "unmanaged", in the sense that they are not managed remotely.
-In the default configuration of *openwisp_config* there are no unmanaged settings.
+In the default configuration of *openwisp-config* there are no unmanaged settings.
 
 Example unmanaged settings::
 
@@ -297,7 +297,7 @@ Complete example:
     EOF
     # make script executable
     chmod +x /usr/sbin/my-pre-reload-hook
-    # reload openwisp_config by using procd's convenient utility
+    # reload openwisp-config by using procd's convenient utility
     reload_config
 
 post-reload-hook
@@ -468,11 +468,11 @@ If you are in doubt openwisp-config is running at all, you can check with::
 
 You should see something like::
 
-    3800 root      1200 S    {openwisp_config} /bin/sh /usr/sbin/openwisp_config --url https://openwisp2.mydomain.com --verify-ssl 1 --consistent-key 1 ...
+    3800 root      1200 S    {openwisp-config} /bin/sh /usr/sbin/openwisp-config --url https://openwisp2.mydomain.com --verify-ssl 1 --consistent-key 1 ...
 
 You can inspect the version of openwisp-config currently installed with::
 
-    openwisp_config --version
+    openwisp-config --version
 
 Quality Assurance Checks
 ------------------------
