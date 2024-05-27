@@ -109,7 +109,7 @@ endef
 define Package/openwisp-config/postrm
 #!/bin/sh
 rm -f /usr/sbin/openwisp_config
-rm -f /etc/init.d/openwisp-config
+rm -f /etc/init.d/openwisp_config
 endef
 
 $(eval $(call BuildPackage,openwisp-config))
