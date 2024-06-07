@@ -1,5 +1,5 @@
-Developer Installation Instructions
-===================================
+Developer Documentation
+=======================
 
 .. include:: ../partials/developer-docs.rst
 
