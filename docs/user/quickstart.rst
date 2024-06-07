@@ -29,8 +29,8 @@ from the official OpenWRT packages:
 **We recommend installing from our latest builds or compiling your own
 firmware image** as the OpenWrt packages are not always up to date.
 
-**If you need to compile the package yourself**, see doc:`compiling` and
-:ref:`compiling_custom_openwrt_image`.
+**If you need to compile the package yourself**, see
+ref:`compiling_openwisp_config` and :doc:`compiling`.
 
 Once installed, *openwisp-config* needs to be configured (see
 :doc:`Configuration options <settings>`). Start the agent with the

@@ -16,7 +16,7 @@ When the registration is completed, the agent will automatically set
 ``uuid`` and ``key`` in ``/etc/config/openwisp``.
 
 To enable this feature by default on your firmware images, follow the
-procedure described in :ref:`compiling_custom_openwrt_image`.
+procedure described in :doc:`compiling`.
 
 .. _config_consistent_key_generation:
 

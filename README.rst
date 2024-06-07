@@ -31,8 +31,10 @@ agent for `OpenWrt <https://openwrt.org/>`_.
 Documentation
 -------------
 
-- `Developer documentation <https://openwisp.io/docs/__new__/dev/openwrt-config-agent/developer/>`_
-- `User documentation <https://openwisp.io/docs/__new__/dev/openwrt-config-agent/>`_
+- `Developer documentation
+  <https://openwisp.io/docs/__new__/dev/openwrt-config-agent/developer/>`_
+- `User documentation
+  <https://openwisp.io/docs/__new__/dev/openwrt-config-agent/>`_
 
 Contributing
 ------------

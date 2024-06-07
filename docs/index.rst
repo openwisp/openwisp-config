@@ -24,4 +24,4 @@ For a comprehensive overview of features, please refer to the
     :caption: Developer Docs
     :maxdepth: 2
 
-    Developer Docs Index <developer/index.rst>
+    Developer installation Instructions <developer/installation.rst>

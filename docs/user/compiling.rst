@@ -1,50 +1,3 @@
-Compiling openwisp-config
-=========================
-
-The following procedure illustrates how to compile *openwisp-config* and
-its dependencies:
-
-.. code-block:: shell
-
-    git clone https://github.com/openwrt/openwrt.git openwrt
-    cd openwrt
-    git checkout <openwrt-branch>
-
-    # configure feeds
-    echo "src-git openwisp https://github.com/openwisp/openwisp-config.git" > feeds.conf
-    cat feeds.conf.default >> feeds.conf
-    ./scripts/feeds update -a
-    ./scripts/feeds install -a
-    # any arch/target is fine because the package is architecture indipendent
-    arch="ar71xx"
-    echo "CONFIG_TARGET_$arch=y" > .config;
-    echo "CONFIG_PACKAGE_openwisp-config=y" >> .config
-    make defconfig
-    make tools/install
-    make toolchain/install
-    make package/openwisp-config/compile
-
-Alternatively, you can configure your build interactively with ``make
-menuconfig``, in this case you will need to select *openwisp-config* by
-going to ``Administration > openwisp``:
-
-.. code-block:: shell
-
-    git clone https://github.com/openwrt/openwrt.git openwrt
-    cd openwrt
-    git checkout <openwrt-branch>
-
-    # configure feeds
-    echo "src-git openwisp https://github.com/openwisp/openwisp-config.git" > feeds.conf
-    cat feeds.conf.default >> feeds.conf
-    ./scripts/feeds update -a
-    ./scripts/feeds install -a
-    make menuconfig
-    # go to Administration > openwisp and select the variant you need interactively
-    make -j1 V=s
-
-.. _compiling_custom_openwrt_image:
-
 Compiling a custom OpenWRT image
 ================================
 
@@ -95,7 +48,7 @@ The following procedure illustrates how to compile a custom `OpenWRT
     make -j1 V=s
 
 Automate compilation for different organizations
-================================================
+------------------------------------------------
 
 If you are working with OpenWISP, there are chances you may be compiling
 several images for different organizations (clients or non-profit
