@@ -1,12 +1,16 @@
 Settings
 ========
 
-Configuration options
+.. contents::
+    :depth: 1
+    :local:
+
+Configuration Options
 ---------------------
 
 UCI configuration options must go in ``/etc/config/openwisp``.
 
-- ``url``: url of controller, eg: ``https://controller.openwisp.org``
+- ``url``: url of controller, eg: ``https://demo.openwisp.io``
 - ``interval``: time in seconds between checks for changes to the
   configuration, defaults to ``120``
 - ``management_interval``: time in seconds between the management ip
@@ -15,31 +19,33 @@ UCI configuration options must go in ``/etc/config/openwisp``.
   attempts, defaults to ``$interval/4``
 - ``verify_ssl``: whether SSL verification must be performed or not,
   defaults to ``1``
-- ``shared_secret``: shared secret, needed for `Automatic registration`_
-- ``consistent_key``: whether `Consistent key generation`_ is enabled or
-  not, defaults to ``1``
-- ``merge_config``: whether `Merge configuration`_ is enabled or not,
-  defaults to ``1``
+- ``shared_secret``: shared secret, needed for
+  :doc:`automatic-registration`
+- ``consistent_key``: whether :ref:`config_consistent_key_generation` is
+  enabled or not, defaults to ``1``
+- ``merge_config``: whether :ref:`config_merge_configuration` is enabled
+  or not, defaults to ``1``
 - ``tags``: template tags to use during registration, multiple tags
-  separated by space can be used, for more information see `Template Tags
-  <https://openwisp.io/docs/user/templates.html#template-tags>`_
+  separated by space can be used, for more information see :ref:`Template
+  Tags <templates_tags>`
 - ``test_config``: whether a new configuration must be tested before being
   considered applied, defaults to ``1``
 - ``test_retries``: maximum number of retries when doing the default
   configuration test, defaults to ``3``
 - ``test_script``: custom test script, read more about this feature in
-  `Configuration test`_
+  :ref:`config_configuration_test`
 - ``uuid``: unique identifier of the router configuration in the
   controller application
 - ``key``: key required to download the configuration
 - ``hardware_id_script``: custom script to read out a hardware id (e.g. a
-  serial number), read more about this feature in `Hardware ID`_
+  serial number), read more about this feature in
+  :ref:`config_hardware_id`
 - ``hardware_id_key``: whether to use the hardware id for key generation
   or not, defaults to ``1``
 - ``bootup_delay``: maximum value in seconds of a random delay after
-  bootup, defaults to ``10``, see `Bootup Delay`_
+  bootup, defaults to ``10``, see :ref:`config_bootup_delay`
 - ``unmanaged``: list of config sections which won't be overwritten, see
-  `Unmanaged Configurations`_
+  :ref:`config_unmanaged_configuration`
 - ``capath``: value passed to curl ``--capath`` argument, by default is
   empty; see also `curl capath argument
   <https://curl.haxx.se/docs/manpage.html#--capath>`_
@@ -57,9 +63,8 @@ UCI configuration options must go in ``/etc/config/openwisp``.
 - ``management_interface``: management interface name (both openwrt UCI
   names and linux interface names are supported), it's used to collect the
   management interface ip address and send this information to the
-  OpenWISP server, for more information please read `how to make sure
-  OpenWISP can reach your devices
-  <https://openwisp.io/docs/user/monitoring.html#openwisp-reach-devices>`_
+  OpenWISP server, for more information please read :ref:`how to make sure
+  OpenWISP can reach your devices <openwisp_reach_devices>`
 - ``default_hostname``: if your firmware has a custom default hostname,
   you can use this configuration option so the agent can recognize it
   during registration and replicate the standard behavior (new device will
@@ -71,13 +76,13 @@ UCI configuration options must go in ``/etc/config/openwisp``.
   on different hardware models and each model has a different default
   hostname)
 - ``pre_reload_hook``: path to custom executable script, see
-  pre-reload-hook_
+  :ref:`config_pre_reload_hook`
 - ``post_reload_hook``: path to custom executable script, see
-  post-reload-hook_
+  :ref:`config_post_reload_hook`
 - ``post_reload_delay``: delay in seconds to wait before the
   post-reload-hook and any configuration test, defaults to ``5``
 - ``post_registration_hook``: path to custom executable script, see
-  post-registration-hook_
+  :ref:`config_post_registration_hook`
 - ``respawn_threshold``: time in seconds used as procd respawn threshold,
   defaults to ``3600``
 - ``respawn_timeout``: time in seconds used as procd respawn timeout,
@@ -93,6 +98,8 @@ UCI configuration options must go in ``/etc/config/openwisp``.
   as: ``checksum_max_retries * respawn_retry``
 - ``checksum_retry_delay``: time in seconds between retries, defaults to
   ``6``
+
+.. _config_merge_configuration:
 
 Merge configuration
 -------------------
@@ -118,6 +125,8 @@ It is possible to turn this feature off by setting ``merge_config`` to
   replaced by the remote configuration are backed up and eventually
   restored if the modifications are removed from the controller
 
+.. _config_configuration_test:
+
 Configuration test
 ------------------
 
@@ -130,7 +139,8 @@ If the test succeeds, the configuration is considered applied and the
 backup is deleted.
 
 If the test fails, the backup is restored and the agent will log the
-failure via syslog (see Debugging_ for more information on auditing logs).
+failure via syslog (see :doc:`debugging` for more information on auditing
+logs).
 
 Disable testing
 ~~~~~~~~~~~~~~~
@@ -148,6 +158,8 @@ the ``test_script`` config option.
 If the exit code of the executable script is higher than ``0`` the test
 will be considered failed.
 
+.. _config_hardware_id:
+
 Hardware ID
 -----------
 
@@ -163,8 +175,10 @@ used for generating the device key, instead of the mac address. If you use
 a hardware id script but prefer to use the mac address for key generation
 then set ``hardware_id_key`` to ``0``.
 
-See also the `related hardware ID settings in OpenWISP Controller
-<https://github.com/openwisp/openwisp-controller/#openwisp-controller-hardware-id-enabled>`_.
+See also the :ref:`related hardware ID settings in OpenWISP Controller
+<openwisp_controller_hardware_id_enabled>`.
+
+.. _config_bootup_delay:
 
 Bootup Delay
 ------------
@@ -184,10 +198,14 @@ large amount of devices boot up at the same time after a blackout.
 
 Large OpenWISP installations may want to increase this value.
 
+.. _config_hooks:
+
 Hooks
 -----
 
 Below are described the available hooks in *openwisp-config*.
+
+.. _config_pre_reload_hook:
 
 pre-reload-hook
 ~~~~~~~~~~~~~~~
@@ -199,8 +217,8 @@ This hook is called each time *openwisp-config* applies a configuration,
 but **before services are reloaded**, more precisely in these situations:
 
 - after a new remote configuration is downloaded and applied
-- after a configuration test failed (see `Configuration test`_) and a
-  previous backup is restored
+- after a configuration test failed (see :ref:`config_configuration_test`)
+  and a previous backup is restored
 
 You can use this hook to perform custom actions before services are
 reloaded, eg: to perform auto-configuration with `LibreMesh
@@ -232,6 +250,8 @@ Complete example:
     # reload openwisp-config by using procd's convenient utility
     reload_config
 
+.. _config_post_reload_hook:
+
 post-reload-hook
 ~~~~~~~~~~~~~~~~
 
@@ -241,6 +261,8 @@ the path does not point to an executable script file.
 Same as `pre_reload_hook` but with the difference that this hook is called
 after the configuration services have been reloaded.
 
+.. _config_post_registration_hook:
+
 post-registration-hook
 ~~~~~~~~~~~~~~~~~~~~~~
 
@@ -248,6 +270,8 @@ Defaults to ``/etc/openwisp/post-registration-hook``;
 
 Path to an executable script that will be called after the registration is
 completed.
+
+.. _config_unmanaged_configuration:
 
 Unmanaged Configurations
 ------------------------

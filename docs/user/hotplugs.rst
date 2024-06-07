@@ -30,7 +30,7 @@ like this:
 
 It will create log entries like this:
 
-.. code-block::
+.. code-block:: text
 
     Wed Jun 22 06:15:17 2022 user.notice root: openwisp-config sent a hotplug event. Action: registration-failed
 

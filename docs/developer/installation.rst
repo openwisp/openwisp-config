@@ -1,5 +1,10 @@
+Developer Installation Instructions
+===================================
+
+.. include:: ../partials/developer-docs.rst
+
 Quality Assurance Checks
-========================
+------------------------
 
 We use `LuaFormatter <https://luarocks.org/modules/tammela/luaformatter>`_
 and `shfmt <https://github.com/mvdan/sh#shfmt>`_ to format lua files and
@@ -23,7 +28,7 @@ To run quality assurance checks you can use the ``run-qa-checks`` script:
     ./run-qa-checks
 
 Run tests
-=========
+---------
 
 To run the unit tests, you must install the required dependencies first;
 to do this, you can take a look at the `install-dev.sh
@@ -32,13 +37,13 @@ script.
 
 You can run all the unit tests by launching the dedicated script:
 
-.. code-block::
+.. code-block:: shell
 
     ./runtests
 
 Alternatively, you can run specifc tests, eg:
 
-.. code-block::
+.. code-block:: shell
 
     cd openwisp-config/tests/
     lua test_utils.lua -v

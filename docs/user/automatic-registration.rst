@@ -16,10 +16,12 @@ When the registration is completed, the agent will automatically set
 ``uuid`` and ``key`` in ``/etc/config/openwisp``.
 
 To enable this feature by default on your firmware images, follow the
-procedure described in `Compiling a custom OpenWRT image`_.
+procedure described in :ref:`compiling_custom_openwrt_image`.
+
+.. _config_consistent_key_generation:
 
 Consistent key generation
-=========================
+-------------------------
 
 When using `Automatic registration`_, this feature allows devices to keep
 the same configuration even if reset or reflashed.
@@ -36,4 +38,5 @@ interface is used. You won't need to change this setting often, but if you
 do, ensure you choose a physical interface which has constant mac address.
 
 The "Consistent key generation" feature is enabled by default, but must be
-enabled also in the controller application in order to work.
+:ref:`enabled also in the controller application
+<openwisp_controller_consistent_registration>` in order to work.

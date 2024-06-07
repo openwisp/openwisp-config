@@ -43,6 +43,8 @@ going to ``Administration > openwisp``:
     # go to Administration > openwisp and select the variant you need interactively
     make -j1 V=s
 
+.. _compiling_custom_openwrt_image:
+
 Compiling a custom OpenWRT image
 ================================
 
@@ -54,9 +56,9 @@ benefits:
 
 - you can save yourself the effort of installing and configuring
   ``openwisp-config`` on each device
-- you can enable `Automatic registration`_ by setting ``shared_secret``,
-  hence saving extra time and effort to register each device on the
-  controller app
+- you can enable :doc:`automatic-registration` by setting
+  ``shared_secret``, hence saving extra time and effort to register each
+  device on the controller app
 - if you happen to reset the firmware to initial settings, these
   precompiled settings will be restored as well
 
@@ -75,8 +77,8 @@ The following procedure illustrates how to compile a custom `OpenWRT
     cat <<EOF > files/etc/config/openwisp
     config controller 'http'
         # change the values of the following 2 options
-        option url 'https://openwisp2.mydomain.com'
-        option shared_secret 'mysharedsecret'
+        option url 'https://demo.openwisp.io'
+        option shared_secret 'nzXTd7qpXKPNdrWZDsYoMxbGpOrEVjeD'
     EOF
 
     # configure feeds
