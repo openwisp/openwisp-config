@@ -17,8 +17,8 @@ For a comprehensive overview of features, please refer to the
     ./user/settings.rst
     ./user/automatic-registration.rst
     ./user/hotplugs.rst
-    ./user/compiling
-    ./user/debugging
+    ./user/compiling.rst
+    ./user/debugging.rst
 
 .. toctree::
     :caption: Developer Docs
