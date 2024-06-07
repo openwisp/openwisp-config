@@ -1,4 +1,4 @@
-Compiling a custom OpenWRT image
+Compiling a Custom OpenWRT Image
 ================================
 
 If you are managing many devices and customizing your ``openwisp-config``
@@ -47,7 +47,7 @@ The following procedure illustrates how to compile a custom `OpenWRT
     # compile with verbose output
     make -j1 V=s
 
-Automate compilation for different organizations
+Automate Compilation for Different Organizations
 ------------------------------------------------
 
 If you are working with OpenWISP, there are chances you may be compiling

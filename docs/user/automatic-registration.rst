@@ -20,7 +20,7 @@ procedure described in :doc:`compiling`.
 
 .. _config_consistent_key_generation:
 
-Consistent key generation
+Consistent Key Generation
 -------------------------
 
 When using `Automatic registration`_, this feature allows devices to keep

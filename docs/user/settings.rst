@@ -101,7 +101,7 @@ UCI configuration options must go in ``/etc/config/openwisp``.
 
 .. _config_merge_configuration:
 
-Merge configuration
+Merge Configuration
 -------------------
 
 By default the remote configuration is merged with the local one. This has
@@ -127,7 +127,7 @@ It is possible to turn this feature off by setting ``merge_config`` to
 
 .. _config_configuration_test:
 
-Configuration test
+Configuration Test
 ------------------
 
 When a new configuration is downloaded, the agent will first backup the
@@ -142,13 +142,13 @@ If the test fails, the backup is restored and the agent will log the
 failure via syslog (see :doc:`debugging` for more information on auditing
 logs).
 
-Disable testing
+Disable Testing
 ~~~~~~~~~~~~~~~
 
 To disable this feature, set the ``test_config`` option to ``0``, then
 reload/restart *openwisp-config*.
 
-Define custom tests
+Define Custom Tests
 ~~~~~~~~~~~~~~~~~~~
 
 If the default test does not satisfy your needs, you can define your own
@@ -262,7 +262,6 @@ Same as `pre_reload_hook` but with the difference that this hook is called
 after the configuration services have been reloaded.
 
 .. _config_post_registration_hook:
-
 post-registration-hook
 ~~~~~~~~~~~~~~~~~~~~~~
 

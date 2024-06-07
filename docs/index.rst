@@ -9,8 +9,6 @@ For a comprehensive overview of features, please refer to the
 :doc:`user/intro` page.
 
 .. toctree::
-    :caption: User Docs
-    :maxdepth: 1
 
     ./user/intro.rst
     ./user/quickstart.rst
@@ -22,6 +20,5 @@ For a comprehensive overview of features, please refer to the
 
 .. toctree::
     :caption: Developer Docs
-    :maxdepth: 2
 
     Developer installation Instructions <developer/installation.rst>
