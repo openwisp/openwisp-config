@@ -262,6 +262,7 @@ Same as `pre_reload_hook` but with the difference that this hook is called
 after the configuration services have been reloaded.
 
 .. _config_post_registration_hook:
+
 post-registration-hook
 ~~~~~~~~~~~~~~~~~~~~~~
 
