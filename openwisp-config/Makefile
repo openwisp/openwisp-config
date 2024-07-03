@@ -97,19 +97,19 @@ endef
 # for backward compatibility
 define Package/openwisp-config/postinst
 #!/bin/sh
-if [ ! -L /usr/sbin/openwisp_config ]; then
-	ln -s /usr/sbin/openwisp-config /usr/sbin/openwisp_config
+if [ ! -L $${IPKG_INSTROOT}/usr/sbin/openwisp_config ]; then
+	ln -s /usr/sbin/openwisp-config $${IPKG_INSTROOT}/usr/sbin/openwisp_config
 fi
 
-if [ ! -L /etc/init.d/openwisp_config ]; then
-	ln -s /etc/init.d/openwisp-config /etc/init.d/openwisp_config
+if [ ! -L $${IPKG_INSTROOT}/etc/init.d/openwisp_config ]; then
+	ln -s /etc/init.d/openwisp-config $${IPKG_INSTROOT}/etc/init.d/openwisp_config
 fi
 endef
 
 define Package/openwisp-config/postrm
 #!/bin/sh
-rm -f /usr/sbin/openwisp_config
-rm -f /etc/init.d/openwisp_config
+rm -f $${IPKG_INSTROOT}/usr/sbin/openwisp_config
+rm -f $${IPKG_INSTROOT}/etc/init.d/openwisp_config
 endef
 
 $(eval $(call BuildPackage,openwisp-config))
