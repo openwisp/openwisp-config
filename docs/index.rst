@@ -1,5 +1,5 @@
-OpenWISP Config
-===============
+OpenWISP Config Agent
+=====================
 
 OpenWISP Config is an `OpenWrt <https://openwrt.org/>`_ configuration
 agent that automates network management tasks. It interfaces with the
