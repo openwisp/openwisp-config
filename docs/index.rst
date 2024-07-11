@@ -1,6 +1,9 @@
 OpenWISP Config Agent
 =====================
 
+**Source code**: `github.com/openwisp/openwisp-config
+<https://github.com/openwisp/openwisp-config>`_.
+
 OpenWISP Config is an `OpenWrt <https://openwrt.org/>`_ configuration
 agent that automates network management tasks. It interfaces with the
 OpenWISP Controller to streamline configuration deployment.
