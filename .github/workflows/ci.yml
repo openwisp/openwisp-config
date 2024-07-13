@@ -58,7 +58,7 @@ jobs:
         with:
           ref: ${{ github.event.pull_request.head.sha }}
 
-      - name: Cache OpenWRT dependencies
+      - name: Cache OpenWrt dependencies
         id: cache
         uses: actions/cache@v2
         env:

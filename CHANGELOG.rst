@@ -144,7 +144,7 @@ Changes
 - Check sanity of downloaded UCI files before applying them
 - Give up with registration only when 403 is returned by the server
 - Show entire registration error message in logs
-- Updated examples and precompiled packages to use OpenWRT 19.07
+- Updated examples and precompiled packages to use OpenWrt 19.07
 - Made check of OpenWISP Controller header case insensitve
 
 Bugfixes
@@ -248,5 +248,5 @@ Bugfixes
 ================
 
 - configuration daemon
-- ``apply_config`` script based on OpenWRT ``/sbin/reload_config``
+- ``apply_config`` script based on OpenWrt ``/sbin/reload_config``
 - automatic registration in controller

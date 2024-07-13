@@ -1,9 +1,9 @@
-Compiling a Custom OpenWRT Image
+Compiling a Custom OpenWrt Image
 ================================
 
 If you are managing many devices and customizing your ``openwisp-config``
 configuration by hand on each new device, you should switch to using a
-custom OpenWRT firmware image that includes ``openwisp-config`` and its
+custom OpenWrt firmware image that includes ``openwisp-config`` and its
 precompiled configuration file, this strategy has a few important
 benefits:
 
@@ -15,7 +15,7 @@ benefits:
 - if you happen to reset the firmware to initial settings, these
   precompiled settings will be restored as well
 
-The following procedure illustrates how to compile a custom `OpenWRT
+The following procedure illustrates how to compile a custom `OpenWrt
 <https://openwrt.org/>`_ image with a precompiled minimal
 ``/etc/config/openwisp`` configuration file:
 
