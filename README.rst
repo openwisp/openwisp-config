@@ -14,7 +14,7 @@ openwisp-config
 
 ----
 
-`OpenWISP Controller <https://openwisp.io/docs/__new__/dev/controller/>`_
+`OpenWISP Controller <https://openwisp.io/docs/dev/controller/>`_
 agent for `OpenWrt <https://openwrt.org/>`_.
 
 **Want to help OpenWISP?** `Find out how to help us grow here
@@ -32,9 +32,9 @@ Documentation
 -------------
 
 - `Developer documentation
-  <https://openwisp.io/docs/__new__/dev/openwrt-config-agent/developer/>`_
+  <https://openwisp.io/docs/dev/openwrt-config-agent/developer/>`_
 - `User documentation
-  <https://openwisp.io/docs/__new__/dev/openwrt-config-agent/>`_
+  <https://openwisp.io/docs/dev/openwrt-config-agent/>`_
 
 Contributing
 ------------
