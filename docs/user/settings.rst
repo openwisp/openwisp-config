@@ -5,6 +5,8 @@ Settings
     :depth: 1
     :local:
 
+.. _openwrt_config_agent_configuration_options:
+
 Configuration Options
 ---------------------
 
