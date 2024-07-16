@@ -1,8 +1,8 @@
 Settings
 ========
 
-.. contents::
-    :depth: 1
+.. contents:: **Table of Contents**:
+    :depth: 2
     :local:
 
 .. _openwrt_config_agent_configuration_options:
@@ -205,12 +205,17 @@ Large OpenWISP installations may want to increase this value.
 Hooks
 -----
 
+.. warning::
+
+    Hooks are deprecated in favour of
+    :doc:`Hotplug events <hotplug-events>`.
+
 Below are described the available hooks in *openwisp-config*.
 
 .. _config_pre_reload_hook:
 
-pre-reload-hook
-~~~~~~~~~~~~~~~
+``pre-reload-hook``
+~~~~~~~~~~~~~~~~~~~
 
 Defaults to ``/etc/openwisp/pre-reload-hook``; the hook is not called if
 the path does not point to an executable script file.
@@ -254,8 +259,8 @@ Complete example:
 
 .. _config_post_reload_hook:
 
-post-reload-hook
-~~~~~~~~~~~~~~~~
+``post-reload-hook``
+~~~~~~~~~~~~~~~~~~~~
 
 Defaults to ``/etc/openwisp/post-reload-hook``; the hook is not called if
 the path does not point to an executable script file.
@@ -265,8 +270,8 @@ after the configuration services have been reloaded.
 
 .. _config_post_registration_hook:
 
-post-registration-hook
-~~~~~~~~~~~~~~~~~~~~~~
+``post-registration-hook``
+~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Defaults to ``/etc/openwisp/post-registration-hook``;
 

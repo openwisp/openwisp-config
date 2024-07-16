@@ -11,4 +11,4 @@ OpenWISP Config agent provides the following features:
   <config_configuration_test>` when the new configuration fails to apply.
 - Simplifies onboarding by :doc:`automatically registering devices
   <automatic-registration>` with the controller using a shared secret.
-- Supports :doc:`OpenWrt hotplugs <hotplugs>`.
+- Supports :doc:`OpenWrt hotplug events <hotplug-events>`.

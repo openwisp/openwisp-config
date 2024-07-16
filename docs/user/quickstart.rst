@@ -1,8 +1,5 @@
-Quickstart
-==========
-
-Install Precompiled Package
----------------------------
+Quickstart Guide
+================
 
 To install openwisp-config on your OpenWrt system follow the steps below:
 

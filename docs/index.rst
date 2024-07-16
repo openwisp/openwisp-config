@@ -19,7 +19,7 @@ For a comprehensive overview of features, please refer to the
     ./user/quickstart.rst
     ./user/settings.rst
     ./user/automatic-registration.rst
-    ./user/hotplugs.rst
+    ./user/hotplug-events.rst
     ./user/compiling.rst
     ./user/debugging.rst
 
