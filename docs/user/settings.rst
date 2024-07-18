@@ -65,8 +65,8 @@ UCI configuration options must go in ``/etc/config/openwisp``.
 - ``management_interface``: management interface name (both openwrt UCI
   names and linux interface names are supported), it's used to collect the
   management interface ip address and send this information to the
-  OpenWISP server, for more information please read :ref:`how to make sure
-  OpenWISP can reach your devices <openwisp_reach_devices>`
+  OpenWISP server, for more information please read :doc:`how to make sure
+  OpenWISP can reach your devices </user/vpn>`
 - ``default_hostname``: if your firmware has a custom default hostname,
   you can use this configuration option so the agent can recognize it
   during registration and replicate the standard behavior (new device will
