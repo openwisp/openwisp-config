@@ -207,8 +207,8 @@ Hooks
 
 .. warning::
 
-    Hooks are deprecated in favour of
-    :doc:`Hotplug events <hotplug-events>`.
+    Hooks are deprecated in favour of :doc:`Hotplug events
+    <hotplug-events>`.
 
 Below are described the available hooks in *openwisp-config*.
 
