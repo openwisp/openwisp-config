@@ -27,6 +27,7 @@ jobs:
         run: sudo ./install-dev.sh
 
       - name: Install Python dependencies
+        id: deps
         run: pip install openwisp-utils[qa]>=0.7
 
       - name: QA-Checks
@@ -35,6 +36,7 @@ jobs:
           CI: 1
 
       - name: Run sh-checker
+        if: ${{ !cancelled() && steps.deps.conclusion == 'success' }}
         uses: luizm/action-sh-checker@v0.4.0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -42,6 +44,7 @@ jobs:
           sh_checker_comment: true
 
       - name: Tests
+        if: ${{ !cancelled() && steps.deps.conclusion == 'success' }}
         run: ./runtests
 
   build:
