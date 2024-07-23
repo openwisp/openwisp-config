@@ -28,7 +28,6 @@ jobs:
         run: |
           sudo ./install-dev.sh
           pip install openwisp-utils[qa]>=0.7
-          sudo ./install-dev.sh
 
       - name: QA-Checks
         run: ./run-qa-checks
