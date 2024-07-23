@@ -23,12 +23,12 @@ jobs:
         with:
           python-version: 3.7
 
-      - name: Install OpenWISP Config
-        run: sudo ./install-dev.sh
-
-      - name: Install Python dependencies
+      - name: Install Dependencies
         id: deps
-        run: pip install openwisp-utils[qa]>=0.7
+        run: |
+          sudo ./install-dev.sh
+          pip install openwisp-utils[qa]>=0.7
+          sudo ./install-dev.sh
 
       - name: QA-Checks
         run: ./run-qa-checks
