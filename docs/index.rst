@@ -13,15 +13,16 @@ OpenWISP Controller to streamline configuration deployment.
 For a comprehensive overview of features, please refer to the
 :doc:`user/intro` page.
 
-The following diagram illustrates the role of the OpenWrt Config Agent
-in the OpenWISP architecture.
+The following diagram illustrates the role of the OpenWrt Config Agent in
+the OpenWISP architecture.
 
 .. figure:: images/architecture-v2-openwrt-config-agent.png
     :target: ../_images/architecture-v2-openwrt-config-agent.png
     :align: center
     :alt: OpenWISP Architecture: OpenWISP Config Agent for OpenWrt
 
-    **OpenWISP Architecture: highlighted OpenWISP Config Agent for OpenWrt**
+    **OpenWISP Architecture: highlighted OpenWISP Config Agent for
+    OpenWrt**
 
 .. important::
 
