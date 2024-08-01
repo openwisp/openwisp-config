@@ -23,11 +23,11 @@ jobs:
         with:
           python-version: 3.7
 
-      - name: Install OpenWISP Config
-        run: sudo ./install-dev.sh
-
-      - name: Install Python dependencies
-        run: pip install openwisp-utils[qa]>=0.7
+      - name: Install Dependencies
+        id: deps
+        run: |
+          sudo ./install-dev.sh
+          pip install openwisp-utils[qa]>=0.7
 
       - name: QA-Checks
         run: ./run-qa-checks
@@ -35,6 +35,7 @@ jobs:
           CI: 1
 
       - name: Run sh-checker
+        if: ${{ !cancelled() && steps.deps.conclusion == 'success' }}
         uses: luizm/action-sh-checker@v0.4.0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -42,6 +43,7 @@ jobs:
           sh_checker_comment: true
 
       - name: Tests
+        if: ${{ !cancelled() && steps.deps.conclusion == 'success' }}
         run: ./runtests
 
   build:
@@ -84,13 +86,18 @@ jobs:
           name: Packages
           path: "${{ env.DOWNLOADS_DIR }}/${{ env.START_TIME }}"
 
-      - name: Setup Google Cloud
+      - name: Google Cloud Auth
         if: ${{ github.event_name=='push' }}
-        uses: google-github-actions/setup-gcloud@v0
+        uses: 'google-github-actions/auth@v2'
         with:
-          service_account_key: ${{ secrets.GCS_DOWNLOADS_SERVICE_ACCOUNT_JSON }}
           project_id: ${{ secrets.GCS_PROJECT_ID }}
-          export_default_credentials: true
+          credentials_json: ${{ secrets.GCS_DOWNLOADS_SERVICE_ACCOUNT_JSON }}
+
+      - name: Google Cloud Setup
+        if: ${{ github.event_name=='push' }}
+        uses: google-github-actions/setup-gcloud@v2
+        with:
+          project_id: ${{ secrets.GCS_PROJECT_ID }}
 
       - name: Upload compiled packages to downloads.openwisp.io
         if: ${{ github.event_name=='push' }}
