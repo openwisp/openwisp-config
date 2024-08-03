@@ -1,6 +1,6 @@
 #!/bin/bash
 # ci build script
-# runs tests and then builds the OpenWRT package
+# runs tests and then builds the OpenWrt package
 # requires the following env vars:
 # - $BUILD_DIR
 # - $DOWNLOADS_DIR

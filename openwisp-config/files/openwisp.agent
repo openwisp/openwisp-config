@@ -171,7 +171,7 @@ BOOTUP_DELAY=${BOOTUP_DELAY:-10}
 CONNECT_TIMEOUT=${CONNECT_TIMEOUT:-15}
 MAX_TIME=${MAX_TIME:-30}
 MAC_INTERFACE=${MAC_INTERFACE:-eth0}
-# LEDE was a popular fork of OpenWRT used in 2017
+# LEDE was a popular fork of OpenWrt used in 2017
 # it's kept here for backward compatibility
 DEFAULT_HOSTNAME=${DEFAULT_HOSTNAME:-"LEDE"}
 PRE_RELOAD_HOOK=${PRE_RELOAD_HOOK:-/etc/openwisp/pre-reload-hook}
