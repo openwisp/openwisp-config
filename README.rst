@@ -31,10 +31,10 @@ for `OpenWrt <https://openwrt.org/>`_.
 Documentation
 -------------
 
-- `Developer documentation
-  <https://openwisp.io/docs/dev/openwrt-config-agent/developer/>`_
-- `User documentation
+- `Usage documentation
   <https://openwisp.io/docs/dev/openwrt-config-agent/>`_
+- `Developer documentation
+  <https://openwisp.io/docs/dev/openwrt-config-agent/developer/installation.html>`_
 
 Contributing
 ------------
