@@ -12,7 +12,7 @@ Configuration Options
 
 UCI configuration options must go in ``/etc/config/openwisp``.
 
-- ``url``: url of controller, eg: ``https://demo.openwisp.io``
+- ``url``: URL of controller, e.g.: ``https://demo.openwisp.io``
 - ``interval``: time in seconds between checks for changes to the
   configuration, defaults to ``120``
 - ``management_interval``: time in seconds between the management ip
@@ -44,8 +44,8 @@ UCI configuration options must go in ``/etc/config/openwisp``.
   :ref:`config_hardware_id`
 - ``hardware_id_key``: whether to use the hardware id for key generation
   or not, defaults to ``1``
-- ``bootup_delay``: maximum value in seconds of a random delay after
-  bootup, defaults to ``10``, see :ref:`config_bootup_delay`
+- ``bootup_delay``: maximum value in seconds of a random delay after boot,
+  defaults to ``10``, see :ref:`config_bootup_delay`
 - ``unmanaged``: list of config sections which won't be overwritten, see
   :ref:`config_unmanaged_configuration`
 - ``capath``: value passed to curl ``--capath`` argument, by default is
@@ -182,8 +182,8 @@ See also the :ref:`related hardware ID settings in OpenWISP Controller
 
 .. _config_bootup_delay:
 
-Bootup Delay
-------------
+Boot Up Delay
+-------------
 
 The option ``bootup_delay`` is used to delay the initialization of the
 agent for a random amount of seconds after the device boots.
@@ -196,7 +196,7 @@ the agent will be delayed for a random number of seconds, this random
 number being comprised between ``0`` and ``10``.
 
 This feature is used to spread the load on the OpenWISP server when a
-large amount of devices boot up at the same time after a blackout.
+large amount of devices boot at the same time after a blackout.
 
 Large OpenWISP installations may want to increase this value.
 
@@ -207,7 +207,7 @@ Hooks
 
 .. warning::
 
-    Hooks are deprecated in favour of :doc:`Hotplug events
+    Hooks are deprecated in favor of :doc:`Hotplug events
     <hotplug-events>`.
 
 Below are described the available hooks in *openwisp-config*.
@@ -228,7 +228,7 @@ but **before services are reloaded**, more precisely in these situations:
   and a previous backup is restored
 
 You can use this hook to perform custom actions before services are
-reloaded, eg: to perform auto-configuration with `LibreMesh
+reloaded, e.g.: to perform auto-configuration with `LibreMesh
 <http://libre-mesh.org/>`_.
 
 Example configuration:

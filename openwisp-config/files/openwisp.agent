@@ -340,7 +340,7 @@ register() {
 	# exit if response does not seem to come from openwisp controller
 	check_header $REGISTRATION_PARAMETERS
 	if ! is_http_status $REGISTRATION_PARAMETERS 201; then
-		# get body of failure response, seperated from header by a blank line (CRLF-ended)
+		# get body of failure response, separated from header by a blank line (CRLF-ended)
 		message=$(awk 'BEGIN{RS="\r\n\r\n"}{if(NR>1)print $0}' $REGISTRATION_PARAMETERS)
 		logger -s "Registration failed! $message" \
 			-t openwisp \

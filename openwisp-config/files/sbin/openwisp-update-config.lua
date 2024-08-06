@@ -238,7 +238,7 @@ for file, bool in pairs(added) do
   end
 end
 
--- restore pre-existing files that were changed via openwisp
+-- restore preexisting files that were changed via openwisp
 -- which are not present anymore
 for file, bool in pairs(modified) do
   local remote_path = remote_dir .. file

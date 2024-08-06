@@ -20,7 +20,7 @@ TestUpdateConfig = {
         os.execute('mkdir -p ' .. remote_config_dir)
         -- prepare config tar gz
         os.execute('cp good-config.tar.gz configuration.tar.gz')
-        -- this file is pre-existing on the device
+        -- this file is preexisting on the device
         os.execute('cp ./update/system '..config_dir..'system')
         os.execute('cp ./update/network '..config_dir..'network')
         os.execute('cp ./update/wireless '..config_dir..'wireless')

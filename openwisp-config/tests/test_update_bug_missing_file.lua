@@ -15,7 +15,7 @@ TestConfigMissingFile = {
     os.execute('mkdir -p ' .. remote_config_dir)
     -- prepare bad config tar gz
     os.execute('cp good-config-missing-file-bug.tar.gz configuration.tar.gz')
-    -- these files are pre-existing on the device
+    -- these files are preexisting on the device
     os.execute('cp ./update/system ' .. remote_config_dir .. '/system')
     os.execute('cp ./update/system ' .. config_dir .. '/system')
     os.execute('cp ./restore/network ' .. remote_config_dir .. '/network')

@@ -54,7 +54,7 @@ Other changes
   configuration is not present yet
 - Increased report status retries: in some cases the report status
   operation may fail because the network reload could take a few minutes
-  to complete (eg: in mesh networks scenarios) and therefore the agent
+  to complete (e.g.: in mesh networks scenarios) and therefore the agent
   must be a bit more patient before giving up
 - Refactored init script to make it more consistent with the best
   practices used in the OpenWrt community
@@ -251,7 +251,7 @@ Bugfixes
 - `#11 <https://github.com/openwisp/openwisp-config/issues/11>`_: added
   ``merge_default`` feature
 - `#12 <https://github.com/openwisp/openwisp-config/issues/12>`_: improved
-  syslog facility and level (eg: daemon.info)
+  syslog facility and level (e.g.: daemon.info)
 - `#14 <https://github.com/openwisp/openwisp-config/issues/14>`_:
   resilient register failure
 - `#13 <https://github.com/openwisp/openwisp-config/issues/13>`_: smarter

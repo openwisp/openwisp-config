@@ -92,7 +92,7 @@ You can run all the unit tests by launching the dedicated script:
 
     ./runtests
 
-Alternatively, you can run specifc tests, eg:
+Alternatively, you can run specific tests, e.g.:
 
 .. code-block:: shell
 
