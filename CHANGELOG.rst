@@ -1,10 +1,65 @@
 Change log
 ==========
 
-1.1.0 [unreleased]
+1.1.0 [2024-09-25]
 ------------------
 
-WIP.
+Features
+~~~~~~~~
+
+- Added the ``default_hostname`` option to force devices to register using
+  their MAC address instead of their hostname.
+- Added support for `hotplug events
+  <https://openwisp.io/docs/dev/openwrt-config-agent/user/hotplug-events.html>`_.
+- Added error reporting functionality, which sends error logs to the
+  controller if the agent fails to apply a configuration update.
+- Implemented a retry mechanism with random backoff for essential
+  operations, including retrieving checksums and downloading
+  configurations from the controller, as well as reporting error statuses.
+
+Changes
+~~~~~~~
+
+Backward incompatible changes
++++++++++++++++++++++++++++++
+
+- Renamed ``/etc/init.d/openwisp_config`` to
+  ``/etc/init.d/openwisp_config``.
+
+Deprecations
+++++++++++++
+
+- Deprecated ``/usr/sbin/openwisp_config`` in favor of
+  ``/usr/sbin/openwisp-config`` to maintain consistency with other files
+  in the package. The path ``/usr/sbin/openwisp_config`` is now a symbolic
+  link to ``/usr/sbin/openwisp-config``.
+- Deprecated `hooks
+  <https://openwisp.io/docs/dev/openwrt-config-agent/user/settings.html#hooks>`_
+  in favor of `hotplug events
+  <https://openwisp.io/docs/dev/openwrt-config-agent/user/hotplug-events.html>`_.
+
+Other changes
++++++++++++++
+
+- Updated logging to capture errors from ``openwisp-update-config`` in
+  ``logd``.
+- Changed the default ``bootup_delay`` to ``10`` seconds.
+- Changed the auto-naming of ``network.device`` objects to make it
+  consistent with OpenWISP.
+
+Bugfixes
+~~~~~~~~
+
+- Ensured full backup of default UCI files to prevent the loss of
+  configuration.
+- Preserved persistent data directories across system upgrades.
+- Fixed a registration bug where the agent failed to automatically fall
+  back to the first non-loopback interface when the configured
+  ``mac_interface`` was not present.
+- Fixed backup process to include all modified files in the backup to
+  ensure no changes are omitted.
+- Resolved issues in post-installation and removal scripts in the
+  ``Makefile``, ensuring proper execution during image building.
 
 1.0.1 [2022-06-21]
 ------------------
