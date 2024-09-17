@@ -11,7 +11,7 @@ on:
 jobs:
   tests:
     name: QA-Checks and Tests
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-24.04
 
     steps:
       - uses: actions/checkout@v2
@@ -21,7 +21,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v2
         with:
-          python-version: 3.7
+          python-version: 3.x
 
       - name: Install Dependencies
         id: deps
@@ -49,7 +49,7 @@ jobs:
   build:
     name: Build and Upload Packages
     needs: tests
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-24.04
     env:
       BUILD_DIR: "/home/runner/work/build"
       DOWNLOADS_DIR: "/home/runner/work/downloads"
@@ -81,7 +81,7 @@ jobs:
           CI_CACHE: ${{ steps.cache.outputs.cache-hit }}
 
       - name: Upload packages as artifacts
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4
         with:
           name: Packages
           path: "${{ env.DOWNLOADS_DIR }}/${{ env.START_TIME }}"
