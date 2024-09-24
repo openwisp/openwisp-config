@@ -100,16 +100,11 @@ define Package/openwisp-config/postinst
 if [ ! -L $${IPKG_INSTROOT}/usr/sbin/openwisp_config ]; then
 	ln -s /usr/sbin/openwisp-config $${IPKG_INSTROOT}/usr/sbin/openwisp_config
 fi
-
-if [ ! -L $${IPKG_INSTROOT}/etc/init.d/openwisp_config ]; then
-	ln -s /etc/init.d/openwisp-config $${IPKG_INSTROOT}/etc/init.d/openwisp_config
-fi
 endef
 
 define Package/openwisp-config/postrm
 #!/bin/sh
 rm -f $${IPKG_INSTROOT}/usr/sbin/openwisp_config
-rm -f $${IPKG_INSTROOT}/etc/init.d/openwisp_config
 endef
 
 $(eval $(call BuildPackage,openwisp-config))
