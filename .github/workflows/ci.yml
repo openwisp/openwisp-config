@@ -36,7 +36,7 @@ jobs:
 
       - name: Run sh-checker
         if: ${{ !cancelled() && steps.deps.conclusion == 'success' }}
-        uses: luizm/action-sh-checker@v0.4.0
+        uses: luizm/action-sh-checker@v0.9.0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
@@ -62,7 +62,7 @@ jobs:
 
       - name: Cache OpenWrt dependencies
         id: cache
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         env:
           cache-name: cache-openwisp-config-dependencies
         with:
