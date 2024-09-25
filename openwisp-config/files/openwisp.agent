@@ -690,7 +690,10 @@ perform_default_test() {
 		fi
 	done
 	rm $TEST_CHECKSUM
-	return $result
+	# "$result" contains the exit code (integer),
+	# hence does not required to be wrapped in quotes.
+	# shellcheck disable=SC2086
+	return "$result"
 }
 
 # stores unmanaged configuration sections that will be merged
