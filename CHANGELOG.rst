@@ -10,7 +10,7 @@ Features
 - Added the ``default_hostname`` option to force devices to register using
   their MAC address instead of their hostname.
 - Added support for `hotplug events
-  <https://openwisp.io/docs/dev/openwrt-config-agent/user/hotplug-events.html>`_.
+  <https://openwisp.io/docs/stable/openwrt-config-agent/user/hotplug-events.html>`_.
 - Added error reporting functionality, which sends error logs to the
   controller if the agent fails to apply a configuration update.
 - Implemented a retry mechanism with random backoff for essential
@@ -34,9 +34,9 @@ Deprecations
   in the package. The path ``/usr/sbin/openwisp_config`` is now a symbolic
   link to ``/usr/sbin/openwisp-config``.
 - Deprecated `hooks
-  <https://openwisp.io/docs/dev/openwrt-config-agent/user/settings.html#hooks>`_
+  <https://openwisp.io/docs/stable/openwrt-config-agent/user/settings.html#hooks>`_
   in favor of `hotplug events
-  <https://openwisp.io/docs/dev/openwrt-config-agent/user/hotplug-events.html>`_.
+  <https://openwisp.io/docs/stable/openwrt-config-agent/user/hotplug-events.html>`_.
 
 Other changes
 +++++++++++++

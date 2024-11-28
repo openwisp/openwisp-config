@@ -39,7 +39,7 @@ You will see the default config file, as shown below.
 .. code-block:: text
 
     # For more information about the config options please see the README
-    # or https://openwisp.io/docs/dev/openwrt-config-agent/user/settings.html
+    # or https://openwisp.io/docs/stable/openwrt-config-agent/user/settings.html
 
     config controller 'http'
         #option url 'https://openwisp2.mynetwork.com'
