@@ -4,7 +4,7 @@ local net = {}
 
 function net.get_interface(name, family)
   local uci_cursor = uci.cursor()
-  local ip_family = family or 'inet'
+  local ip_family = family or 'inet6'
   -- if UCI network name is a bridge, the ifname won't be the name of the bridge
   local is_bridge = uci_cursor:get('network', name, 'type') == 'bridge'
   local ifname
