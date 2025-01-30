@@ -17,6 +17,10 @@ function net.get_interface(name, family)
   end
   -- get list of interfaces and loop until found
   local interfaces = nixio.getifaddrs()
+  -- sort list of interfaces by addr (2001:xx:xx:xx::1,fd52:xx:xx::1,fe80::xx:xx:xx:901a)
+  table.sort(interfaces, function (left, right)
+    return left['addr'] < right['addr']
+  end)
   for _, interface in pairs(interfaces) do
     if interface.name == ifname and interface.family == ip_family then
       return interface
