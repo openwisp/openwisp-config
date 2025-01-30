@@ -24,8 +24,8 @@ function net.get_interface(name, family, ula)
   for _, interface in pairs(interfaces) do
     if interface.name == ifname and interface.family == ip_family then
       if ip_family == 'inet6' then
-        if not string.match(interface.addr,'fe',0) then
-          if not ula and not string.match(interface.addr,'fd',0) then
+        if string.find(interface.addr,'fe') ~= 1 then
+          if not ula and string.find(interface.addr,'fd') ~= 1 then
             return interface
           elseif ula then
             return interface
