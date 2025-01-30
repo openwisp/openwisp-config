@@ -2,7 +2,7 @@ local nixio = require('nixio')
 local uci = require('uci')
 local net = {}
 
-function net.get_interface(name, family)
+function net.get_interface(name, family, ula)
   local uci_cursor = uci.cursor()
   local ip_family = family or 'inet6'
   -- if UCI network name is a bridge, the ifname won't be the name of the bridge
@@ -23,7 +23,17 @@ function net.get_interface(name, family)
   end)
   for _, interface in pairs(interfaces) do
     if interface.name == ifname and interface.family == ip_family then
-      return interface
+      if ip_family == 'inet6' then
+        if not string.match(interface.addr,'fe',0) then
+          if not ula and not string.match(interface.addr,'fd',0) then
+            return interface
+          elseif ula then
+            return interface
+          end
+        end
+      else
+        return interface
+      end
     end
   end
   -- return nil if nothing is found
