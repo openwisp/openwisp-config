@@ -4,7 +4,18 @@ local net = {}
 
 function net.get_interface(name, family, ula)
   local uci_cursor = uci.cursor()
-  local ip_family = family or 'inet6'
+  local ip_family
+  if family == 'inet' then
+    ip_family = 'inet'
+  else
+    ip_family = 'inet6'
+  end
+  local ip_ula
+  if ula == '1' then
+    ip_ula = true
+  else
+    ip_ula = false
+  end
   -- if UCI network name is a bridge, the ifname won't be the name of the bridge
   local is_bridge = uci_cursor:get('network', name, 'type') == 'bridge'
   local ifname
@@ -28,9 +39,9 @@ function net.get_interface(name, family, ula)
         -- check if limklocal fe80::xx:xx:xx:xx addr
         if string.find(interface.addr,'fe') ~= 1 then
           -- check if ula fd52:xx:xx::1 addr
-          if not ula and string.find(interface.addr,'fd') ~= 1 then
+          if not ip_ula and string.find(interface.addr,'fd') ~= 1 then
             return interface
-          elseif ula then
+          elseif ip_ula then
             return interface
           end
         end
