@@ -11,7 +11,7 @@ local family = arg[2]
 local ula = arg[3]
 local interface = net.get_interface(name, family, ula)
 if not interface and not family then
-  interface = net.get_interface(name, 'inet')
+  interface = net.get_interface(name, 'inet6')
 end
 
 if interface then

@@ -5,10 +5,10 @@ local net = {}
 function net.get_interface(name, family, ula)
   local uci_cursor = uci.cursor()
   local ip_family
-  if family == 'inet' then
-    ip_family = 'inet'
-  else
+  if family == 'inet6' then
     ip_family = 'inet6'
+  else
+    ip_family = 'inet'
   end
   local ip_ula
   if ula == '1' then
