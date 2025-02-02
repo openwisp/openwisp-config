@@ -10,7 +10,7 @@ local name = arg[1]
 local family = arg[2]
 local ula = arg[3]
 local interface = net.get_interface(name, family, ula)
-if not interface and not family then
+if not interface and family ~= 'inet6' then
   interface = net.get_interface(name, 'inet6')
 end
 
