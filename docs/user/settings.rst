@@ -33,7 +33,7 @@ UCI configuration options must go in ``/etc/config/openwisp``.
 - ``test_config``: whether a new configuration must be tested before being
   considered applied, defaults to ``1``
 - ``test_retries``: maximum number of retries when doing the default
-  configuration test, defaults to ``3``
+  configuration test, defaults to ``10``
 - ``test_script``: custom test script, read more about this feature in
   :ref:`config_configuration_test`
 - ``uuid``: unique identifier of the router configuration in the
