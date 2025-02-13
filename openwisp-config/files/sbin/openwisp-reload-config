@@ -22,7 +22,8 @@ if [ -f $MD5FILE ]; then
 			logger_msg="Service $service has been reloaded via init.d script"
 		fi
 		# log which service has been reloaded and how
-		logger "$logger_msg" -t openwisp -p daemon.info
+		/usr/sbin/openwisp-config --log-message "$logger_msg"
+		
 	done
 fi
 md5sum /var/run/config.check/* >$MD5FILE

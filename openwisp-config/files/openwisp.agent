@@ -129,6 +129,10 @@ while [ -n "$1" ]; do
 			export CHECKSUM_RETRY_DELAY="$2"
 			shift
 			;;
+		--log-message)
+			log_message "$2"
+			exit 0
+			;;
 		-*)
 			echo "Invalid option: $1"
 			exit 1
@@ -971,3 +975,10 @@ while true; do
 	# ignore SIGUSR1 signals again
 	trap "" USR1
 done
+
+# Logging function
+log_message() {
+	local level="$1"
+	local message="$2"
+	os.execute(string.format('logger -t openwisp -p %s "%s"', level, message))
+}
