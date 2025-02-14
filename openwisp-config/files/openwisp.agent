@@ -979,6 +979,11 @@ done
 # Logging function
 log_message() {
 	local level="$1"
-	local message="$2"
-	os.execute(string.format('logger -t openwisp -p %s "%s"', level, message))
+	local message="${2:-}"  # Default to an empty string if the second argument is not provided
+
+	if [ -z "$message" ]; then
+		logger -t openwisp -p "$level" "No message provided"
+	else
+		logger -t openwisp -p "$level" "$message"
+	fi
 }
