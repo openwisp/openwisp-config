@@ -75,7 +75,7 @@ start_service() {
 	config_foreach parse_config controller
 	procd_set_param respawn "${respawn_threshold:-3600}" "${respawn_timeout:-5}" "${respawn_retry:-5}"
 	procd_close_instance
-	/usr/sbin/openwisp-config --log-message "$PROG_NAME started"
+	/usr/sbin/openwisp-config --log-level daemon.info --log-message "$PROG_NAME started"
 }
 
 service_triggers() {
@@ -83,11 +83,11 @@ service_triggers() {
 }
 
 stop_service() {
-	logger -s "$PROG_NAME stopping" -t openwisp -p daemon.info
+	/usr/sbin/openwisp-config --log-level daemon.info --log-message "$PROG_NAME stopping"
 }
 
 reload_service() {
-	/usr/sbin/openwisp-config --log-message "$PROG_NAME received reload trigger"
+	/usr/sbin/openwisp-config --log-level daemon.info --log-message "$PROG_NAME received reload trigger"
 	# avoid reloading while configuration is being applied
 	# will wait for a maximum of 30 seconds
 	for _ in $(seq 1 30); do
