@@ -9,6 +9,14 @@ while [ -n "$1" ]; do
 			export VERSION=1
 			break
 			;;
+		--log-level)
+			export LOG_LEVEL="$2"
+			shift
+			;;
+		--log-message)
+			export LOG_MESSAGE="$2"
+			shift
+			;;
 		--url)
 			export URL="${2%/}"
 			shift
@@ -137,6 +145,12 @@ while [ -n "$1" ]; do
 	esac
 	shift
 done
+
+# Handle logging request if present
+if [ -n "$LOG_MESSAGE" ]; then
+	log_message "${LOG_LEVEL:-daemon.info}" "$LOG_MESSAGE"
+	exit 0
+fi
 
 if [ "$VERSION" -eq "1" ]; then
 	VERSION=$(cat /usr/lib/openwisp-config/VERSION)
@@ -977,3 +991,17 @@ while true; do
 	# ignore SIGUSR1 signals again
 	trap "" USR1
 done
+
+# Logging function
+log_message() {
+	local level="${1:-daemon.info}"  # Default to daemon.info if no level provided
+	local message="$2"
+	
+	# Check if message is provided (it's required)
+	if [ -z "$message" ]; then
+		echo "Error: Message parameter is required for logging" >&2
+		return 1
+	fi
+	
+	logger -t openwisp -p "$level" "$message"
+}
