@@ -2,20 +2,26 @@
 # shellcheck disable=SC2039
 # shellcheck disable=SC3043
 
+# Add near the top of the file, after the initial comments
+# Centralized logging function for consistent log handling
+log_message() {
+	local level="${1:-daemon.info}"  # Default level if not specified
+	local message="$2"
+	local silent="${3:-0}"          # Whether to suppress stderr output
+	
+	if [ "$silent" -eq "0" ]; then
+		logger -s -t openwisp -p "$level" "$message"
+	else
+		logger -t openwisp -p "$level" "$message"
+	fi
+}
+
 # parse options
 while [ -n "$1" ]; do
 	case "$1" in
 		--version | -v)
 			export VERSION=1
 			break
-			;;
-		--log-level)
-			export LOG_LEVEL="$2"
-			shift
-			;;
-		--log-message)
-			export LOG_MESSAGE="$2"
-			shift
 			;;
 		--url)
 			export URL="${2%/}"
@@ -137,6 +143,14 @@ while [ -n "$1" ]; do
 			export CHECKSUM_RETRY_DELAY="$2"
 			shift
 			;;
+		--log-level)
+			export LOG_LEVEL="$2"
+			shift
+			;;
+		--log-message)
+			export LOG_MESSAGE="$2"
+			shift
+			;;
 		-*)
 			echo "Invalid option: $1"
 			exit 1
@@ -146,9 +160,12 @@ while [ -n "$1" ]; do
 	shift
 done
 
-# Handle logging request if present
+# Handle direct logging requests if specified
 if [ -n "$LOG_MESSAGE" ]; then
-	log_message "${LOG_LEVEL:-daemon.info}" "$LOG_MESSAGE"
+	if [ -z "$LOG_LEVEL" ]; then
+		LOG_LEVEL="daemon.info"
+	fi
+	log_message "$LOG_LEVEL" "$LOG_MESSAGE"
 	exit 0
 fi
 
@@ -159,16 +176,12 @@ if [ "$VERSION" -eq "1" ]; then
 fi
 
 if [ -z "$URL" ]; then
-	logger -s "missing required --url option" \
-		-t openwisp \
-		-p daemon.err
+	log_message "daemon.err" "missing required --url option"
 	exit 2
 fi
 
 if { [ -z "$UUID" ] || [ -z "$KEY" ]; } && [ -z "$SHARED_SECRET" ]; then
-	logger -s "you must either specify --uuid and --key, or --shared-secret" \
-		-t openwisp \
-		-p daemon.err
+	log_message "daemon.err" "you must either specify --uuid and --key, or --shared-secret"
 	exit 3
 fi
 
@@ -271,9 +284,7 @@ check_header() {
 	local is_controller
 	is_controller=$(grep -ic "X-Openwisp-Controller: true" "$1")
 	if [ "$is_controller" -lt 1 ]; then
-		logger -s "Invalid url: missing X-Openwisp-Controller header" \
-			-t openwisp \
-			-p daemon.err
+		log_message "daemon.err" "Invalid url: missing X-Openwisp-Controller header"
 		exit 4
 	fi
 }
@@ -284,9 +295,7 @@ is_http_status() {
 
 # performs automatic registration
 register() {
-	logger "Registering device..." \
-		-t openwisp \
-		-p daemon.info
+	log_message "daemon.info" "Registering device..."
 
 	local hostname raw macaddr name backend tags model os system hardware_id \
 		params keybase consistent_key exit_code message new prefix
@@ -346,9 +355,7 @@ register() {
 	exit_code=$?
 	# report eventual failures and return
 	if [ "$exit_code" -ne "0" ]; then
-		logger -s "Failed to connect to controller during registration: curl exit code $exit_code" \
-			-t openwisp \
-			-p daemon.err
+		log_message "daemon.err" "Failed to connect to controller during registration: curl exit code $exit_code"
 		return 1
 	fi
 	# exit if response does not seem to come from openwisp controller
@@ -356,9 +363,7 @@ register() {
 	if ! is_http_status $REGISTRATION_PARAMETERS 201; then
 		# get body of failure response, separated from header by a blank line (CRLF-ended)
 		message=$(awk 'BEGIN{RS="\r\n\r\n"}{if(NR>1)print $0}' $REGISTRATION_PARAMETERS)
-		logger -s "Registration failed! $message" \
-			-t openwisp \
-			-p daemon.err
+		log_message "daemon.err" "Registration failed! $message"
 		# send registration-failed hotplug event
 		env -i ACTION="registration-failed" /sbin/hotplug-call openwisp
 		# if controller returns 403, stop retrying because it's useless
@@ -392,9 +397,7 @@ register() {
 	rm $REGISTRATION_PARAMETERS
 	# log operation
 	prefix=$([ "$new" -eq "1" ] && echo "New" || echo "Existing")
-	logger "$prefix device registered successfully as $name, id: $UUID" \
-		-t openwisp \
-		-p daemon.info
+	log_message "daemon.info" "$prefix device registered successfully as $name, id: $UUID"
 	# indicates this function has been called
 	# (used by `discover_management_ip`)
 	export REGISTER_CALLED=1
@@ -418,21 +421,15 @@ get_checksum() {
 	exit_code=$?
 
 	if [ "$exit_code" -ne "0" ]; then
-		logger -s "Failed to connect to controller while getting checksum: curl exit code $exit_code" \
-			-t openwisp \
-			-p daemon.err
+		log_message "daemon.err" "Failed to connect to controller while getting checksum: curl exit code $exit_code"
 		return 2
 	fi
 
 	if is_http_status "$1" 404; then
-		logger -s "Failed to retrieve checksum: 404 Not Found" \
-			-t openwisp \
-			-p daemon.warning
+		log_message "daemon.warning" "Failed to retrieve checksum: 404 Not Found"
 
 		if [ "$attempt_no" -eq "$CHECKSUM_MAX_RETRIES" ]; then
-			logger -s "Giving up and shutting down: the device may have been deleted from OpenWISP Controller" \
-				-t openwisp \
-				-p daemon.err
+			log_message "daemon.err" "Giving up and shutting down: the device may have been deleted from OpenWISP Controller"
 			exit 0
 		fi
 		sleep "$CHECKSUM_RETRY_DELAY"
@@ -440,9 +437,7 @@ get_checksum() {
 
 	if ! is_http_status "$1" 200; then
 		status=$(head -n 1 "$1")
-		logger -s "Failed to retrieve checksum: $status" \
-			-t openwisp \
-			-p daemon.err
+		log_message "daemon.err" "Failed to retrieve checksum: $status"
 		return 3
 	fi
 
@@ -467,9 +462,7 @@ configuration_changed() {
 	REMOTE_CHECKSUM=$(tail -n 1 $CONFIGURATION_CHECKSUM 2>/dev/null)
 
 	if [ "$CURRENT_CHECKSUM" != "$REMOTE_CHECKSUM" ]; then
-		logger "Local configuration outdated" \
-			-t openwisp \
-			-p daemon.info
+		log_message "daemon.info" "Local configuration outdated" 1
 		return 1
 	fi
 
@@ -482,9 +475,7 @@ pre_reload_hook() {
 	if [ -x "$PRE_RELOAD_HOOK" ]; then
 		$PRE_RELOAD_HOOK
 		exit_code=$?
-		logger "Called pre-reload-hook: $PRE_RELOAD_HOOK - exit code: $exit_code" \
-			-t openwisp \
-			-p daemon.info
+		log_message "daemon.info" "Called pre-reload-hook: $PRE_RELOAD_HOOK - exit code: $exit_code"
 		return $exit_code
 	fi
 }
@@ -494,9 +485,7 @@ post_reload_hook() {
 	if [ -x "$POST_RELOAD_HOOK" ]; then
 		$POST_RELOAD_HOOK
 		local exit_code=$?
-		logger "Called post-reload-hook: $POST_RELOAD_HOOK - exit code: $exit_code" \
-			-t openwisp \
-			-p daemon.info
+		log_message "daemon.info" "Called post-reload-hook: $POST_RELOAD_HOOK - exit code: $exit_code"
 		return $exit_code
 	fi
 }
@@ -506,9 +495,7 @@ post_registration_hook() {
 	if [ -x "$POST_REGISTRATION_HOOK" ]; then
 		$POST_REGISTRATION_HOOK
 		local exit_code=$?
-		logger "Called post-registration-hook: $POST_REGISTRATION_HOOK - exit code: $exit_code" \
-			-t openwisp \
-			-p daemon.info
+		log_message "daemon.info" "Called post-registration-hook: $POST_REGISTRATION_HOOK - exit code: $exit_code"
 		return $exit_code
 	fi
 }
@@ -525,10 +512,8 @@ apply_configuration() {
 	# if configuration could not be applied
 	# (because of a syntax error) restore a backup
 	if [ "$exit_code" -ne "0" ]; then
-		logger -s "Could not apply configuration, openwisp-update-config exit code was $exit_code" \
-			-t openwisp \
-			-p daemon.crit
-		logger -t openwisp -p daemon.crit -s <"$UPDATE_CONFIG_LOG"
+		log_message "daemon.crit" "Could not apply configuration, openwisp-update-config exit code was $exit_code"
+		log_message "daemon.crit" -t openwisp -s <"$UPDATE_CONFIG_LOG"
 		rm "$UPDATE_CONFIG_LOG"
 		restore_backup
 		return 1
@@ -564,9 +549,7 @@ update_info() {
 			"$UPDATE_INFO_URL" >$UPDATE_INFO
 		exit_code=$?
 		if [ "$exit_code" -eq "0" ]; then
-			logger "Device info updated on the controller" \
-				-t openwisp \
-				-p daemon.info
+			log_message "daemon.info" "Device info updated on the controller"
 			break
 		else
 			sleep 2
@@ -574,18 +557,14 @@ update_info() {
 	done
 
 	if [ "$exit_code" -ne "0" ]; then
-		logger -s "Failed to connect to controller during update-info: curl exit code $exit_code" \
-			-t openwisp \
-			-p daemon.err
+		log_message "daemon.err" "Failed to connect to controller during update-info: curl exit code $exit_code"
 		return 2
 	fi
 
 	if ! is_http_status $UPDATE_INFO 200; then
 		local status
 		status=$(head -n 1 $UPDATE_INFO)
-		logger -s "Failed to update device info: $status" \
-			-t openwisp \
-			-p daemon.err
+		log_message "daemon.err" "Failed to update device info: $status"
 		return 3
 	fi
 	check_header $UPDATE_INFO
@@ -636,18 +615,14 @@ report_status() {
 	exit_code=$?
 
 	if [ "$exit_code" -ne "0" ]; then
-		logger -s "Failed to connect to controller during report-status: curl exit code $exit_code" \
-			-t openwisp \
-			-p daemon.err
+		log_message "daemon.err" "Failed to connect to controller during report-status: curl exit code $exit_code"
 		return 2
 	fi
 
 	if ! is_http_status $STATUS_REPORT 200; then
 		local status
 		status=$(head -n 1 $STATUS_REPORT)
-		logger -s "Failed to report status: $status" \
-			-t openwisp \
-			-p daemon.err
+		log_message "daemon.err" "Failed to report status: $status"
 		return 3
 	fi
 	check_header $STATUS_REPORT
@@ -660,9 +635,7 @@ test_configuration() {
 		return 1
 	fi
 
-	logger "Testing configuration..." \
-		-t openwisp \
-		-p daemon.info
+	log_message "daemon.info" "Testing configuration..."
 
 	if [ -z "$TEST_SCRIPT" ]; then
 		perform_default_test
@@ -673,15 +646,11 @@ test_configuration() {
 	fi
 
 	if [ $test_result -gt 0 ]; then
-		logger -s "Configuration test failed! Restoring previous backup" \
-			-t openwisp \
-			-p daemon.err
+		log_message "daemon.err" "Configuration test failed! Restoring previous backup"
 		restore_backup
 		local ret=1
 	else
-		logger "Configuration test succeeded" \
-			-t openwisp \
-			-p daemon.info
+		log_message "daemon.info" "Configuration test succeeded"
 		local ret=0
 	fi
 
@@ -695,9 +664,7 @@ perform_default_test() {
 		$FETCH_COMMAND -i "$CHECKSUM_URL" >$TEST_CHECKSUM
 		local result=$?
 		if [ $result -ne 0 ]; then
-			logger "Configuration test failed (attempt $i)" \
-				-t openwisp \
-				-p daemon.warning
+			log_message "daemon.warning" "Configuration test failed (attempt $i)"
 			sleep 5
 		else
 			break
@@ -734,9 +701,7 @@ call_restore_unmanaged() {
 fix_uci_config() {
 	output=$(/usr/sbin/openwisp-uci-autoname)
 	if [ -n "$output" ]; then
-		logger "The following uci configs have been renamed: $output" \
-			-t openwisp \
-			-p daemon.info
+		log_message "daemon.info" "The following uci configs have been renamed: $output"
 	fi
 
 	# Re-generate the md5 checksums to avoid reloading services which had
@@ -754,15 +719,11 @@ fix_uci_config() {
 }
 
 download_configuration() {
-	logger "Downloading configuration from controller..." \
-		-t openwisp \
-		-p daemon.info
+	log_message "daemon.info" "Downloading configuration from controller..."
 	$FETCH_COMMAND --fail "$CONFIGURATION_URL" -o "$CONFIGURATION_ARCHIVE"
 	local exit_code=$?
 	if [ "$exit_code" -ne "0" ]; then
-		logger -s "Failed to connect to controller while downloading new config: curl exit code $exit_code" \
-			-t openwisp \
-			-p daemon.err
+		log_message "daemon.err" "Failed to connect to controller while downloading new config: curl exit code $exit_code"
 	fi
 	return "$exit_code"
 }
@@ -775,9 +736,7 @@ update_configuration() {
 	local exit_code=$?
 
 	if [ "$exit_code" -ne "0" ]; then
-		logger -s "Failed to download configuration from controller, giving up!" \
-			-t openwisp \
-			-p daemon.err
+		log_message "daemon.err" "Failed to download configuration from controller, giving up!"
 		# remove the checksum to ensure update is tried again at the next run
 		rm -f $CONFIGURATION_CHECKSUM
 		return $exit_code
@@ -789,17 +748,13 @@ update_configuration() {
 	REMOTE_CHECKSUM=$(tail -n 1 $CONFIGURATION_CHECKSUM 2>/dev/null)
 
 	if [ "$LOCAL_CHECKSUM" != "$REMOTE_CHECKSUM" ]; then
-		logger -s "Configuration checksum mismatch! Local: $LOCAL_CHECKSUM, Remote: $REMOTE_CHECKSUM" \
-			-t openwisp \
-			-p daemon.err
+		log_message "daemon.err" "Configuration checksum mismatch! Local: $LOCAL_CHECKSUM, Remote: $REMOTE_CHECKSUM"
 		# remove the checksum to ensure update is tried again at the next run
 		rm -f $CONFIGURATION_CHECKSUM
 		return 4
 	fi
 
-	logger "Configuration downloaded, now applying it..." \
-		-t openwisp \
-		-p daemon.info
+	log_message "daemon.info" "Configuration downloaded, now applying it..."
 
 	# makes fixes to the default uci config so
 	# it's more suited for remote control
@@ -823,9 +778,7 @@ update_configuration() {
 	fi
 
 	if [ "$result" -eq "0" ]; then
-		logger "Configuration applied successfully" \
-			-t openwisp \
-			-p daemon.info
+		log_message "daemon.info" "Configuration applied successfully"
 		# send config-applied hotplug event
 		env -i ACTION="config-applied" /sbin/hotplug-call openwisp
 		# store the new checksum as last known checksum
@@ -864,9 +817,7 @@ restore_backup() {
 	/usr/sbin/openwisp-reload-config
 	sleep "$POST_RELOAD_DELAY"
 	post_reload_hook
-	logger -s "The most recent configuration backup was restored" \
-		-t openwisp \
-		-p daemon.info
+	log_message "daemon.info" "The most recent configuration backup was restored"
 	# send config-restored hotplug event
 	env -i ACTION="config-restored" /sbin/hotplug-call openwisp
 }
@@ -895,15 +846,11 @@ discover_management_ip() {
 			MANAGEMENT_IP=$(/usr/sbin/openwisp-get-address "$MANAGEMENT_INTERFACE")
 
 			if [ -z "$MANAGEMENT_IP" ]; then
-				logger -s "management interface not ready (attempt $attempt of $MAX_ATTEMPTS)" \
-					-t openwisp \
-					-p daemon.notice
+				log_message "daemon.notice" "management interface not ready (attempt $attempt of $MAX_ATTEMPTS)"
 				if [ "$attempt" -lt "$MAX_ATTEMPTS" ]; then
 					sleep "$MANAGEMENT_INTERVAL"
 				else
-					logger -s "could not determine ip address of management interface, giving up..." \
-						-t openwisp \
-						-p daemon.warning
+					log_message "daemon.warning" "could not determine ip address of management interface, giving up..."
 				fi
 			else
 				break
@@ -918,9 +865,7 @@ discover_management_ip() {
 }
 
 handle_sigusr1() {
-	logger -s "Received SIGUSR1: interrupting interval sleep..." \
-		-t openwisp \
-		-p daemon.info
+	log_message "daemon.info" "Received SIGUSR1: interrupting interval sleep..."
 }
 
 # ensure both UUID and KEY are defined
@@ -950,9 +895,7 @@ if [ ! -f "$BOOTUP" ]; then
 	if [ "$BOOTUP_DELAY" -ne "0" ]; then
 		# get a random number between zero and $BOOTUP_DELAY
 		DELAY=$(/usr/sbin/openwisp-get-random-number 0 "$BOOTUP_DELAY")
-		logger "Delaying startup for $DELAY seconds..." \
-			-t openwisp \
-			-p daemon.info
+		log_message "daemon.info" "Delaying startup for $DELAY seconds..."
 		sleep "$DELAY"
 	fi
 	# send bootup hotplug event
@@ -985,17 +928,3 @@ while true; do
 	# ignore SIGUSR1 signals again
 	trap "" USR1
 done
-
-# Logging function
-log_message() {
-	local level="${1:-daemon.info}"  # Default to daemon.info if no level provided
-	local message="$2"
-	
-	# Check if message is provided (it's required)
-	if [ -z "$message" ]; then
-		echo "Error: Message parameter is required for logging" >&2
-		return 1
-	fi
-	
-	logger -t openwisp -p "$level" "$message"
-}
