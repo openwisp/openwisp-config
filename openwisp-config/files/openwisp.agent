@@ -5,15 +5,9 @@
 # Add near the top of the file, after the initial comments
 # Centralized logging function for consistent log handling
 log_message() {
-	local level="${1:-daemon.info}"  # Default level if not specified
-	local message="$2"
-	local silent="${3:-0}"          # Whether to suppress stderr output
-	
-	if [ "$silent" -eq "0" ]; then
-		logger -s -t openwisp -p "$level" "$message"
-	else
-		logger -t openwisp -p "$level" "$message"
-	fi
+    local level="${1:-daemon.info}"  # Default level if not specified
+    local message="$2"               # Message mandatory
+    logger -t openwisp -p "$level" "$message"
 }
 
 # parse options
@@ -162,11 +156,12 @@ done
 
 # Handle direct logging requests if specified
 if [ -n "$LOG_MESSAGE" ]; then
-	if [ -z "$LOG_LEVEL" ]; then
-		LOG_LEVEL="daemon.info"
-	fi
-	log_message "$LOG_LEVEL" "$LOG_MESSAGE"
-	exit 0
+    if [ -z "$LOG_MESSAGE" ]; then
+        echo "Error: --log-message requires a message" >&2
+        exit 1
+    fi
+    log_message "$LOG_LEVEL" "$LOG_MESSAGE"
+    exit 0
 fi
 
 if [ "$VERSION" -eq "1" ]; then
