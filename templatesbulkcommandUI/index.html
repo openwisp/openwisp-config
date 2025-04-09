@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mass Command Executor</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<div class="container">
+    <h2 class="title">Execute Mass Command</h2>
+    <div class="form-container">
+        <!-- Select Target Scope -->
+        <div class="form-group">
+            <label for="scope">Target Scope</label>
+            <select id="scope" name="scope" class="input-field">
+                <option value="all-devices">All Devices</option>
+                <option value="organization">Specific Organization</option>
+                <option value="device-group">Device Group</option>
+                <option value="geolocation">Geographic Location</option>
+                <option value="specific-devices">Specific Devices</option>
+            </select>
+        </div>
+
+        <!-- Dynamic Fields (Rendered based on the scope) -->
+        <div id="dynamic-fields" class="form-group"></div>
+
+        <!-- Command Input -->
+        <div class="form-group">
+            <label for="command">Shell Command</label>
+            <textarea id="command" name="command" rows="4" placeholder="Enter the shell command here..." class="input-field"></textarea>
+        </div>
+
+        <!-- Submit Button -->
+        <div class="form-group">
+            <button type="button" class="submit-btn" onclick="submitForm(event)">Execute Command</button>
+        </div>
+    </div>
+</div>
+
+<script src="scripts.js"></script>
+
+</body>
+</html>
