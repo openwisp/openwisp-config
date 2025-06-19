@@ -1,0 +1,18 @@
+#!/bin/sh
+# Triggers the update of the management IP address on the
+# OpenWISP server when the management interface comes up.
+
+MANAGEMENT_INTERFACE=$(/sbin/uci get openwisp.http.management_interface)
+
+if [ "$ACTION" = "ifup" ] && [ "$INTERFACE" = "$MANAGEMENT_INTERFACE" ]; then
+	ow_pid=$(pidof openwisp-config)
+	applying=/tmp/openwisp/applying_conf
+	# wait until configuration has finished applying
+	while [ -e "$applying" ]; do
+		sleep 1
+	done
+	# If the process is running, send SIGUSR1 (triggers config check)
+	if [ ! -z "$ow_pid" ]; then
+		kill -SIGUSR1 "$ow_pid"
+	fi
+fi
