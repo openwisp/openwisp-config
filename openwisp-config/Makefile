@@ -38,7 +38,8 @@ define Package/openwisp-config/install
 		$(1)/etc/init.d \
 		$(1)/etc/config \
 		$(1)/usr/lib/openwisp-config \
-		$(1)/usr/lib/lua/openwisp
+		$(1)/usr/lib/lua/openwisp \
+		$(1)/etc/hotplug.d/iface
 
 	$(INSTALL_BIN) \
 		files/openwisp.agent \
@@ -50,6 +51,10 @@ define Package/openwisp-config/install
 
 	$(INSTALL_CONF) files/openwisp.config \
 		$(1)/etc/config/openwisp
+
+	$(INSTALL_BIN) \
+		files/openwisp.hotplug \
+		$(1)/etc/hotplug.d/iface/90-openwisp-config
 
 	$(INSTALL_BIN) \
 		files/sbin/openwisp-reload-config \

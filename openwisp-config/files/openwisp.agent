@@ -172,7 +172,7 @@ REGISTRATION_INTERVAL=${REGISTRATION_INTERVAL:-$((INTERVAL / 4))}
 VERIFY_SSL=${VERIFY_SSL:-1}
 MERGE_CONFIG=${MERGE_CONFIG:-1}
 TEST_CONFIG=${TEST_CONFIG:-1}
-TEST_RETRIES=${TEST_RETRIES:-3}
+TEST_RETRIES=${TEST_RETRIES:-10}
 CONSISTENT_KEY=${CONSISTENT_KEY:-1}
 HARDWARE_ID_KEY=${HARDWARE_ID_KEY:-1}
 BOOTUP_DELAY=${BOOTUP_DELAY:-10}
@@ -687,21 +687,27 @@ perform_default_test() {
 	# the default test is performed several times, as indicated by $TEST_RETRIES
 	for i in $(seq 1 "$TEST_RETRIES"); do
 		$FETCH_COMMAND -i "$CHECKSUM_URL" >$TEST_CHECKSUM
-		local result=$?
-		if [ $result -ne 0 ]; then
-			logger "Configuration test failed (attempt $i)" \
+		local exit_code=$?
+		if [ $exit_code -ne 0 ]; then
+			logger "Configuration test failed (attempt $i). Failed to connect to controller: curl exit code $exit_code" \
 				-t openwisp \
 				-p daemon.warning
-			sleep 5
+			sleep "$(/usr/sbin/openwisp-get-random-number 5 20)"
 		else
+			if ! is_http_status "$TEST_CHECKSUM" 200; then
+				status=$(head -n 1 "$TEST_CHECKSUM")
+				logger -s "Configuration test passed, but the controller returned $status" \
+					-t openwisp \
+					-p daemon.warning
+			fi
 			break
 		fi
 	done
 	rm $TEST_CHECKSUM
-	# "$result" contains the exit code (integer),
+	# "$exit_code" contains the exit code (integer),
 	# hence does not required to be wrapped in quotes.
 	# shellcheck disable=SC2086
-	return "$result"
+	return $exit_code
 }
 
 # stores unmanaged configuration sections that will be merged
