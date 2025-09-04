@@ -27,7 +27,7 @@ jobs:
         id: deps
         run: |
           sudo ./install-dev.sh
-          pip install openwisp-utils[qa] @ https://github.com/openwisp/openwisp-utils/tarball/1.2
+          pip install "openwisp-utils[qa] @ https://github.com/openwisp/openwisp-utils/tarball/1.2"
 
       - name: QA-Checks
         run: ./run-qa-checks
