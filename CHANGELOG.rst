@@ -1,6 +1,34 @@
 Change log
 ==========
 
+1.2.0 [2025-10-27]
+------------------
+
+Features
+~~~~~~~~
+
+- Added hotplug script for ``management_interface`` to automatically
+  update the management IP when the interface comes up `#208
+  <https://github.com/openwisp/openwisp-config/issues/208>`_.
+
+Changes
+~~~~~~~
+
+Other changes
++++++++++++++
+
+- Added random wait time between 5 and 20 seconds before retrying default
+  tests after failure to reduce simultaneous retries and improve
+  reliability.
+- Increased default ``test_retries`` to 10 for improved connection
+  stability.
+
+Bugfixes
+~~~~~~~~
+
+- Added IPv6 support to ``openwisp-get-address`` `#224
+  <https://github.com/openwisp/openwisp-config/issues/224>`_.
+
 1.1.0 [2024-09-25]
 ------------------
 
