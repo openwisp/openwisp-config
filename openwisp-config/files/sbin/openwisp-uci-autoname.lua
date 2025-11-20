@@ -80,21 +80,22 @@ for file in lfs.dir(standard_path) do
           new_name = 'led_' .. string.lower(section['name'])
         elseif file == 'wireless' and section['.type'] == 'wifi-iface' then
           if section['ifname'] == nil then
-            new_name = 'wifi_' .. getUCIName(
+            new_name = 'wifi_' .. (
               standard:get('network', section['network'], 'ifname')
             )
           else
-            new_name = 'wifi_' .. getUCIName(section['ifname'])
+            new_name = 'wifi_' .. section['ifname']
           end
         else
-          new_name = nextAvailableName(getUCIName(section['.type']))
+          new_name = nextAvailableName(section['.type'])
         end
         -- make sure the new name is unique
         if all_names[new_name] then
             new_name = nextAvailableName(new_name .. '_')
         end
         all_names[new_name] = true
-        section['.name'] = new_name
+        -- make sure name is valid
+        section['.name'] = getUCIName(new_name)
         section['.anonymous'] = false
         utils.write_uci_section(output, file, section)
         output:reorder(file, section['.name'], index)

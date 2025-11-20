@@ -42,6 +42,9 @@ function TestUciAutoname.test_default_behaviour()
   -- ensure rest of config options are present
   luaunit.assertNotNil(string.find(networkContents, "config interface 'loopback'"))
   luaunit.assertNotNil(string.find(networkContents, "config interface 'lan'"))
+  -- ensure device eth0.2 is renamed
+  luaunit.assertNotNil(string.find(networkContents, "config device 'device_eth0_2'"))
+  luaunit.assertNotNil(string.find(networkContents, "option macaddr '00:00:00:00:00:11'"))
   -- check wireless
   local wirelessFile = io.open(write_dir .. 'wireless')
   luaunit.assertNotNil(wirelessFile)
