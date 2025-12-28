@@ -54,9 +54,8 @@ make -j"$CORES" package/openwisp-config/compile || make -j1 V=s package/openwisp
 
 # Generate package index with checksums
 cd "$BUILD_DIR"/openwrt
-# Ensure usign tool is available (needed for package signing/indexing)
-make tools/usign/compile V=s || make -j1 V=s tools/usign/compile
-make tools/usign/install V=s || make -j1 V=s tools/usign/install
+# Ensure tools are built (usign is needed for package index generation)
+make -j1 tools/install V=s
 make package/index V=s
 
 # Filter Packages file to include only openwisp packages and save as checksum file
