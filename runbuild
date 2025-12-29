@@ -52,16 +52,18 @@ fi
 
 make -j"$CORES" package/openwisp-config/compile || make -j1 V=s package/openwisp-config/compile || exit 1
 
-# Generate package index with checksums
+# Generate package index with checksums (unsigned - no usign needed)
 cd "$BUILD_DIR"/openwrt
-# Ensure tools are built (usign is needed for package index generation)
-make -j1 tools/install V=s
-make package/index V=s
+make package/index SIGNED_PACKAGES= V=s
 
 # Filter Packages file to include only openwisp packages and save as checksum file
-awk '/^Package: openwisp/,/^$/' \
-	"$BUILD_DIR"/openwrt/bin/packages/"$COMPILE_TARGET"/Packages \
-	>"$BUILD_DIR"/openwrt/bin/packages/"$COMPILE_TARGET"/openwisp/Packages.sha256.checksum
+mkdir -p "$BUILD_DIR/openwrt/bin/packages/$COMPILE_TARGET/openwisp"
+awk '
+	/^Package: openwisp-/ {flag=1}
+	flag {print}
+	/^$/ {flag=0}
+' "$BUILD_DIR/openwrt/bin/packages/$COMPILE_TARGET/Packages" \
+	>"$BUILD_DIR/openwrt/bin/packages/$COMPILE_TARGET/openwisp/Packages.sha256.checksum"
 
 mv "$BUILD_DIR"/openwrt/bin/packages/"$COMPILE_TARGET"/openwisp "$VERSIONED_DIR"
 
