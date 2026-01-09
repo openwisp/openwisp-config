@@ -62,7 +62,7 @@ jobs:
 
       - name: Cache OpenWrt dependencies
         id: cache
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         env:
           cache-name: cache-openwisp-config-dependencies
         with:
@@ -81,7 +81,7 @@ jobs:
           CI_CACHE: ${{ steps.cache.outputs.cache-hit }}
 
       - name: Upload packages as artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: Packages
           path: "${{ env.DOWNLOADS_DIR }}/${{ env.START_TIME }}"
