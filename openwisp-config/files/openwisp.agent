@@ -914,7 +914,14 @@ handle_sigusr1() {
 		-t openwisp \
 		-p daemon.info
 }
-
+handle_sigusr2() {
+	logger -s "Received SIGUSR2: forcing configuration reload..." \
+		-t openwisp \
+		-p daemon.info
+	# Remove checksum files to ensure update_configuration doesn't skip the run
+	rm -f "$CONFIGURATION_CHECKSUM" "$PERSISTENT_CHECKSUM"
+	FORCE_RELOAD=1
+}
 # ensure both UUID and KEY are defined
 # otherwise perform registration
 if [ -z "$UUID" ] || [ -z "$KEY" ]; then
@@ -957,23 +964,42 @@ else
 	env -i ACTION="restart" /sbin/hotplug-call openwisp
 fi
 
+# By adding "FORCE_RELOAD" variable and handling SIGUSR2,
+# we allow forcing configuration reload from outside
+# without waiting for the next interval
+FORCE_RELOAD=0
 while true; do
 	# check management interface at each iteration
 	# (because the address may change due to
 	# configuration updates or manual reconfigurations)
 	discover_management_ip
 
-	configuration_changed
-
-	if [ "$?" -eq "1" ]; then
+	# if forced reload is requested, skip check
+	if [ "$FORCE_RELOAD" -eq "1" ]; then
 		update_configuration
+		FORCE_RELOAD=0
+	else
+		configuration_changed
+		if [ "$?" -eq "1" ]; then
+			update_configuration
+		fi
 	fi
 	env -i ACTION="end-of-cycle" /sbin/hotplug-call openwisp
 
-	# handle SIGUSR1 to interrupt sleep
+	# handle SIGUSR1 to interrupt sleep and SIGUSR2 to force a reload
+	# sending SIGUSR2 to the agent process while it is in the sleep
+	# interval below will cause an immediate configuration reload on
+	# the next loop iteration. If SIGUSR2 is delivered while
+	# configuration_changed or update_configuration are running, it
+	# will be ignored because traps are not active in that phase.
+	# Example (as root), if this script is running as "openwisp-agent":
+	#   kill -USR2 "$(pidof openwisp.agent || pidof openwisp-agent)"
 	trap handle_sigusr1 USR1
+	# handle SIGUSR2 to force reload
+	trap handle_sigusr2 USR2
 	sleep "$INTERVAL" &
 	wait $!
-	# ignore SIGUSR1 signals again
+	# ignore SIGUSR1 and SIGUSR2 signals again
 	trap "" USR1
+	trap "" USR2
 done
