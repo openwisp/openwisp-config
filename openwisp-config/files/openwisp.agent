@@ -101,6 +101,14 @@ while [ -n "$1" ]; do
 			export MANAGEMENT_INTERFACE="$2"
 			shift
 			;;
+		--management-interface-family)
+			export MANAGEMENT_INTERFACE_FAMILY="$2"
+			shift
+			;;
+		--management-interface-ula)
+			export MANAGEMENT_INTERFACE_ULA="$2"
+			shift
+			;;
 		--default-hostname)
 			export DEFAULT_HOSTNAME="$2"
 			shift
@@ -245,7 +253,7 @@ fi
 # if management interface is not ready, the ip will be empty but other
 # attempts at determining it will be done before the start-up is completed
 if [ -n "$MANAGEMENT_INTERFACE" ]; then
-	MANAGEMENT_IP=$(/usr/sbin/openwisp-get-address "$MANAGEMENT_INTERFACE")
+	MANAGEMENT_IP=$(/usr/sbin/openwisp-get-address "$MANAGEMENT_INTERFACE" "$MANAGEMENT_INTERFACE_FAMILY" "$MANAGEMENT_INTERFACE_ULA")
 fi
 
 get_model() { cat /tmp/sysinfo/model; }
@@ -876,7 +884,7 @@ discover_management_ip() {
 		unset REGISTER_CALLED
 		return
 	fi
-	MANAGEMENT_IP=$(/usr/sbin/openwisp-get-address "$MANAGEMENT_INTERFACE")
+	MANAGEMENT_IP=$(/usr/sbin/openwisp-get-address "$MANAGEMENT_INTERFACE" "$MANAGEMENT_INTERFACE_FAMILY" "$MANAGEMENT_INTERFACE_ULA")
 	# if management interface is defined but its ip could not be determined
 	# and the shared secret is not present anymore
 	# (which means the device has been already registered)
@@ -884,7 +892,7 @@ discover_management_ip() {
 	if [ -z "$MANAGEMENT_IP" ] && [ -z "$SHARED_SECRET" ]; then
 		MAX_ATTEMPTS=3
 		for attempt in $(seq $MAX_ATTEMPTS); do
-			MANAGEMENT_IP=$(/usr/sbin/openwisp-get-address "$MANAGEMENT_INTERFACE")
+			MANAGEMENT_IP=$(/usr/sbin/openwisp-get-address "$MANAGEMENT_INTERFACE" "$MANAGEMENT_INTERFACE_FAMILY" "$MANAGEMENT_INTERFACE_ULA")
 
 			if [ -z "$MANAGEMENT_IP" ]; then
 				logger -s "management interface not ready (attempt $attempt of $MAX_ATTEMPTS)" \
