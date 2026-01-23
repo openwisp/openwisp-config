@@ -925,6 +925,7 @@ handle_sigusr1() {
 		-t openwisp \
 		-p daemon.info
 }
+
 handle_sigusr2() {
 	logger -s "Received SIGUSR2: forcing configuration update..." \
 		-t openwisp \
@@ -933,6 +934,7 @@ handle_sigusr2() {
 	# which will trigger update_configuration on the next loop iteration
 	rm -f "$CONFIGURATION_CHECKSUM" "$PERSISTENT_CHECKSUM"
 }
+
 # ensure both UUID and KEY are defined
 # otherwise perform registration
 if [ -z "$UUID" ] || [ -z "$KEY" ]; then
