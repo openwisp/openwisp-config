@@ -9,6 +9,17 @@ while [ -n "$1" ]; do
 			export VERSION=1
 			break
 			;;
+		--force-update)
+			# Check if agent is running and send SIGUSR2 to force configuration reload
+			AGENT_PID=$(pgrep -P 1 -f openwisp-config)
+			if [ -z "$AGENT_PID" ]; then
+				echo "Error: openwisp-config agent is not running" >&2
+				exit 1
+			fi
+			kill -USR2 "$AGENT_PID"
+			echo "Sent SIGUSR2 to openwisp-config agent (PID: $AGENT_PID) to force configuration update"
+			exit 0
+			;;
 		--url)
 			export URL="${2%/}"
 			shift
@@ -915,6 +926,15 @@ handle_sigusr1() {
 		-p daemon.info
 }
 
+handle_sigusr2() {
+	logger -s "Received SIGUSR2: forcing configuration update..." \
+		-t openwisp \
+		-p daemon.info
+	# Remove checksum files to ensure configuration_changed returns 1
+	# which will trigger update_configuration on the next loop iteration
+	rm -f "$CONFIGURATION_CHECKSUM" "$PERSISTENT_CHECKSUM"
+}
+
 # ensure both UUID and KEY are defined
 # otherwise perform registration
 if [ -z "$UUID" ] || [ -z "$KEY" ]; then
@@ -972,8 +992,11 @@ while true; do
 
 	# handle SIGUSR1 to interrupt sleep
 	trap handle_sigusr1 USR1
+	# handle SIGUSR2 to force downloading and applying config again
+	trap handle_sigusr2 USR2
 	sleep "$INTERVAL" &
 	wait $!
-	# ignore SIGUSR1 signals again
+	# ignore SIGUSR1 and SIGUSR2 signals again
 	trap "" USR1
+	trap "" USR2
 done
