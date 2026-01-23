@@ -1,8 +1,8 @@
 openwisp-config
 ===============
 
-.. image:: https://github.com/openwisp/openwisp-config/workflows/OpenWISP%20Config%20CI%20Build/badge.svg?branch=master
-    :target: https://github.com/openwisp/openwisp-config/actions?query=workflow%3A%22OpenWISP+Config+CI+Build%22
+.. image:: https://github.com/openwisp/openwisp-config/actions/workflows/ci.yml/badge.svg
+    :target: https://github.com/openwisp/openwisp-config/actions/workflows/ci.yml
     :alt: ci build
 
 .. image:: http://img.shields.io/github/release/openwisp/openwisp-config.svg
