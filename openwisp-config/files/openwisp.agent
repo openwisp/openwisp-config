@@ -926,7 +926,7 @@ handle_sigusr1() {
 		-p daemon.info
 }
 handle_sigusr2() {
-	logger -s "Received SIGUSR2: forcing configuration reload..." \
+	logger -s "Received SIGUSR2: forcing configuration update..." \
 		-t openwisp \
 		-p daemon.info
 	# Remove checksum files to ensure configuration_changed returns 1
@@ -974,6 +974,7 @@ else
 	# send restart hotplug event
 	env -i ACTION="restart" /sbin/hotplug-call openwisp
 fi
+
 while true; do
 	# check management interface at each iteration
 	# (because the address may change due to
@@ -981,6 +982,7 @@ while true; do
 	discover_management_ip
 
 	configuration_changed
+
 	if [ "$?" -eq "1" ]; then
 		update_configuration
 	fi
@@ -988,7 +990,7 @@ while true; do
 
 	# handle SIGUSR1 to interrupt sleep
 	trap handle_sigusr1 USR1
-	# handle SIGUSR2 to force reload
+	# handle SIGUSR2 to force downloading and applying config again
 	trap handle_sigusr2 USR2
 	sleep "$INTERVAL" &
 	wait $!
