@@ -36,7 +36,7 @@ jobs:
 
       - name: Run sh-checker
         if: ${{ !cancelled() && steps.deps.conclusion == 'success' }}
-        uses: luizm/action-sh-checker@v0.9.0
+        uses: luizm/action-sh-checker@v0.10.0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
