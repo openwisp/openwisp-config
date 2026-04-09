@@ -1,6 +1,14 @@
 Change log
 ==========
 
+1.2.1 [2026-04-09]
+------------------
+
+Bugfixes
+~~~~~~~~
+
+- Fixed UCI name escaping in uci-autoname script
+
 1.2.0 [2025-10-27]
 ------------------
 
