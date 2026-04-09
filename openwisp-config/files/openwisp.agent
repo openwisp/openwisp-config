@@ -200,6 +200,7 @@ REGISTRATION_PARAMETERS="$WORKING_DIR/registration_parameters"
 TEST_CHECKSUM="$WORKING_DIR/test_checksum"
 UPDATE_INFO="$WORKING_DIR/update_info"
 STATUS_REPORT="$WORKING_DIR/status_report"
+PENDING_REPORT="$WORKING_DIR/pending_report"
 APPLYING_CONF="$WORKING_DIR/applying_conf"
 UPDATE_CONFIG_LOG="$WORKING_DIR/update-config.log"
 BOOTUP="$WORKING_DIR/bootup"
@@ -825,6 +826,7 @@ update_configuration() {
 		result=$?
 	fi
 
+	local status_to_report pending_marker_saved=0
 	if [ "$result" -eq "0" ]; then
 		logger "Configuration applied successfully" \
 			-t openwisp \
@@ -833,14 +835,41 @@ update_configuration() {
 		env -i ACTION="config-applied" /sbin/hotplug-call openwisp
 		# store the new checksum as last known checksum
 		cp "$CONFIGURATION_CHECKSUM" "$PERSISTENT_CHECKSUM"
-		retry_with_backoff report_status "applied"
+		status_to_report="applied"
 	else
-		retry_with_backoff report_status "error"
+		status_to_report="error"
 	fi
-	# if reporting of the status fails, let it retry in the next cycle
+
+	# Persist the pending status BEFORE calling report_status so that a
+	# crash or reboot between the retry attempt and success does not lose
+	# the status. The marker is removed only after report_status succeeds.
+	# Write atomically via a tmp file + rename so a partial write (e.g.
+	# full disk) cannot leave a truncated marker behind.
+	if printf '%s\n' "$status_to_report" >"${PENDING_REPORT}.tmp" \
+		&& mv "${PENDING_REPORT}.tmp" "$PENDING_REPORT"; then
+		pending_marker_saved=1
+	else
+		rm -f "${PENDING_REPORT}.tmp"
+		logger -s "Failed to persist pending report marker, " \
+			"falling back to checksum invalidation on failure" \
+			-t openwisp \
+			-p daemon.warning
+	fi
+
+	retry_with_backoff report_status "$status_to_report"
 	# shellcheck disable=SC2181
-	if [ "$?" -ne "0" ]; then
-		rm -f $CONFIGURATION_CHECKSUM $PERSISTENT_CHECKSUM
+	if [ "$?" -eq "0" ]; then
+		rm -f "$PENDING_REPORT"
+	else
+		logger -s "report_status failed, will retry in the next cycle" \
+			-t openwisp \
+			-p daemon.warning
+		# If the marker could not be saved, invalidate the checksum so
+		# the next cycle forces a re-download. This preserves the
+		# previous behaviour whenever the retry marker is unavailable.
+		if [ "$pending_marker_saved" -eq "0" ]; then
+			rm -f "$PERSISTENT_CHECKSUM"
+		fi
 	fi
 
 	rm $APPLYING_CONF
@@ -977,6 +1006,35 @@ else
 	env -i ACTION="restart" /sbin/hotplug-call openwisp
 fi
 
+retry_pending_report() {
+	local pending_status
+	if [ ! -f "$PENDING_REPORT" ]; then
+		return 0
+	fi
+	# Trim whitespace to tolerate an occasional trailing newline.
+	pending_status=$(tr -d '[:space:]' <"$PENDING_REPORT")
+	# Validate against the same known-good set accepted by report_status.
+	# update_configuration() only ever writes "applied" or "error" today.
+	case "$pending_status" in
+		applied | error) ;;
+		*)
+			logger -s "Pending report marker has invalid status '$pending_status', discarding" \
+				-t openwisp \
+				-p daemon.err
+			rm -f "$PENDING_REPORT"
+			return 1
+			;;
+	esac
+	logger "Retrying pending report_status: $pending_status" \
+		-t openwisp \
+		-p daemon.info
+	retry_with_backoff report_status "$pending_status"
+	# shellcheck disable=SC2181
+	if [ "$?" -eq "0" ]; then
+		rm -f "$PENDING_REPORT"
+	fi
+}
+
 while true; do
 	# check management interface at each iteration
 	# (because the address may change due to
@@ -984,9 +1042,16 @@ while true; do
 	discover_management_ip
 
 	configuration_changed
+	config_change_status=$?
 
-	if [ "$?" -eq "1" ]; then
+	if [ "$config_change_status" -eq "1" ]; then
 		update_configuration
+	elif [ "$config_change_status" -eq "0" ] && [ -f "$PENDING_REPORT" ]; then
+		# Retry a previously failed report_status without re-downloading.
+		# Only do this after a confirmed no-change result (exit 0); other
+		# exit codes indicate checksum fetch failures and the pending
+		# applied/error status could no longer be accurate.
+		retry_pending_report
 	fi
 	env -i ACTION="end-of-cycle" /sbin/hotplug-call openwisp
 
