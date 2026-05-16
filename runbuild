@@ -4,7 +4,7 @@
 # requires the following env vars:
 # - $BUILD_DIR
 # - $DOWNLOADS_DIR
-# - $CORES (defaults to 1)
+# - $CORES (defaults to number of CPU cores on system)
 # - $COMPILE_TARGET (defaults to mips_24kc)
 set -e
 
@@ -12,13 +12,13 @@ CI=${CI:-0}
 
 [ "$CI" -eq "1" ] || ./runtests
 
-BUILD_DIR=${BUILD_DIR-./build}
-DOWNLOADS_DIR=${DOWNLOADS_DIR-./downloads}
+BUILD_DIR=${BUILD_DIR-$(pwd)/build}
+DOWNLOADS_DIR=${DOWNLOADS_DIR-$(pwd)/downloads}
 START_TIME=${START_TIME-$(date +"%Y-%m-%d-%H%M%S")}
 VERSIONED_DIR="$DOWNLOADS_DIR/$START_TIME"
 COMPILE_TARGET=${COMPILE_TARGET-mips_24kc}
 LATEST_LINK="$DOWNLOADS_DIR/latest"
-CORES=${CORES:-1}
+CORES=${CORES:-$(nproc)}
 CURRENT_DIR=$(pwd)
 OPENWRT_BRANCH="openwrt-24.10"
 
@@ -76,5 +76,5 @@ rm "$PACKAGES_DIR"/Packages*
 # Move artifacts
 mv "$PACKAGES_DIR" "$VERSIONED_DIR"
 
-rm "$LATEST_LINK" || true
+rm -f "$LATEST_LINK"
 ln -s "$VERSIONED_DIR" "$LATEST_LINK"
