@@ -62,16 +62,19 @@ fi
 # Generate package index with checksums (unsigned - no usign needed)
 make package/index SIGNED_PACKAGES= V=s
 
-# Filter Packages file to include only openwisp packages and save as checksum file
-mkdir -p "$BUILD_DIR/openwrt/bin/packages/$COMPILE_TARGET/openwisp"
-awk '
-	/^Package: openwisp-/ {flag=1}
-	flag {print}
-	/^$/ {flag=0}
-' "$BUILD_DIR/openwrt/bin/packages/$COMPILE_TARGET/Packages" \
-	>"$BUILD_DIR/openwrt/bin/packages/$COMPILE_TARGET/openwisp/Packages.sha256.checksum"
+# Publish sha256.manifest (renamed from Packages.manifest) for integrity verification
+PACKAGES_DIR="$BUILD_DIR/openwrt/bin/packages/$COMPILE_TARGET/openwisp"
+MANIFEST_FILE="$PACKAGES_DIR/Packages.manifest"
+if [ ! -f "$MANIFEST_FILE" ]; then
+	echo "ERROR: Package manifest file not found at $MANIFEST_FILE"
+	exit 1
+fi
+mv "$MANIFEST_FILE" "$PACKAGES_DIR/sha256.manifest"
+rm "$PACKAGES_DIR"/*.json
+rm "$PACKAGES_DIR"/Packages*
 
-mv "$BUILD_DIR"/openwrt/bin/packages/"$COMPILE_TARGET"/openwisp "$VERSIONED_DIR"
+# Move artifacts
+mv "$PACKAGES_DIR" "$VERSIONED_DIR"
 
 rm "$LATEST_LINK" || true
 ln -s "$VERSIONED_DIR" "$LATEST_LINK"
