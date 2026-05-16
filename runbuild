@@ -45,6 +45,10 @@ sed -i '/routing/d' feeds.conf
 echo "CONFIG_PACKAGE_openwisp-config=y" >>.config
 make defconfig
 
+# disable package signing: make defconfig sets CONFIG_SIGNED_PACKAGES=y by default
+# but usign is not available in CI, so we disable it to allow index generation
+sed -i 's/^CONFIG_SIGNED_PACKAGES=y$/CONFIG_SIGNED_PACKAGES=/' .config
+
 if [ ! "$CI_CACHE" ]; then
 	make -j"$CORES" tools/install || make -j1 V=s tools/install
 	make -j"$CORES" toolchain/install || make -j1 V=s toolchain/install
@@ -52,17 +56,8 @@ fi
 
 make -j"$CORES" package/openwisp-config/compile || make -j1 V=s package/openwisp-config/compile || exit 1
 
-# Ensure usign tool is available (required for package index generation)
-# Even when generating unsigned indexes, OpenWRT's Makefile needs usign for SHA-512 padding workaround
-if [ ! -f staging_dir/host/bin/usign ]; then
-	echo "usign not found, building tools..."
-	make -j"$CORES" tools/install || make -j1 V=s tools/install
-fi
-
-# Generate package index with checksums (unsigned - no usign needed)
-make package/index SIGNED_PACKAGES= V=s
-
-# Publish sha256.manifest (renamed from Packages.manifest) for integrity verification
+# Publish sha256.manifest (renamed from Package.manifest) for integrity verification
+make package/index V=s
 PACKAGES_DIR="$BUILD_DIR/openwrt/bin/packages/$COMPILE_TARGET/openwisp"
 MANIFEST_FILE="$PACKAGES_DIR/Packages.manifest"
 if [ ! -f "$MANIFEST_FILE" ]; then
