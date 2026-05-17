@@ -4,7 +4,7 @@
 # requires the following env vars:
 # - $BUILD_DIR
 # - $DOWNLOADS_DIR
-# - $CORES (defaults to 1)
+# - $CORES (defaults to number of CPU cores on system)
 # - $COMPILE_TARGET (defaults to mips_24kc)
 set -e
 
@@ -12,13 +12,13 @@ CI=${CI:-0}
 
 [ "$CI" -eq "1" ] || ./runtests
 
-BUILD_DIR=${BUILD_DIR-./build}
-DOWNLOADS_DIR=${DOWNLOADS_DIR-./downloads}
+BUILD_DIR=${BUILD_DIR-$(pwd)/build}
+DOWNLOADS_DIR=${DOWNLOADS_DIR-$(pwd)/downloads}
 START_TIME=${START_TIME-$(date +"%Y-%m-%d-%H%M%S")}
 VERSIONED_DIR="$DOWNLOADS_DIR/$START_TIME"
 COMPILE_TARGET=${COMPILE_TARGET-mips_24kc}
 LATEST_LINK="$DOWNLOADS_DIR/latest"
-CORES=${CORES:-1}
+CORES=${CORES:-$(nproc)}
 CURRENT_DIR=$(pwd)
 OPENWRT_BRANCH="openwrt-24.10"
 
@@ -45,6 +45,10 @@ sed -i '/routing/d' feeds.conf
 echo "CONFIG_PACKAGE_openwisp-config=y" >>.config
 make defconfig
 
+# disable package signing: make defconfig sets CONFIG_SIGNED_PACKAGES=y by default
+# but usign is not available in CI, so we disable it to allow index generation
+sed -i 's/^CONFIG_SIGNED_PACKAGES=y$/CONFIG_SIGNED_PACKAGES=/' .config
+
 if [ ! "$CI_CACHE" ]; then
 	make -j"$CORES" tools/install || make -j1 V=s tools/install
 	make -j"$CORES" toolchain/install || make -j1 V=s toolchain/install
@@ -52,7 +56,20 @@ fi
 
 make -j"$CORES" package/openwisp-config/compile || make -j1 V=s package/openwisp-config/compile || exit 1
 
-mv "$BUILD_DIR"/openwrt/bin/packages/"$COMPILE_TARGET"/openwisp "$VERSIONED_DIR"
+# Publish sha256.manifest (renamed from Package.manifest) for integrity verification
+make package/index V=s
+PACKAGES_DIR="$BUILD_DIR/openwrt/bin/packages/$COMPILE_TARGET/openwisp"
+MANIFEST_FILE="$PACKAGES_DIR/Packages.manifest"
+if [ ! -f "$MANIFEST_FILE" ]; then
+	echo "ERROR: Package manifest file not found at $MANIFEST_FILE"
+	exit 1
+fi
+mv "$MANIFEST_FILE" "$PACKAGES_DIR/sha256.manifest"
+rm "$PACKAGES_DIR"/*.json
+rm "$PACKAGES_DIR"/Packages*
 
-rm "$LATEST_LINK" || true
+# Move artifacts
+mv "$PACKAGES_DIR" "$VERSIONED_DIR"
+
+rm -f "$LATEST_LINK"
 ln -s "$VERSIONED_DIR" "$LATEST_LINK"
