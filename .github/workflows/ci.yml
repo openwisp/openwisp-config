@@ -85,6 +85,7 @@ jobs:
         with:
           name: Packages
           path: "${{ env.DOWNLOADS_DIR }}/${{ env.START_TIME }}"
+          retention-days: 1
 
       - name: Google Cloud Auth
         if: ${{ github.event_name=='push' }}
