@@ -7,9 +7,12 @@ function net.get_interface(name, family)
   local ip_family = family or 'inet'
   -- if UCI network name is a bridge, the ifname won't be the name of the bridge
   local is_bridge = uci_cursor:get('network', name, 'type') == 'bridge'
+  local is_pppoe = uci_cursor:get('network', name, 'proto') == 'pppoe'
   local ifname
   if is_bridge then
     ifname = 'br-' .. name
+  elseif is_pppoe then
+    ifname = 'pppoe-' .. name
   else
     -- get ifname from network configuration or
     -- default to supplied name if none is found
