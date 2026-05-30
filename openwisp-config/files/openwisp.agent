@@ -840,9 +840,15 @@ update_configuration() {
 		status_to_report="error"
 	fi
 
-	# Persist the pending status BEFORE calling report_status so that a
-	# crash or reboot between the retry attempt and success does not lose
-	# the status. The marker is removed only after report_status succeeds.
+	# Persist the pending status BEFORE calling report_status so that the
+	# retry on the next polling cycle does not lose the status if
+	# report_status fails or the agent is interrupted between the retry
+	# attempt and the post-success cleanup. The marker is removed only
+	# after report_status succeeds. Note: PENDING_REPORT lives in
+	# WORKING_DIR alongside the other agent markers, so when WORKING_DIR
+	# is on tmpfs (the default) the marker does NOT survive a reboot;
+	# the retry guarantee is cross-polling-cycle within the same agent
+	# session, not across reboots.
 	# Write atomically via a tmp file + rename so a partial write (e.g.
 	# full disk) cannot leave a truncated marker behind.
 	if printf '%s\n' "$status_to_report" >"${PENDING_REPORT}.tmp" \
@@ -864,11 +870,17 @@ update_configuration() {
 		logger -s "report_status failed, will retry in the next cycle" \
 			-t openwisp \
 			-p daemon.warning
-		# If the marker could not be saved, invalidate the checksum so
-		# the next cycle forces a re-download. This preserves the
-		# previous behaviour whenever the retry marker is unavailable.
+		# If the marker could not be saved, restore the pre-#251
+		# behaviour: invalidate BOTH checksum files so the next cycle
+		# forces a re-download. Removing only PERSISTENT_CHECKSUM is
+		# not enough -- configuration_changed reads CURRENT_CHECKSUM
+		# from CONFIGURATION_CHECKSUM (which still contains the latest
+		# remote value from this cycle) before fetching the new remote
+		# value, so if the controller has not changed the comparison
+		# would short-circuit to "no change" and the retry path would
+		# never trigger.
 		if [ "$pending_marker_saved" -eq "0" ]; then
-			rm -f "$PERSISTENT_CHECKSUM"
+			rm -f "$CONFIGURATION_CHECKSUM" "$PERSISTENT_CHECKSUM"
 		fi
 	fi
 
