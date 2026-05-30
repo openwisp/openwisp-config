@@ -181,7 +181,8 @@ retry_pending_report() {
 ############################################################
 echo "T1: apply ok, report ok"
 reset_state
-REPORT_CALLS=0; REPORT_RESULT=0
+REPORT_CALLS=0
+REPORT_RESULT=0
 update_configuration_stub 0
 assert_not_file "$PENDING_REPORT" "T1 marker absent after success"
 assert_file "$PERSISTENT_CHECKSUM" "T1 persistent checksum kept"
@@ -194,7 +195,8 @@ assert_eq "$REPORT_CALLS" "1" "T1 single report attempt"
 ############################################################
 echo "T2: apply ok, report fails -> marker persisted"
 reset_state
-REPORT_CALLS=0; REPORT_RESULT=2
+REPORT_CALLS=0
+REPORT_RESULT=2
 update_configuration_stub 0
 assert_file "$PENDING_REPORT" "T2 marker present after report fail"
 marker_content=$(cat "$PENDING_REPORT")
@@ -207,7 +209,8 @@ assert_file "$CONFIGURATION_CHECKSUM" "T2 working checksum NOT removed (retry pa
 ############################################################
 echo "T3: next cycle, retry succeeds -> marker removed"
 # carry state forward from T2
-REPORT_CALLS=0; REPORT_RESULT=0
+REPORT_CALLS=0
+REPORT_RESULT=0
 # emulate the agent loop branch: config_change_status==0 && marker exists
 config_change_status=0
 if [ "$config_change_status" -eq 0 ] && [ -f "$PENDING_REPORT" ]; then
@@ -224,7 +227,8 @@ echo "T4: next cycle, checksum fetch error -> marker untouched"
 reset_state
 # seed an existing pending marker (as if a previous cycle failed reporting)
 printf 'error\n' >"$PENDING_REPORT"
-REPORT_CALLS=0; REPORT_RESULT=0
+REPORT_CALLS=0
+REPORT_RESULT=0
 config_change_status=2
 if [ "$config_change_status" -eq 0 ] && [ -f "$PENDING_REPORT" ]; then
 	retry_pending_report
@@ -237,7 +241,8 @@ assert_eq "$REPORT_CALLS" "0" "T4 retry NOT attempted"
 ############################################################
 echo "T5: marker save fails -> both checksums invalidated"
 reset_state
-REPORT_CALLS=0; REPORT_RESULT=2
+REPORT_CALLS=0
+REPORT_RESULT=2
 # Make WORKING_DIR read-only so the marker write fails.
 chmod 0500 "$WORKING_DIR"
 # The checksum files were created in reset_state under WORKING_DIR /
@@ -260,7 +265,8 @@ assert_not_file "$PERSISTENT_CHECKSUM" "T5 persistent checksum invalidated"
 echo "T6: garbage marker discarded"
 reset_state
 printf 'rogue-status\n' >"$PENDING_REPORT"
-REPORT_CALLS=0; REPORT_RESULT=0
+REPORT_CALLS=0
+REPORT_RESULT=0
 config_change_status=0
 if [ "$config_change_status" -eq 0 ] && [ -f "$PENDING_REPORT" ]; then
 	retry_pending_report || true
