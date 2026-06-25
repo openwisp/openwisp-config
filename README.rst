@@ -5,11 +5,11 @@ openwisp-config
     :target: https://github.com/openwisp/openwisp-config/actions/workflows/ci.yml
     :alt: ci build
 
-.. image:: http://img.shields.io/github/release/openwisp/openwisp-config.svg
+.. image:: https://img.shields.io/github/v/release/openwisp/openwisp-config.svg
     :target: https://github.com/openwisp/openwisp-config/releases
 
 .. image:: https://img.shields.io/gitter/room/nwjs/nw.js.svg?style=flat-square
-    :target: https://gitter.im/openwisp/general
+    :target: https://app.gitter.im/#/room/#openwisp_general:gitter.im
     :alt: support chat
 
 ----
@@ -18,12 +18,12 @@ openwisp-config
 for `OpenWrt <https://openwrt.org/>`_.
 
 **Want to help OpenWISP?** `Find out how to help us grow here
-<http://openwisp.io/docs/general/help-us.html>`_.
+<https://openwisp.io/docs/stable/general/help-us.html>`_.
 
 **Want a quick overview of OpenWISP?** `Try the OpenWISP Demo
-<https://openwisp.org/demo.html>`_.
+<https://openwisp.org/demo/>`_.
 
-.. image:: http://netjsonconfig.openwisp.org/en/latest/_images/openwisp.org.svg
+.. image:: https://openwisp.io/docs/dev/_images/openwisp-logo-black.svg
     :target: http://openwisp.org
 
 ----
@@ -40,7 +40,7 @@ Contributing
 ------------
 
 Please read the `OpenWISP contributing guidelines
-<http://openwisp.io/docs/developer/contributing.html>`_.
+<https://openwisp.io/docs/dev/developer/contributing.html>`_.
 
 Changelog
 ---------
@@ -57,4 +57,4 @@ See `LICENSE
 Support
 -------
 
-See `OpenWISP Support Channels <http://openwisp.org/support.html>`_.
+See `OpenWISP Support Channels <https://openwisp.org/support/>`_.
