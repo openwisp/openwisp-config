@@ -977,6 +977,21 @@ else
 	env -i ACTION="restart" /sbin/hotplug-call openwisp
 fi
 
+# Install the SIGUSR1/USR2 handlers once, before the main loop. They used to be
+# set only around the sleep and cleared right after, which left the first
+# configuration cycle after boot -- and every work phase -- running under the
+# default signal disposition, where SIGUSR1/USR2 terminate the process. A
+# SIGUSR1 from openwisp.hotplug on management-interface ifup, or a SIGUSR2 from
+# "openwisp-config --force-update", arriving during that first apply would then
+# kill the agent instead of being handled. Keeping the handlers installed for
+# the whole loop makes these signals always handled and never fatal; the
+# handlers only log and (for USR2) drop the checksum files, so they are safe to
+# run at any point.
+# handle SIGUSR1 to interrupt the interval sleep
+trap handle_sigusr1 USR1
+# handle SIGUSR2 to force downloading and applying config again
+trap handle_sigusr2 USR2
+
 while true; do
 	# check management interface at each iteration
 	# (because the address may change due to
@@ -990,13 +1005,8 @@ while true; do
 	fi
 	env -i ACTION="end-of-cycle" /sbin/hotplug-call openwisp
 
-	# handle SIGUSR1 to interrupt sleep
-	trap handle_sigusr1 USR1
-	# handle SIGUSR2 to force downloading and applying config again
-	trap handle_sigusr2 USR2
+	# SIGUSR1/USR2 (handlers installed above) interrupt this sleep so the next
+	# cycle starts immediately
 	sleep "$INTERVAL" &
 	wait $!
-	# ignore SIGUSR1 and SIGUSR2 signals again
-	trap "" USR1
-	trap "" USR2
 done
