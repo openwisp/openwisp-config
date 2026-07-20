@@ -160,6 +160,18 @@ end
 
 function utils.starts_with(str, start) return str:sub(1, #start) == start end
 
+function utils.is_valid_file_path(path)
+  if type(path) ~= 'string' or path == '' then return false end
+  if string.find(path, '[^%w%._/%-]') then return false end
+  if string.find(path, '//') or string.sub(path, -1) == '/' then return false end
+  local relative_path = string.gsub(path, '^/', '')
+  if relative_path == '' then return false end
+  for component in string.gmatch(relative_path, '[^/]+') do
+    if component == '.' or component == '..' then return false end
+  end
+  return true
+end
+
 -- iterates over a table in alphabeticaly order
 function utils.sorted_pairs(t)
   -- collect keys

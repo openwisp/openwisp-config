@@ -46,6 +46,8 @@ TestUpdateConfig = {
     tearDown = function()
         os.execute('rm -rf ' .. write_dir)
         os.execute('rm -rf ' .. openwisp_dir)
+        os.execute('rm -rf invalid-conf')
+        os.execute('rm -f invalid-conf.tar.gz pwned')
         os.execute('rm configuration.tar.gz')
     end
 }
@@ -213,6 +215,16 @@ function TestUpdateConfig.test_removal_list_options()
     luaunit.assertEquals(string_count(networkContents, "list addresses '10.0.0.3'"), 1)
     luaunit.assertEquals(string_count(networkContents, "list addresses '10.0.0.4'"), 2)
     luaunit.assertNotNil(string.find(networkContents, "option test_restore '2'"))
+end
+
+function TestUpdateConfig.test_invalid_extra_file_path_is_skipped()
+    os.execute('mkdir -p invalid-conf')
+    os.execute('tar -zxf good-config.tar.gz -C invalid-conf')
+    os.execute('touch "invalid-conf/etc/x; touch pwned ;"')
+    os.execute('tar -czf invalid-conf.tar.gz -C invalid-conf etc')
+    update_config('--test=1', '--conf=./invalid-conf.tar.gz')
+    luaunit.assertNil(io.open('pwned'))
+    luaunit.assertNil(io.open(write_dir .. 'etc/x; touch pwned ;'))
 end
 
 os.exit(luaunit.LuaUnit.run())
