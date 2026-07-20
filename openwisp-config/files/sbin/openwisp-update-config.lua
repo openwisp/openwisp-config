@@ -208,8 +208,9 @@ for path, attr in utils.dirtree(remote_dir) do
           modified[dest_path] = true
           modified_changed = true
           -- store original in /etc/openwisp/stored/<path>
-          os.execute('mkdir -p ' .. stored_dir .. dest_dir)
-          os.execute('cp ' .. check_path .. ' ' .. stored_dir .. dest_path)
+          os.execute('mkdir -p ' .. utils.escape_shell_arg(stored_dir .. dest_dir))
+          os.execute('cp ' .. utils.escape_shell_arg(check_path) .. ' ' ..
+                       utils.escape_shell_arg(stored_dir .. dest_path))
         else
           -- add file path added set
           added[dest_path] = true
@@ -221,8 +222,9 @@ for path, attr in utils.dirtree(remote_dir) do
         dest_dir = test_root_dir .. dest_dir
       end
       -- add file to filesystem
-      os.execute('mkdir -p ' .. dest_dir)
-      os.execute('cp ' .. path .. ' ' .. dest_path)
+      os.execute('mkdir -p ' .. utils.escape_shell_arg(dest_dir))
+      os.execute('cp ' .. utils.escape_shell_arg(path) .. ' ' ..
+                   utils.escape_shell_arg(dest_path))
     end
   end
 end

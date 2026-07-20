@@ -160,6 +160,7 @@ end
 
 function utils.starts_with(str, start) return str:sub(1, #start) == start end
 
+-- Extra files come from downloaded archives; keep accepted paths simple.
 function utils.is_valid_file_path(path)
   if type(path) ~= 'string' or path == '' then return false end
   if string.find(path, '[^%w%._/%-]') then return false end
@@ -170,6 +171,11 @@ function utils.is_valid_file_path(path)
     if component == '.' or component == '..' then return false end
   end
   return true
+end
+
+-- Escape paths passed to os.execute so the shell does not interpret them.
+function utils.escape_shell_arg(value)
+  return "'" .. tostring(value):gsub("'", "'\\''") .. "'"
 end
 
 -- iterates over a table in alphabeticaly order

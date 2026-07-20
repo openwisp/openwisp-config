@@ -30,6 +30,12 @@ function TestUtils.test_is_valid_file_path()
   luaunit.assertEquals(utils.is_valid_file_path('{{cert_path}}'), false)
 end
 
+function TestUtils.test_escape_shell_arg()
+  luaunit.assertEquals(utils.escape_shell_arg('/etc/config/network'),
+    "'/etc/config/network'")
+  luaunit.assertEquals(utils.escape_shell_arg("a'b"), "'a'\\''b'")
+end
+
 function TestUtils.test_write_uci_section_named()
   local u = uci.cursor(write_dir)
   utils.write_uci_section(u, 'network', {

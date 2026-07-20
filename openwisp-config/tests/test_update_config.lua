@@ -220,6 +220,7 @@ end
 function TestUpdateConfig.test_invalid_extra_file_path_is_skipped()
     os.execute('mkdir -p invalid-conf')
     os.execute('tar -zxf good-config.tar.gz -C invalid-conf')
+    -- Semicolons would be interpreted by the shell if this path was used raw.
     os.execute('touch "invalid-conf/etc/x; touch pwned ;"')
     os.execute('tar -czf invalid-conf.tar.gz -C invalid-conf etc')
     update_config('--test=1', '--conf=./invalid-conf.tar.gz')
