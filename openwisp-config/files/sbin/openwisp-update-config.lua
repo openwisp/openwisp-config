@@ -192,34 +192,40 @@ for path, attr in utils.dirtree(remote_dir) do
   if attr.mode == 'file' and not is_ignored(path) then
     -- calculates destination dir
     local dest_path = path:sub(#(remote_dir .. '/'))
-    local dest_dir = utils.dirname(dest_path)
-    -- like dest_path but used during automated tests
-    local check_path = not TEST and dest_path or test_root_dir .. dest_path
-    local is_added = added[dest_path] == true
-    local is_modified = modified[dest_path] == true
-    -- if file is neither in added.list nor modified.list
-    if is_added == false and is_modified == false then
-      -- if file exists
-      if utils.file_exists(check_path) then
-        -- add file path to modified set
-        modified[dest_path] = true
-        modified_changed = true
-        -- store original in /etc/openwisp/stored/<path>
-        os.execute('mkdir -p ' .. stored_dir .. dest_dir)
-        os.execute('cp ' .. check_path .. ' ' .. stored_dir .. dest_path)
-      else
-        -- add file path added set
-        added[dest_path] = true
-        added_changed = true
+    if not utils.is_valid_file_path(dest_path) then
+      print('WARNING: skipping invalid file path: ' .. dest_path)
+    else
+      local dest_dir = utils.dirname(dest_path)
+      -- like dest_path but used during automated tests
+      local check_path = not TEST and dest_path or test_root_dir .. dest_path
+      local is_added = added[dest_path] == true
+      local is_modified = modified[dest_path] == true
+      -- if file is neither in added.list nor modified.list
+      if is_added == false and is_modified == false then
+        -- if file exists
+        if utils.file_exists(check_path) then
+          -- add file path to modified set
+          modified[dest_path] = true
+          modified_changed = true
+          -- store original in /etc/openwisp/stored/<path>
+          os.execute('mkdir -p ' .. utils.escape_shell_arg(stored_dir .. dest_dir))
+          os.execute('cp ' .. utils.escape_shell_arg(check_path) .. ' ' ..
+                       utils.escape_shell_arg(stored_dir .. dest_path))
+        else
+          -- add file path added set
+          added[dest_path] = true
+          added_changed = true
+        end
       end
+      if TEST then
+        dest_path = test_root_dir .. dest_path
+        dest_dir = test_root_dir .. dest_dir
+      end
+      -- add file to filesystem
+      os.execute('mkdir -p ' .. utils.escape_shell_arg(dest_dir))
+      os.execute('cp ' .. utils.escape_shell_arg(path) .. ' ' ..
+                   utils.escape_shell_arg(dest_path))
     end
-    if TEST then
-      dest_path = test_root_dir .. dest_path
-      dest_dir = test_root_dir .. dest_dir
-    end
-    -- add file to filesystem
-    os.execute('mkdir -p ' .. dest_dir)
-    os.execute('cp ' .. path .. ' ' .. dest_path)
   end
 end
 
