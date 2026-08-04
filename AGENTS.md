@@ -31,7 +31,7 @@ If instructions conflict, repository config and CI workflows win first, docs nex
 
 ## Testing and QA
 
-- For bug fixes, write the regression test first, run it against the unfixed code, confirm it fails for the expected reason, then implement the fix.
+- For Lua bug fixes, write the regression test first, run it against the unfixed code, confirm it fails for the expected reason, then implement the fix.
 - Use targeted tests while iterating, then run the documented full build/test command before considering the change complete.
 - Run `./qa-format` when present.
 - Treat QA failures as blocking unless confirmed unrelated and reported.
@@ -50,7 +50,7 @@ If instructions conflict, repository config and CI workflows win first, docs nex
 
 - Before editing, inspect the relevant implementation, tests, documentation, and configuration. Follow existing repository patterns and do not invent behavior or requirements.
 - Keep each contribution focused and change only the lines necessary for its goal. Do not include unrelated refactors, formatting churn, or generated and dependency-file changes unless explicitly required.
-- Add or update focused tests for every behavior change. In repositories without a dedicated automated test suite, use the documented build and QA workflow as the equivalent behavior verification. For bug fixes, first reproduce the failure with a regression test when the repository's test setup allows it.
+- Add or update focused Lua tests for changes to existing Lua behavior. For Lua bug fixes, follow the regression-test rule above. Validate shell and package changes with the relevant existing build and QA checks; do not add shell tests or a shell test harness unless explicitly required.
 - Run the relevant targeted tests, builds, and documented QA checks, including `./run-qa-checks` when provided. Do not claim a change is complete when verification fails; report the failure or blocker.
 - When requirements, intended behavior, or an unexpected failure are unclear, stop and seek clarification instead of making speculative changes.
 - When starting work on a new issue, create a new branch from `master`. Use `issues/<issue-number>-<short-title>` for issue work; otherwise, use a short, descriptive branch name.
