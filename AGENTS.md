@@ -33,7 +33,7 @@ If instructions conflict, repository config and CI workflows win first, docs nex
 - Add an explanatory commit body only for substantial changes, new features, or non-obvious bug fixes. The releaser automatically publishes the subject of `[feature]`, `[change]`, `[change!]`, `[deps]`, and `[fix]` commits, including scoped variants, in the changelog. Write those subjects in clear, user-friendly language suitable for release notes.
 - Send new commits in response to review feedback instead of amending existing commits.
 
-## Development Notes
+## Development Rules
 
 - Preserve UCI configuration compatibility, package file paths, service behavior, upgrade behavior, and Controller API contracts unless explicitly required.
 - Edit package sources under `openwisp-config/files/`; regenerate `build/` and `downloads/` instead of editing their contents directly.
@@ -45,7 +45,7 @@ If instructions conflict, repository config and CI workflows win first, docs nex
 - Review documentation examples and references when behavior changes.
 - Preserve public documentation anchors, URLs, include directives, and versioned links unless explicitly required.
 
-## Security Notes
+## Security Rules
 
 - Watch for command injection, unsafe shell expansion, insecure TLS handling, leaked credentials, unsafe file permissions, and broken registration/auth flows.
 - Preserve validation and safe handling around Controller URLs, shared secrets, certificates, UCI values, downloaded configs, and shell commands.
