@@ -35,6 +35,7 @@ If instructions conflict, repository config and CI workflows win first, docs nex
 
 ## Development Rules
 
+- Follow the DRY principle: do not duplicate information or code across files.
 - Preserve UCI configuration compatibility, package file paths, service behavior, upgrade behavior, and Controller API contracts unless explicitly required.
 - Edit package sources under `openwisp-config/files/`; regenerate `build/` and `downloads/` instead of editing their contents directly.
 - Be careful with Lua code, shell scripts, init scripts, network state, retry logic, registration, and generated configuration.
