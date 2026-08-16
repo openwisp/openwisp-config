@@ -18,7 +18,8 @@ local standard = uci.cursor(standard_path)
 local changed = false
 
 local function is_default_wifi(section)
-  if section.encryption == 'none' and section.mode == 'ap' and section.network ==
+  if (section.encryption == "none" or section.encryption == "owe")
+    and section.mode == 'ap' and section.network ==
     'lan' and (section.ssid == 'LEDE' or section.ssid == 'OpenWrt') then return true end
   return false
 end

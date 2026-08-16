@@ -48,3 +48,11 @@ config wifi-iface
 	option device 'radio1'
 	option mode 'ap'
 	option network 'lan'
+
+config wifi-iface
+	option ssid 'OpenWrt'
+	option encryption 'owe'
+	option device 'radio2'
+	option mode 'ap'
+	option network 'lan'
+	option ieee80211w '2'
