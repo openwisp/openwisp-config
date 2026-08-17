@@ -16,11 +16,12 @@ local standard_path = standard_prefix .. 'config/'
 -- standard standard
 local standard = uci.cursor(standard_path)
 local changed = false
+local default_encryption = {none = true, owe = true}
+local default_ssid = {LEDE = true, OpenWrt = true}
 
 local function is_default_wifi(section)
-  if (section.encryption == "none" or section.encryption == "owe")
-    and section.mode == 'ap' and section.network ==
-    'lan' and (section.ssid == 'LEDE' or section.ssid == 'OpenWrt') then return true end
+  if default_encryption[section.encryption] and section.mode == 'ap' and
+    section.network == 'lan' and default_ssid[section.ssid] then return true end
   return false
 end
 
