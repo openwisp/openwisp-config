@@ -4,7 +4,12 @@ Change log
 1.3.0 [unreleased]
 ------------------
 
-WIP.
+Bugfixes
+~~~~~~~~
+
+- Fixed retrying pending ``report_status`` instead of forcing a
+  re-download after a transient HTTP error `#251
+  <https://github.com/openwisp/openwisp-config/pull/251>`_.
 
 1.2.1 [2026-04-09]
 ------------------
