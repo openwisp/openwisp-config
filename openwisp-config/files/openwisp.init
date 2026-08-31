@@ -45,6 +45,8 @@ parse_config() {
 	add_option "$cfg" "--cacert" cacert
 	add_option "$cfg" "--mac-interface" mac_interface
 	add_option "$cfg" "--management-interface" management_interface
+	add_option "$cfg" "--management-interface-family" management_interface_family
+	add_option "$cfg" "--management-interface-ula" management_interface_ula
 	add_option "$cfg" "--default-hostname" default_hostname
 	add_option "$cfg" "--pre-reload-hook" pre_reload_hook
 	add_option "$cfg" "--post-reload-hook" post_reload_hook
