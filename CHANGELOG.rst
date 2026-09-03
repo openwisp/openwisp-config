@@ -1,10 +1,31 @@
 Change log
 ==========
 
-1.3.0 [unreleased]
+1.3.0 [2026-09-04]
 ------------------
 
-WIP.
+Features
+~~~~~~~~
+
+- Added support for `forcing a configuration reload with SIGUSR2
+  <https://github.com/openwisp/openwisp-config/issues/181>`_.
+
+Changes
+~~~~~~~
+
+Other changes
++++++++++++++
+
+- Added support for removing the default 6 GHz SSID when OpenWrt uses
+  ``owe`` encryption, which is the default for 6 GHz radios.
+
+Bugfixes
+~~~~~~~~
+
+- Skipped `invalid file paths before applying configurations
+  <https://github.com/openwisp/openwisp-config/issues/265>`_.
+- Added `support for PPPoE management interfaces
+  <https://github.com/openwisp/openwisp-config/issues/258>`_.
 
 1.2.1 [2026-04-09]
 ------------------
