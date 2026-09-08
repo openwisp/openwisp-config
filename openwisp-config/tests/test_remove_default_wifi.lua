@@ -1,12 +1,15 @@
 require('os')
 require('io')
 local luaunit = require('luaunit')
-local remove_default_wifi = assert(loadfile(
-  "../files/sbin/openwisp-remove-default-wifi.lua"))
+local remove_default_wifi = assert(loadfile("../files/sbin/openwisp-remove-default-wifi.lua"))
 
 TestRemoveDefaultWifi = {
-  setUp = function() os.execute('cp ./wifi/wireless ./config') end,
-  tearDown = function() os.execute('rm ./config/wireless') end
+  setUp = function()
+    os.execute('cp ./wifi/wireless ./config')
+  end,
+  tearDown = function()
+    os.execute('rm ./config/wireless')
+  end
 }
 
 function TestRemoveDefaultWifi.test_default()

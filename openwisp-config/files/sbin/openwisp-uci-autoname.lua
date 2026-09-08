@@ -17,8 +17,8 @@ local standard_prefix = test and '../tests/' or '/etc/'
 local standard_path = standard_prefix .. (test and 'anonymous' or 'config')
 local standard = uci.cursor(standard_path) -- read operations
 
-local output = standard  -- write operations
-local stdout = ''  -- result
+local output = standard -- write operations
+local stdout = '' -- result
 local new_name = ''
 local all_names = {}
 
@@ -51,9 +51,7 @@ for file in lfs.dir(standard_path) do
     local changed = false
     -- avoid name collisions by storing all existing names
     standard:foreach(file, nil, function(section)
-      if not section['.anonymous'] then
-        all_names[section['.name']] = true
-      end
+      if not section['.anonymous'] then all_names[section['.name']] = true end
     end)
     standard:foreach(file, nil, function(section)
       local index = section['.index']
@@ -65,8 +63,7 @@ for file in lfs.dir(standard_path) do
           new_name = 'globals'
         elseif file == 'network' and section['.type'] == 'device' then
           new_name = 'device_' .. section['name']:gsub('br%-', '')
-        elseif file == 'network' and
-          (section['.type'] == 'route' or section['.type'] == 'route6') then
+        elseif file == 'network' and (section['.type'] == 'route' or section['.type'] == 'route6') then
           new_name = nextAvailableName('route')
         elseif file == 'network' and section['.type'] == 'switch' then
           new_name = section['name']
@@ -80,9 +77,7 @@ for file in lfs.dir(standard_path) do
           new_name = 'led_' .. string.lower(section['name'])
         elseif file == 'wireless' and section['.type'] == 'wifi-iface' then
           if section['ifname'] == nil then
-            new_name = 'wifi_' .. (
-              standard:get('network', section['network'], 'ifname')
-            )
+            new_name = 'wifi_' .. (standard:get('network', section['network'], 'ifname'))
           else
             new_name = 'wifi_' .. section['ifname']
           end
@@ -90,9 +85,7 @@ for file in lfs.dir(standard_path) do
           new_name = nextAvailableName(section['.type'])
         end
         -- make sure the new name is unique
-        if all_names[new_name] then
-            new_name = nextAvailableName(new_name .. '_')
-        end
+        if all_names[new_name] then new_name = nextAvailableName(new_name .. '_') end
         all_names[new_name] = true
         -- make sure name is valid
         section['.name'] = getUCIName(new_name)

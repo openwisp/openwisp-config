@@ -20,8 +20,8 @@ local default_encryption = {none = true, owe = true}
 local default_ssid = {LEDE = true, OpenWrt = true}
 
 local function is_default_wifi(section)
-  if default_encryption[section.encryption] and section.mode == 'ap' and
-    section.network == 'lan' and default_ssid[section.ssid] then return true end
+  if default_encryption[section.encryption] and section.mode == 'ap' and section.network == 'lan' and
+    default_ssid[section.ssid] then return true end
   return false
 end
 

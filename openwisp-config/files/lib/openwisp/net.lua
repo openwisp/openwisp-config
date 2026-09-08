@@ -21,9 +21,7 @@ function net.get_interface(name, family)
   -- get list of interfaces and loop until found
   local interfaces = nixio.getifaddrs()
   for _, interface in pairs(interfaces) do
-    if interface.name == ifname and interface.family == ip_family then
-      return interface
-    end
+    if interface.name == ifname and interface.family == ip_family then return interface end
   end
   -- return nil if nothing is found
   return nil

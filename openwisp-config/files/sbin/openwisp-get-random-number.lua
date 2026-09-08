@@ -13,8 +13,7 @@ for _, value in pairs(arg) do
 end
 
 local function to_int(str)
-  return math.floor(tonumber(str) or
-                      error("Could not cast '" .. tostring(str) .. "' to number.'"))
+  return math.floor(tonumber(str) or error("Could not cast '" .. tostring(str) .. "' to number.'"))
 end
 
 local function get_random(seed, minimum_value, maximum_value)
