@@ -25,5 +25,8 @@ luarocks install luafilesystem
 luarocks install luaunit
 # install luacheck
 luarocks install luacheck
+# install luaformatter
+git clone --recurse-submodules https://github.com/Koihik/LuaFormatter.git
+{ cd LuaFormatter && cmake . && make install && cd ..; } || { echo 'Installing LuaFormatter failed' && exit 1; }
 # clean
-rm -rf json-c libubox uci
+rm -rf json-c libubox uci LuaFormatter
