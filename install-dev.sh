@@ -32,7 +32,7 @@ git clone --no-checkout https://github.com/Koihik/LuaFormatter.git LuaFormatter 
 	cd LuaFormatter \
 		&& git checkout --detach "$LUA_FORMATTER_COMMIT" \
 		&& git submodule update --init --recursive \
-		&& cmake . \
+		&& cmake -DBUILD_TESTS=OFF . \
 		&& make install
 ) || { rm -rf LuaFormatter && echo 'Installing LuaFormatter failed' && exit 1; }
 # clean
