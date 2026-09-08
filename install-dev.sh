@@ -26,7 +26,14 @@ luarocks install luaunit
 # install luacheck
 luarocks install luacheck
 # install luaformatter
-git clone --recurse-submodules https://github.com/Koihik/LuaFormatter.git
-{ cd LuaFormatter && cmake . && make install && cd ..; } || { echo 'Installing LuaFormatter failed' && exit 1; }
+# Pin LuaFormatter and its submodules to immutable commits before building.
+LUA_FORMATTER_COMMIT=417d4570a4265109ebbab6610023e91c4668f631
+git clone --no-checkout https://github.com/Koihik/LuaFormatter.git LuaFormatter && (
+	cd LuaFormatter \
+		&& git checkout --detach "$LUA_FORMATTER_COMMIT" \
+		&& git submodule update --init --recursive \
+		&& cmake . \
+		&& make install
+) || { rm -rf LuaFormatter && echo 'Installing LuaFormatter failed' && exit 1; }
 # clean
 rm -rf json-c libubox uci LuaFormatter
