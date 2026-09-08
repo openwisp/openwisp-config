@@ -91,7 +91,7 @@ end
 
 -- returns true if uci section is empty
 function utils.is_uci_empty(table)
-  for key, value in pairs(table) do if not utils.starts_with_dot(key) then return false end end
+  for key in pairs(table) do if not utils.starts_with_dot(key) then return false end end
   return true
 end
 
