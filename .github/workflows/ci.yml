@@ -116,6 +116,7 @@ jobs:
         if: ${{ success() && github.event_name=='push' }}
         shell: bash
         run: |
+          set -o pipefail
           cutoff=$(date -u -d '2 years ago' +%F)
           gsutil ls "$BASE_URL/" | while IFS= read -r path; do
             # Retain only the direct child directory name.
