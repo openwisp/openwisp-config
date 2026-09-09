@@ -4,7 +4,9 @@ local lfs = require('lfs')
 
 local utils = {}
 
-function utils.starts_with_dot(str) return str:sub(1, 1) == '.' end
+function utils.starts_with_dot(str)
+  return str:sub(1, 1) == '.'
+end
 
 function utils.split(input, sep)
   if input == '' or input == nil then return {} end
@@ -27,9 +29,7 @@ function utils.dirname(path)
   local parts = utils.split(path, '/')
   local returnPath = '/'
   local length = table.getn(parts)
-  for i, part in ipairs(parts) do
-    if i < length then returnPath = returnPath .. part .. '/' end
-  end
+  for i, part in ipairs(parts) do if i < length then returnPath = returnPath .. part .. '/' end end
   return returnPath
 end
 
@@ -91,9 +91,7 @@ end
 
 -- returns true if uci section is empty
 function utils.is_uci_empty(table)
-  for key, value in pairs(table) do
-    if not utils.starts_with_dot(key) then return false end
-  end
+  for key in pairs(table) do if not utils.starts_with_dot(key) then return false end end
   return true
 end
 
@@ -132,7 +130,9 @@ function utils.dirtree(dir_param)
       end
     end
   end
-  return coroutine.wrap(function() yieldtree(dir_param) end)
+  return coroutine.wrap(function()
+    yieldtree(dir_param)
+  end)
 end
 
 function utils.file_exists(path)
@@ -158,7 +158,9 @@ function utils.set_to_file(set, path)
   return true
 end
 
-function utils.starts_with(str, start) return str:sub(1, #start) == start end
+function utils.starts_with(str, start)
+  return str:sub(1, #start) == start
+end
 
 -- Extra files come from downloaded archives; keep accepted paths simple.
 function utils.is_valid_file_path(path)

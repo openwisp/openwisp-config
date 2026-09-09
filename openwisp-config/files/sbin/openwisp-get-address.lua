@@ -8,9 +8,7 @@ local os = require('os')
 local net = require('openwisp.net')
 local name = arg[1]
 local interface = net.get_interface(name, 'inet')
-if not interface then
-  interface = net.get_interface(name, 'inet6')
-end
+if not interface then interface = net.get_interface(name, 'inet6') end
 
 if interface then
   print(interface.addr)

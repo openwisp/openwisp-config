@@ -9,16 +9,18 @@ package.loaded['uci'] = {
   cursor = function()
     return {
       get = function(_, config, section, option)
-        if config ~= 'network' or not network_config[section] then
-          return nil
-        end
+        if config ~= 'network' or not network_config[section] then return nil end
         return network_config[section][option]
       end
     }
   end
 }
 
-package.loaded['nixio'] = {getifaddrs = function() return interfaces end}
+package.loaded['nixio'] = {
+  getifaddrs = function()
+    return interfaces
+  end
+}
 local net = require('openwisp.net')
 TestNet = {}
 
