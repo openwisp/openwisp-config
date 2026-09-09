@@ -125,7 +125,9 @@ jobs:
             date=${dir_name:0:10}
             # Only dated build directories with a commit SHA match.
             if [[ $dir_name =~ ^[0-9]{4}-[0-9]{2}-[0-9]{2}-[0-9a-f]+$ ]] && [[ $date < $cutoff ]]; then
-              gsutil -m rm -r "$path"
+              if ! gsutil -m rm -r "$path"; then
+                exit 1
+              fi
             fi
           done
         env:
