@@ -44,14 +44,18 @@ its dependencies:
     cat feeds.conf.default >> feeds.conf
     ./scripts/feeds update -a
     ./scripts/feeds install -a
-    # any arch/target is fine because the package is architecture indipendent
-    arch="ar71xx"
-    echo "CONFIG_TARGET_$arch=y" > .config;
+    # any supported target and subtarget work because the package is architecture independent
+    target="ath79"
+    subtarget="generic"
+    echo "CONFIG_TARGET_$target=y" > .config
+    echo "CONFIG_TARGET_${target}_${subtarget}=y" >> .config
     echo "CONFIG_PACKAGE_openwisp-config=y" >> .config
     make defconfig
     make tools/install
     make toolchain/install
     make package/openwisp-config/compile
+
+The compiled packages will go in ``bin/packages/*/openwisp``.
 
 Alternatively, you can configure your build interactively with ``make
 menuconfig``, in this case you will need to select *openwisp-config* by

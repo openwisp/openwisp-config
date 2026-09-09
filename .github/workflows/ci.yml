@@ -64,10 +64,10 @@ jobs:
         id: cache
         uses: actions/cache@v6
         env:
-          cache-name: cache-openwisp-config-dependencies
+          cache-name: cache-openwrt-dependencies
         with:
           path: "/home/runner/work/build"
-          key: ${{ runner.os }}-build-${{ env.cache-name }}
+          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('runbuild') }}
 
       - name: Set Environment
         run: |
@@ -79,6 +79,7 @@ jobs:
         env:
           CI: 1
           CI_CACHE: ${{ steps.cache.outputs.cache-hit }}
+          OPENWRT_APK_PRIVATE_KEY: ${{ github.event_name == 'push' && secrets.OPENWRT_APK_PRIVATE_KEY || '' }}
 
       - name: Upload packages as artifacts
         uses: actions/upload-artifact@v7

@@ -5,7 +5,6 @@
 # - $BUILD_DIR
 # - $DOWNLOADS_DIR
 # - $CORES (defaults to number of CPU cores on system)
-# - $COMPILE_TARGET (defaults to mips_24kc)
 set -e
 
 CI=${CI:-0}
@@ -16,11 +15,10 @@ BUILD_DIR=${BUILD_DIR-$(pwd)/build}
 DOWNLOADS_DIR=${DOWNLOADS_DIR-$(pwd)/downloads}
 START_TIME=${START_TIME-$(date +"%Y-%m-%d-%H%M%S")}
 VERSIONED_DIR="$DOWNLOADS_DIR/$START_TIME"
-COMPILE_TARGET=${COMPILE_TARGET-mips_24kc}
 LATEST_LINK="$DOWNLOADS_DIR/latest"
 CORES=${CORES:-$(nproc)}
 CURRENT_DIR=$(pwd)
-OPENWRT_BRANCH="openwrt-24.10"
+OPENWRT_BRANCH="openwrt-25.12"
 
 mkdir -p "$BUILD_DIR"
 mkdir -p "$VERSIONED_DIR"
@@ -30,9 +28,15 @@ if ! [ -d "openwrt" ]; then
 	git clone https://git.openwrt.org/openwrt/openwrt.git --depth 1 --branch $OPENWRT_BRANCH
 fi
 cd openwrt
-git reset --hard HEAD
-git checkout $OPENWRT_BRANCH
-git pull origin $OPENWRT_BRANCH
+git fetch --depth 1 origin $OPENWRT_BRANCH
+git checkout -B $OPENWRT_BRANCH FETCH_HEAD
+
+# OpenWrt generates a local key when CI does not provide the release key.
+trap 'rm -f private-key.pem' EXIT
+if [ -n "${OPENWRT_APK_PRIVATE_KEY:-}" ]; then
+	printf '%s\n' "$OPENWRT_APK_PRIVATE_KEY" >private-key.pem
+	chmod 600 private-key.pem
+fi
 
 # configure feeds
 echo "src-link openwisp $CURRENT_DIR" >feeds.conf
@@ -42,31 +46,48 @@ sed -i '/telephony/d' feeds.conf
 sed -i '/routing/d' feeds.conf
 ./scripts/feeds update -a
 ./scripts/feeds install -a
-echo "CONFIG_PACKAGE_openwisp-config=y" >>.config
+{
+	echo "CONFIG_USE_APK=y"
+	echo "CONFIG_SIGNED_PACKAGES=y"
+	echo "CONFIG_PACKAGE_openwisp-config=y"
+} >>.config
 make defconfig
-
-# disable package signing: make defconfig sets CONFIG_SIGNED_PACKAGES=y by default
-# but usign is not available in CI, so we disable it to allow index generation
-sed -i 's/^CONFIG_SIGNED_PACKAGES=y$/CONFIG_SIGNED_PACKAGES=/' .config
+COMPILE_TARGET=$(grep -E '^CONFIG_TARGET_ARCH_PACKAGES="[^"]+"$' .config | cut -d '"' -f 2)
+if [ -z "$COMPILE_TARGET" ] || [ "$(printf '%s\n' "$COMPILE_TARGET" | wc -l)" -ne 1 ]; then
+	echo "ERROR: OpenWrt package architecture not found in .config"
+	exit 1
+fi
+PACKAGES_DIR="$BUILD_DIR/openwrt/bin/packages/$COMPILE_TARGET/openwisp"
+rm -f "$PACKAGES_DIR"/*.apk "$PACKAGES_DIR"/packages.adb \
+	"$PACKAGES_DIR"/index.json "$PACKAGES_DIR"/public-key.pem
 
 if [ ! "$CI_CACHE" ]; then
 	make -j"$CORES" tools/install || make -j1 V=s tools/install
 	make -j"$CORES" toolchain/install || make -j1 V=s toolchain/install
 fi
 
-make -j"$CORES" package/openwisp-config/compile || make -j1 V=s package/openwisp-config/compile || exit 1
+make -j"$CORES" package/openwisp-config/compile \
+	|| make -j1 V=s package/openwisp-config/compile || exit 1
 
-# Publish sha256.manifest (renamed from Package.manifest) for integrity verification
+# package/index creates packages.adb, the APK repository index used by apk,
+# and index.json, a JSON representation of the package metadata.
 make package/index V=s
-PACKAGES_DIR="$BUILD_DIR/openwrt/bin/packages/$COMPILE_TARGET/openwisp"
-MANIFEST_FILE="$PACKAGES_DIR/Packages.manifest"
-if [ ! -f "$MANIFEST_FILE" ]; then
-	echo "ERROR: Package manifest file not found at $MANIFEST_FILE"
+PUBLIC_KEY="$BUILD_DIR/openwrt/public-key.pem"
+if ! compgen -G "$PACKAGES_DIR/*.apk" >/dev/null; then
+	echo "ERROR: APK package files not found at $PACKAGES_DIR"
 	exit 1
 fi
-mv "$MANIFEST_FILE" "$PACKAGES_DIR/sha256.manifest"
-rm "$PACKAGES_DIR"/*.json
-rm "$PACKAGES_DIR"/Packages*
+if [ ! -f "$PUBLIC_KEY" ]; then
+	echo "ERROR: APK repository public key not found at $PUBLIC_KEY"
+	exit 1
+fi
+cp "$PUBLIC_KEY" "$PACKAGES_DIR"
+for index_file in packages.adb index.json public-key.pem; do
+	if [ ! -f "$PACKAGES_DIR/$index_file" ]; then
+		echo "ERROR: APK repository metadata not found at $PACKAGES_DIR/$index_file"
+		exit 1
+	fi
+done
 
 # Move artifacts
 mv "$PACKAGES_DIR" "$VERSIONED_DIR"
