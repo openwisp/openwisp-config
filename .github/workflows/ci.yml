@@ -90,20 +90,20 @@ jobs:
           path: "${{ env.DOWNLOADS_DIR }}/${{ env.START_TIME }}"
 
       - name: Google Cloud Auth
-        if: ${{ github.event_name=='push' }}
+        if: ${{ github.event_name=='push' && github.ref == 'refs/heads/master' }}
         uses: "google-github-actions/auth@v3"
         with:
           project_id: ${{ secrets.GCS_PROJECT_ID }}
           credentials_json: ${{ secrets.GCS_DOWNLOADS_SERVICE_ACCOUNT_JSON }}
 
       - name: Google Cloud Setup
-        if: ${{ github.event_name=='push' }}
+        if: ${{ github.event_name=='push' && github.ref == 'refs/heads/master' }}
         uses: google-github-actions/setup-gcloud@v3
         with:
           project_id: ${{ secrets.GCS_PROJECT_ID }}
 
       - name: Upload compiled packages to downloads.openwisp.io
-        if: ${{ github.event_name=='push' }}
+        if: ${{ github.event_name=='push' && github.ref == 'refs/heads/master' }}
         run: |
           gsutil -m rsync -r ${{ env.SRC_URL }} ${{ env.DST_URL }}
           gsutil -m rsync -r -d ${{ env.SRC_URL }} ${{ env.LATEST_URL }}
