@@ -25,7 +25,7 @@ mkdir -p "$VERSIONED_DIR"
 cd "$BUILD_DIR"
 
 if ! [ -d "openwrt" ]; then
-	git clone https://git.openwrt.org/openwrt/openwrt.git --depth 1 --branch $OPENWRT_BRANCH
+	git clone https://git.openwrt.org/openwrt/openwrt.git
 fi
 cd openwrt
 git fetch origin

@@ -7,7 +7,7 @@ Install the Config Agent on your OpenWrt system with:
 
     # OpenWrt >= 25.12
     apk update
-    apk install openwisp-config
+    apk add openwisp-config
 
     # OpenWrt <= 24.10
     opkg update
