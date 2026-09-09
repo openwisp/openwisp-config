@@ -25,12 +25,11 @@ mkdir -p "$VERSIONED_DIR"
 cd "$BUILD_DIR"
 
 if ! [ -d "openwrt" ]; then
-	git clone https://git.openwrt.org/openwrt/openwrt.git
+	git clone https://git.openwrt.org/openwrt/openwrt.git --depth 1 --branch $OPENWRT_BRANCH
 fi
 cd openwrt
-git fetch origin
-git checkout $OPENWRT_BRANCH
-git reset --hard origin/$OPENWRT_BRANCH
+git fetch --depth 1 origin $OPENWRT_BRANCH
+git checkout -B $OPENWRT_BRANCH FETCH_HEAD
 
 # OpenWrt generates a local key when CI does not provide the release key.
 trap 'rm -f private-key.pem' EXIT
