@@ -53,6 +53,8 @@ its dependencies:
     make toolchain/install
     make package/openwisp-config/compile
 
+The compiled packages will go in ``bin/packages/*/openwisp``.
+
 Alternatively, you can configure your build interactively with ``make
 menuconfig``, in this case you will need to select *openwisp-config* by
 going to ``Administration > openwisp``:

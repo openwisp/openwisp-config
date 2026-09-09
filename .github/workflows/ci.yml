@@ -79,6 +79,7 @@ jobs:
         env:
           CI: 1
           CI_CACHE: ${{ steps.cache.outputs.cache-hit }}
+          OPENWRT_APK_PRIVATE_KEY: ${{ github.event_name == 'push' && secrets.OPENWRT_APK_PRIVATE_KEY || '' }}
 
       - name: Upload packages as artifacts
         uses: actions/upload-artifact@v7

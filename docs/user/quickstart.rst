@@ -1,35 +1,42 @@
 Quick Start Guide
 =================
 
-To install the Config Agent on your OpenWrt system, follow these steps:
+Install the Config Agent on your OpenWrt system with:
 
-Download and install the latest build from `downloads.openwisp.io
-<http://downloads.openwisp.io/?prefix=openwisp-config/>`_. Copy the URL of
-the IPK file you want to download, then run the following commands on your
-OpenWrt device:
+.. code-block:: shell
 
-.. code-block:: bash
+    # OpenWrt >= 25.12
+    apk update
+    apk install openwisp-config
 
-    cd /tmp  # /tmp runs in memory
-    wget <URL-just-copied>
-    opkg update
-    opkg install ./<file-just-downloaded>
-
-Replace ``<URL-just-copied>`` with the URL of the package from
-`downloads.openwisp.io
-<http://downloads.openwisp.io/?prefix=openwisp-config/>`_.
-
-You can also install from the official OpenWrt packages:
-
-.. code-block:: bash
-
+    # OpenWrt <= 24.10
     opkg update
     opkg install openwisp-config
 
-.. important::
+Development Builds
+------------------
 
-    **We recommend installing from our latest builds** because the OpenWrt
-    packages are not always up to date.
+If you need an unreleased feature or bug fix, try the development version
+from `downloads.openwisp.io <https://downloads.openwisp.io/>`_. It
+provides APK packages built by our continuous integration. Before
+installing one, add the OpenWISP public key to the APK keyring:
+
+.. code-block:: shell
+
+    cat > /etc/apk/keys/openwisp-config.pem <<'EOF'
+    -----BEGIN PUBLIC KEY-----
+    MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEYhhsie+759Mk34fJso4cDHVeLNeE
+    277qiiRySdHKYQNx8KV1RGd1ynm+5m+Z3RUl1BMYAAqi8Tip1+6q+DgEiQ==
+    -----END PUBLIC KEY-----
+    EOF
+
+Then download the ``openwisp-config`` APK from `the latest build
+<https://downloads.openwisp.io/?prefix=openwisp-config/latest/>`_ and
+install it. ``apk`` verifies its signature with the installed public key.
+
+.. code-block:: shell
+
+    apk add /tmp/openwisp-config_*.apk
 
 Once the config agent is installed, you need to configure it. Edit the
 config file located at ``/etc/config/openwisp``.
