@@ -17,9 +17,9 @@ Development Builds
 ------------------
 
 If you need an unreleased feature or bug fix, try the development version
-from `downloads.openwisp.io <https://downloads.openwisp.io/>`_. It
-provides APK packages built by our continuous integration. Before
-installing one, add the OpenWISP public key to the APK keyring:
+from `downloads.openwisp.io <https://downloads.openwisp.io/>`_. It lists
+APK packages built in the last two years by our continuous integration.
+Before installing one, add the OpenWISP public key to the APK keyring:
 
 .. code-block:: shell
 
