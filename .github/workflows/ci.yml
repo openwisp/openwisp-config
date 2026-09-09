@@ -64,10 +64,10 @@ jobs:
         id: cache
         uses: actions/cache@v6
         env:
-          cache-name: cache-openwisp-config-dependencies-openwrt-25.12
+          cache-name: cache-openwrt-dependencies
         with:
           path: "/home/runner/work/build"
-          key: ${{ runner.os }}-build-${{ env.cache-name }}
+          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('runbuild') }}
 
       - name: Set Environment
         run: |
