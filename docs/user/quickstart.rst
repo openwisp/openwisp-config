@@ -30,12 +30,16 @@ Before installing one, add the OpenWISP public key to the APK keyring:
     -----END PUBLIC KEY-----
     EOF
 
-Then download the ``openwisp-config`` APK from `the latest build
-<https://downloads.openwisp.io/?prefix=openwisp-config/latest/>`_ and
-install it. ``apk`` verifies its signature with the installed public key.
+Then download the ``openwisp-config`` APK and ``sha256.manifest`` from
+`the latest build
+<https://downloads.openwisp.io/?prefix=openwisp-config/latest/>`_. Verify
+the APK checksum before installing it. ``apk`` verifies its signature with
+the installed public key.
 
 .. code-block:: shell
 
+    cd /tmp
+    sha256sum -c sha256.manifest
     apk add /tmp/openwisp-config_*.apk
 
 Once the config agent is installed, you need to configure it. Edit the
