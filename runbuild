@@ -59,7 +59,8 @@ if [ -z "$COMPILE_TARGET" ] || [ "$(printf '%s\n' "$COMPILE_TARGET" | wc -l)" -n
 fi
 PACKAGES_DIR="$BUILD_DIR/openwrt/bin/packages/$COMPILE_TARGET/openwisp"
 rm -f "$PACKAGES_DIR"/*.apk "$PACKAGES_DIR"/packages.adb \
-	"$PACKAGES_DIR"/index.json "$PACKAGES_DIR"/public-key.pem
+	"$PACKAGES_DIR"/index.json "$PACKAGES_DIR"/public-key.pem \
+	"$PACKAGES_DIR"/sha256.manifest
 
 if [ ! "$CI_CACHE" ]; then
 	make -j"$CORES" tools/install || make -j1 V=s tools/install
@@ -77,12 +78,16 @@ if ! compgen -G "$PACKAGES_DIR/*.apk" >/dev/null; then
 	echo "ERROR: APK package files not found at $PACKAGES_DIR"
 	exit 1
 fi
+(
+	cd "$PACKAGES_DIR"
+	sha256sum ./*.apk >sha256.manifest
+)
 if [ ! -f "$PUBLIC_KEY" ]; then
 	echo "ERROR: APK repository public key not found at $PUBLIC_KEY"
 	exit 1
 fi
 cp "$PUBLIC_KEY" "$PACKAGES_DIR"
-for index_file in packages.adb index.json public-key.pem; do
+for index_file in packages.adb index.json public-key.pem sha256.manifest; do
 	if [ ! -f "$PACKAGES_DIR/$index_file" ]; then
 		echo "ERROR: APK repository metadata not found at $PACKAGES_DIR/$index_file"
 		exit 1
