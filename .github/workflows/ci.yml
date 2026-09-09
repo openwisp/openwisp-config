@@ -116,6 +116,7 @@ jobs:
         if: ${{ success() && github.event_name=='push' }}
         shell: bash
         run: |
+          # Propagate failures from gsutil ls through the loop.
           set -o pipefail
           cutoff=$(date -u -d '2 years ago' +%F)
           gsutil ls "$BASE_URL/" | while IFS= read -r path; do
