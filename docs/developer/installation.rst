@@ -142,7 +142,9 @@ package:
 
 .. code-block:: shell
 
-    curl -L https://codeload.github.com/openwisp/openwisp-config/tar.gz/<version> | sha256sum
+    curl --fail --show-error --location --output openwisp-config.tar.gz \
+      https://codeload.github.com/openwisp/openwisp-config/tar.gz/<version> &&
+    sha256sum openwisp-config.tar.gz
 
 Replace ``<version>`` with the release tag and copy the resulting checksum
 to ``PKG_HASH``.
