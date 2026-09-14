@@ -122,3 +122,33 @@ Alternatively, you can run specific tests, e.g.:
 
     cd openwisp-config/tests/
     lua test_utils.lua -v
+
+Releasing to the OpenWrt Package Feed
+-------------------------------------
+
+After publishing a new OpenWISP Config release, update the package
+definition in the official `OpenWrt packages feed
+<https://github.com/openwrt/packages>`_.
+
+In `admin/openwisp-config/Makefile
+<https://github.com/openwrt/packages/blob/master/admin/openwisp-config/Makefile>`_:
+
+1. Set ``PKG_VERSION`` to the new release version.
+2. Reset ``PKG_RELEASE`` to ``1``.
+3. Update ``PKG_HASH`` with the SHA-256 checksum of the release tarball.
+
+Calculate the checksum from the same GitHub codeload URL used by the
+package:
+
+.. code-block:: shell
+
+    curl -L https://codeload.github.com/openwisp/openwisp-config/tar.gz/<version> | sha256sum
+
+Replace ``<version>`` with the release tag and copy the resulting checksum
+to ``PKG_HASH``.
+
+Commit the changes according to the `OpenWrt package contribution
+guidelines
+<https://github.com/openwrt/packages/blob/master/CONTRIBUTING.md>`_ and
+open a pull request against the default branch of the ``openwrt/packages``
+repository.
