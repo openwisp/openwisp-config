@@ -30,26 +30,24 @@ function TestUciAutoname.test_default_behaviour()
   luaunit.assertNotNil(networkFile)
   local networkContents = networkFile:read('*all')
   luaunit.assertNotNil(string.find(networkContents, "config switch 'switch"))
-  luaunit.assertNotNil(string.find(networkContents,
-    "config switch_vlan 'switch0_vlan1"))
-  luaunit.assertNotNil(string.find(networkContents,
-    "config switch_port 'switch0_port1"))
+  luaunit.assertNotNil(string.find(networkContents, "config switch_vlan 'switch0_vlan1"))
+  luaunit.assertNotNil(string.find(networkContents, "config switch_port 'switch0_port1"))
   luaunit.assertNotNil(string.find(networkContents, "config globals 'globals"))
-  luaunit.assertNotNil(string.find(networkContents,
-    "config device 'device_lan2"))
+  luaunit.assertNotNil(string.find(networkContents, "config device 'device_lan2"))
   luaunit.assertNotNil(string.find(networkContents, "config route 'route1"))
   luaunit.assertNotNil(string.find(networkContents, "config route 'route2"))
   -- ensure rest of config options are present
   luaunit.assertNotNil(string.find(networkContents, "config interface 'loopback'"))
   luaunit.assertNotNil(string.find(networkContents, "config interface 'lan'"))
+  -- ensure device eth0.2 is renamed
+  luaunit.assertNotNil(string.find(networkContents, "config device 'device_eth0_2'"))
+  luaunit.assertNotNil(string.find(networkContents, "option macaddr '00:00:00:00:00:11'"))
   -- check wireless
   local wirelessFile = io.open(write_dir .. 'wireless')
   luaunit.assertNotNil(wirelessFile)
   local wirelessContents = wirelessFile:read('*all')
-  luaunit.assertNotNil(string.find(wirelessContents, "config wifi-iface 'wifi_wlan0",
-    nil, true))
-  luaunit.assertNotNil(string.find(wirelessContents, "config wifi-iface 'wifi_wlan1",
-    nil, true))
+  luaunit.assertNotNil(string.find(wirelessContents, "config wifi-iface 'wifi_wlan0", nil, true))
+  luaunit.assertNotNil(string.find(wirelessContents, "config wifi-iface 'wifi_wlan1", nil, true))
   -- check system
   local systemFile = io.open(write_dir .. 'system')
   luaunit.assertNotNil(systemFile)

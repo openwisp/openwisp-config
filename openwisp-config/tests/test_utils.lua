@@ -12,13 +12,29 @@ TestUtils = {
     os.execute('mkdir ' .. write_dir)
     os.execute('touch ' .. write_dir .. '/network')
   end,
-  tearDown = function() os.execute('rm -rf ' .. write_dir) end
+  tearDown = function()
+    os.execute('rm -rf ' .. write_dir)
+  end
 }
 
 function TestUtils.test_starts_with_dot()
   luaunit.assertEquals(utils.starts_with_dot('.name'), true)
   luaunit.assertEquals(utils.starts_with_dot('.type'), true)
   luaunit.assertEquals(utils.starts_with_dot('ifname'), false)
+end
+
+function TestUtils.test_is_valid_file_path()
+  luaunit.assertEquals(utils.is_valid_file_path('/etc/config/network'), true)
+  luaunit.assertEquals(utils.is_valid_file_path('etc/openvpn/client.conf'), true)
+  luaunit.assertEquals(utils.is_valid_file_path('tmp/x; reboot'), false)
+  luaunit.assertEquals(utils.is_valid_file_path('../../../etc/passwd'), false)
+  luaunit.assertEquals(utils.is_valid_file_path('tmp/a b'), false)
+  luaunit.assertEquals(utils.is_valid_file_path('{{cert_path}}'), false)
+end
+
+function TestUtils.test_escape_shell_arg()
+  luaunit.assertEquals(utils.escape_shell_arg('/etc/config/network'), "'/etc/config/network'")
+  luaunit.assertEquals(utils.escape_shell_arg("a'b"), "'a'\\''b'")
 end
 
 function TestUtils.test_write_uci_section_named()
@@ -34,8 +50,7 @@ function TestUtils.test_write_uci_section_named()
   luaunit.assertNotNil(file)
   local contents = file:read('*all')
   luaunit.assertNotNil(string.find(contents, "config globals 'globals'"))
-  luaunit.assertNotNil(
-    string.find(contents, "option ula_prefix 'fd8e:f40a:fede::/48'"))
+  luaunit.assertNotNil(string.find(contents, "option ula_prefix 'fd8e:f40a:fede::/48'"))
 end
 
 function TestUtils.test_write_uci_section_anon()
@@ -312,8 +327,7 @@ end
 
 function TestUtils.test_starts_with()
   luaunit.assertEquals(utils.starts_with('/etc/config/network', '/etc/config/'), true)
-  luaunit.assertEquals(utils.starts_with('/etc/mypackage/myfile', '/etc/config/'),
-    false)
+  luaunit.assertEquals(utils.starts_with('/etc/mypackage/myfile', '/etc/config/'), false)
 end
 
 function TestUtils.test_sorted_pairs()
@@ -338,9 +352,9 @@ function TestUtils.test_write_uci_section_order()
   local file = io.open(write_dir .. '/network')
   luaunit.assertNotNil(file)
   local contents = file:read('*all')
-  local expected = "\toption aaaaaa 'should come first'\n" ..
-                     "\toption ula_prefix 'fd8e:f40a:fede::/48'\n" ..
-                     "\toption zzzzzz 'just a test'"
+  local expected =
+    "\toption aaaaaa 'should come first'\n" .. "\toption ula_prefix 'fd8e:f40a:fede::/48'\n" ..
+      "\toption zzzzzz 'just a test'"
   luaunit.assertNotNil(string.find(contents, expected))
 end
 

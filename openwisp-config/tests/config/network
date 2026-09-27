@@ -14,8 +14,12 @@ config interface 'lan'
 	option ip6assign '60'
 	option force_link '0'
 
+config device
+	option name 'eth0.2'
+	option macaddr '00:00:00:00:00:11'
+
 config interface 'wan'
-	option ifname 'eth0.2'
+	option device 'eth0.2'
 	option proto 'none'
 	option test_restore '1'
 

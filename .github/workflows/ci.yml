@@ -14,20 +14,22 @@ jobs:
     runs-on: ubuntu-24.04
 
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
         with:
           ref: ${{ github.event.pull_request.head.sha }}
 
       - name: Set up Python
-        uses: actions/setup-python@v6
+        uses: actions/setup-python@v7
         with:
-          python-version: 3.x
+          python-version: "3.13"
+          cache: pip
+          cache-dependency-path: requirements-test.txt
 
       - name: Install Dependencies
         id: deps
         run: |
           sudo ./install-dev.sh
-          pip install "openwisp-utils[qa]~=1.2.0"
+          pip install --upgrade -r requirements-test.txt
 
       - name: QA-Checks
         run: ./run-qa-checks
@@ -36,7 +38,7 @@ jobs:
 
       - name: Run sh-checker
         if: ${{ !cancelled() && steps.deps.conclusion == 'success' }}
-        uses: luizm/action-sh-checker@v0.9.0
+        uses: luizm/action-sh-checker@v0.10.0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
@@ -56,18 +58,18 @@ jobs:
       CORES: 2
 
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
         with:
           ref: ${{ github.event.pull_request.head.sha }}
 
       - name: Cache OpenWrt dependencies
         id: cache
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         env:
-          cache-name: cache-openwisp-config-dependencies
+          cache-name: cache-openwrt-dependencies
         with:
           path: "/home/runner/work/build"
-          key: ${{ runner.os }}-build-${{ env.cache-name }}
+          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('runbuild') }}
 
       - name: Set Environment
         run: |
@@ -79,32 +81,55 @@ jobs:
         env:
           CI: 1
           CI_CACHE: ${{ steps.cache.outputs.cache-hit }}
+          OPENWRT_APK_PRIVATE_KEY: ${{ github.event_name == 'push' && secrets.OPENWRT_APK_PRIVATE_KEY || '' }}
 
       - name: Upload packages as artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: Packages
           path: "${{ env.DOWNLOADS_DIR }}/${{ env.START_TIME }}"
 
       - name: Google Cloud Auth
-        if: ${{ github.event_name=='push' }}
+        if: ${{ github.event_name=='push' && github.ref == 'refs/heads/master' }}
         uses: "google-github-actions/auth@v3"
         with:
           project_id: ${{ secrets.GCS_PROJECT_ID }}
           credentials_json: ${{ secrets.GCS_DOWNLOADS_SERVICE_ACCOUNT_JSON }}
 
       - name: Google Cloud Setup
-        if: ${{ github.event_name=='push' }}
+        if: ${{ github.event_name=='push' && github.ref == 'refs/heads/master' }}
         uses: google-github-actions/setup-gcloud@v3
         with:
           project_id: ${{ secrets.GCS_PROJECT_ID }}
 
       - name: Upload compiled packages to downloads.openwisp.io
-        if: ${{ github.event_name=='push' }}
+        if: ${{ github.event_name=='push' && github.ref == 'refs/heads/master' }}
         run: |
-          gsutil -m rsync -r ${{ env.SRC_URL }} ${{ env.DST_URL }}
-          gsutil -m rsync -r -d ${{ env.SRC_URL }} ${{ env.LATEST_URL }}
+          gcloud storage rsync --recursive ${{ env.SRC_URL }} ${{ env.DST_URL }}
+          gcloud storage rsync --recursive --delete-unmatched-destination-objects ${{ env.SRC_URL }} ${{ env.LATEST_URL }}
         env:
           SRC_URL: ${{ env.DOWNLOADS_DIR }}/${{ env.START_TIME }}/openwisp
           DST_URL: gs://${{ secrets.GCS_DOWNLOADS_BUCKET_NAME }}/openwisp-config/${{ env.START_TIME }}-${{ env.COMMIT_SHA }}
           LATEST_URL: gs://${{ secrets.GCS_DOWNLOADS_BUCKET_NAME }}/openwisp-config/latest
+
+      - name: Delete compiled packages older than two years
+        if: ${{ success() && github.event_name=='push' }}
+        shell: bash
+        run: |
+          # Propagate failures from gcloud storage ls through the loop.
+          set -o pipefail
+          cutoff=$(date -u -d '2 years ago' +%F)
+          gcloud storage ls "$BASE_URL/" | while IFS= read -r path; do
+            # Retain only the direct child directory name.
+            dir_name=${path#"$BASE_URL/"}
+            dir_name=${dir_name%/}
+            date=${dir_name:0:10}
+            # Only dated build directories with a commit SHA match.
+            if [[ $dir_name =~ ^[0-9]{4}-[0-9]{2}-[0-9]{2}-[0-9a-f]+$ ]] && [[ $date < $cutoff ]]; then
+              if ! gcloud storage rm --recursive "$path"; then
+                exit 1
+              fi
+            fi
+          done
+        env:
+          BASE_URL: gs://${{ secrets.GCS_DOWNLOADS_BUCKET_NAME }}/openwisp-config

@@ -25,8 +25,7 @@ local check_dir = tmp_dir .. '/check'
 local check_config_dir = check_dir .. '/etc/config'
 local downloaded_conf = conf or (tmp_dir .. '/configuration.tar.gz')
 local openwisp_dir = not TEST and '/etc/openwisp' or working_dir .. '/openwisp'
-local standard_config_dir = not TEST and '/etc/config' or working_dir ..
-                              '/update-test/etc/config'
+local standard_config_dir = not TEST and '/etc/config' or working_dir .. '/update-test/etc/config'
 local test_root_dir = working_dir .. '/update-test'
 local remote_dir = openwisp_dir .. '/remote'
 local remote_config_dir = remote_dir .. '/etc/config'
@@ -34,7 +33,9 @@ local stored_dir = openwisp_dir .. '/stored'
 local stored_config_dir = stored_dir .. '/etc/config'
 local added_file = openwisp_dir .. '/added.list'
 local modified_file = openwisp_dir .. '/modified.list'
-local get_standard = function() return uci.cursor(standard_config_dir) end
+local get_standard = function()
+  return uci.cursor(standard_config_dir)
+end
 local get_remote = function()
   return uci.cursor(remote_config_dir, '/tmp/openwisp/.uci')
 end
@@ -119,17 +120,13 @@ if lfs.attributes(remote_config_dir, 'mode') == 'directory' then
           end
           -- remove entire section if empty
           local result = standard:get_all(file, section['.name'])
-          if result and utils.is_uci_empty(result) then
-            standard:delete(file, section['.name'])
-          end
+          if result and utils.is_uci_empty(result) then standard:delete(file, section['.name']) end
         end
       end
       standard:commit(file)
       -- remove uci file if empty
       local uci_file = standard:get_all(file)
-      if uci_file and utils.is_table_empty(uci_file) then
-        os.remove(standard_path)
-      end
+      if uci_file and utils.is_table_empty(uci_file) then os.remove(standard_path) end
     end
   end
 end
@@ -186,40 +183,47 @@ local modified_changed = false
 
 -- loop each file except directories and standard UCI config files
 local ignored_path = remote_config_dir .. '/'
-local function is_ignored(path) return utils.starts_with(path, ignored_path) end
+local function is_ignored(path)
+  return utils.starts_with(path, ignored_path)
+end
 
 for path, attr in utils.dirtree(remote_dir) do
   if attr.mode == 'file' and not is_ignored(path) then
     -- calculates destination dir
     local dest_path = path:sub(#(remote_dir .. '/'))
-    local dest_dir = utils.dirname(dest_path)
-    -- like dest_path but used during automated tests
-    local check_path = not TEST and dest_path or test_root_dir .. dest_path
-    local is_added = added[dest_path] == true
-    local is_modified = modified[dest_path] == true
-    -- if file is neither in added.list nor modified.list
-    if is_added == false and is_modified == false then
-      -- if file exists
-      if utils.file_exists(check_path) then
-        -- add file path to modified set
-        modified[dest_path] = true
-        modified_changed = true
-        -- store original in /etc/openwisp/stored/<path>
-        os.execute('mkdir -p ' .. stored_dir .. dest_dir)
-        os.execute('cp ' .. check_path .. ' ' .. stored_dir .. dest_path)
-      else
-        -- add file path added set
-        added[dest_path] = true
-        added_changed = true
+    if not utils.is_valid_file_path(dest_path) then
+      print('WARNING: skipping invalid file path: ' .. dest_path)
+    else
+      local dest_dir = utils.dirname(dest_path)
+      -- like dest_path but used during automated tests
+      local check_path = not TEST and dest_path or test_root_dir .. dest_path
+      local is_added = added[dest_path] == true
+      local is_modified = modified[dest_path] == true
+      -- if file is neither in added.list nor modified.list
+      if is_added == false and is_modified == false then
+        -- if file exists
+        if utils.file_exists(check_path) then
+          -- add file path to modified set
+          modified[dest_path] = true
+          modified_changed = true
+          -- store original in /etc/openwisp/stored/<path>
+          os.execute('mkdir -p ' .. utils.escape_shell_arg(stored_dir .. dest_dir))
+          os.execute('cp ' .. utils.escape_shell_arg(check_path) .. ' ' ..
+                       utils.escape_shell_arg(stored_dir .. dest_path))
+        else
+          -- add file path added set
+          added[dest_path] = true
+          added_changed = true
+        end
       end
+      if TEST then
+        dest_path = test_root_dir .. dest_path
+        dest_dir = test_root_dir .. dest_dir
+      end
+      -- add file to filesystem
+      os.execute('mkdir -p ' .. utils.escape_shell_arg(dest_dir))
+      os.execute('cp ' .. utils.escape_shell_arg(path) .. ' ' .. utils.escape_shell_arg(dest_path))
     end
-    if TEST then
-      dest_path = test_root_dir .. dest_path
-      dest_dir = test_root_dir .. dest_dir
-    end
-    -- add file to filesystem
-    os.execute('mkdir -p ' .. dest_dir)
-    os.execute('cp ' .. path .. ' ' .. dest_path)
   end
 end
 

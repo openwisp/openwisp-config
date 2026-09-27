@@ -4,7 +4,9 @@ local lfs = require('lfs')
 
 local utils = {}
 
-function utils.starts_with_dot(str) return str:sub(1, 1) == '.' end
+function utils.starts_with_dot(str)
+  return str:sub(1, 1) == '.'
+end
 
 function utils.split(input, sep)
   if input == '' or input == nil then return {} end
@@ -27,9 +29,7 @@ function utils.dirname(path)
   local parts = utils.split(path, '/')
   local returnPath = '/'
   local length = table.getn(parts)
-  for i, part in ipairs(parts) do
-    if i < length then returnPath = returnPath .. part .. '/' end
-  end
+  for i, part in ipairs(parts) do if i < length then returnPath = returnPath .. part .. '/' end end
   return returnPath
 end
 
@@ -91,9 +91,7 @@ end
 
 -- returns true if uci section is empty
 function utils.is_uci_empty(table)
-  for key, value in pairs(table) do
-    if not utils.starts_with_dot(key) then return false end
-  end
+  for key in pairs(table) do if not utils.starts_with_dot(key) then return false end end
   return true
 end
 
@@ -132,7 +130,9 @@ function utils.dirtree(dir_param)
       end
     end
   end
-  return coroutine.wrap(function() yieldtree(dir_param) end)
+  return coroutine.wrap(function()
+    yieldtree(dir_param)
+  end)
 end
 
 function utils.file_exists(path)
@@ -158,7 +158,27 @@ function utils.set_to_file(set, path)
   return true
 end
 
-function utils.starts_with(str, start) return str:sub(1, #start) == start end
+function utils.starts_with(str, start)
+  return str:sub(1, #start) == start
+end
+
+-- Extra files come from downloaded archives; keep accepted paths simple.
+function utils.is_valid_file_path(path)
+  if type(path) ~= 'string' or path == '' then return false end
+  if string.find(path, '[^%w%._/%-]') then return false end
+  if string.find(path, '//') or string.sub(path, -1) == '/' then return false end
+  local relative_path = string.gsub(path, '^/', '')
+  if relative_path == '' then return false end
+  for component in string.gmatch(relative_path, '[^/]+') do
+    if component == '.' or component == '..' then return false end
+  end
+  return true
+end
+
+-- Escape paths passed to os.execute so the shell does not interpret them.
+function utils.escape_shell_arg(value)
+  return "'" .. tostring(value):gsub("'", "'\\''") .. "'"
+end
 
 -- iterates over a table in alphabeticaly order
 function utils.sorted_pairs(t)

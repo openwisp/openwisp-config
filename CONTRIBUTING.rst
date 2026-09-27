@@ -1,2 +1,2 @@
 Please read the `OpenWISP Contributing Guidelines
-<http://openwisp.io/docs/developer/contributing.html>`_.
+<https://openwisp.io/docs/dev/developer/contributing.html>`_.

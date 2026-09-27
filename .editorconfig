@@ -8,3 +8,6 @@ switch_case_indent = true
 # (used in compilation testing and CI builds).
 [openwrt/**]
 ignore = true
+
+[build/**]
+ignore = true

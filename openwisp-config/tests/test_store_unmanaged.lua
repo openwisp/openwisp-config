@@ -4,9 +4,8 @@ require('os')
 require('io')
 local luaunit = require('luaunit')
 local store_unmanaged = assert(loadfile("../files/sbin/openwisp-store-unmanaged.lua"))
-local default_blocks = "system.ntp " .. "system.@led " .. "network.loopback " ..
-                         "network.@globals " .. "network.lan " .. "network.wan " ..
-                         "network.@switch " .. "network.@switch_vlan"
+local default_blocks = "system.ntp " .. "system.@led " .. "network.loopback " .. "network.@globals " ..
+                         "network.lan " .. "network.wan " .. "network.@switch " .. "network.@switch_vlan"
 local write_dir = './unmanaged/'
 local assertNotNil = luaunit.assertNotNil
 local assertNil = luaunit.assertNil

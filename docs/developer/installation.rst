@@ -3,6 +3,24 @@ Developer Documentation
 
 .. include:: ../partials/developer-docs.rst
 
+The following diagram illustrates the role of the OpenWrt Config Agent in
+the OpenWISP architecture.
+
+.. figure:: ../images/architecture-v2-openwrt-config-agent.png
+    :target: ../../_images/architecture-v2-openwrt-config-agent.png
+    :align: center
+    :alt: OpenWISP Architecture: OpenWISP Config Agent for OpenWrt
+
+    **OpenWISP Architecture: highlighted OpenWISP Config Agent for
+    OpenWrt**
+
+.. important::
+
+    For an enhanced viewing experience, open the image above in a new
+    browser tab.
+
+    Refer to :doc:`/general/architecture` for more information.
+
 .. contents:: **Table of Contents**:
     :depth: 2
     :local:
@@ -26,14 +44,18 @@ its dependencies:
     cat feeds.conf.default >> feeds.conf
     ./scripts/feeds update -a
     ./scripts/feeds install -a
-    # any arch/target is fine because the package is architecture indipendent
-    arch="ar71xx"
-    echo "CONFIG_TARGET_$arch=y" > .config;
+    # any supported target and subtarget work because the package is architecture independent
+    target="ath79"
+    subtarget="generic"
+    echo "CONFIG_TARGET_$target=y" > .config
+    echo "CONFIG_TARGET_${target}_${subtarget}=y" >> .config
     echo "CONFIG_PACKAGE_openwisp-config=y" >> .config
     make defconfig
     make tools/install
     make toolchain/install
     make package/openwisp-config/compile
+
+The compiled packages will go in ``bin/packages/*/openwisp``.
 
 Alternatively, you can configure your build interactively with ``make
 menuconfig``, in this case you will need to select *openwisp-config* by
@@ -72,8 +94,10 @@ To run quality assurance checks you can use the ``run-qa-checks`` script:
 
 .. code-block::
 
-    # install openwisp-utils QA tools first
-    pip install openwisp-utils[qa]
+    # install development dependencies and QA tools first
+    sudo ./install-dev.sh
+    sudo apt install shfmt
+    pip install -r requirements-test.txt
 
     # run QA checks before committing code
     ./run-qa-checks

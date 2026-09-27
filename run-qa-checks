@@ -11,16 +11,24 @@ if [ "$CI" -eq 1 ]; then
 	cp openwisp-config/files/openwisp.init openwisp_init
 else
 	# check shell scripts formatting
-	sh_files=$(shfmt -f .)
+	sh_files=$(shfmt -f --apply-ignore .)
 	# shellcheck disable=SC2086
 	shellcheck $sh_files \
 		openwisp-config/files/openwisp.agent \
 		openwisp-config/files/openwisp.init
 
-	shfmt -d .
+	shfmt -d --apply-ignore .
 	shfmt -d openwisp-config/files/openwisp.agent
 	shfmt -d openwisp-config/files/openwisp.init
 fi
+
+(
+	cd openwisp-config
+	lua-format --check --config=luaformat.config \
+		files/sbin/*.lua \
+		files/lib/openwisp/*.lua \
+		tests/*.lua
+)
 
 openwisp-qa-check \
 	--skip-checkmigrations \

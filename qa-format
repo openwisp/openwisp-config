@@ -2,9 +2,11 @@
 set -e
 
 # format shell scripts
-shfmt -w -l .
+shfmt -w -l --apply-ignore .
 shfmt -w -l openwisp-config/files/openwisp.agent
 shfmt -w -l openwisp-config/files/openwisp.init
+
+openwisp-qa-format
 
 # format lua files
 cd openwisp-config

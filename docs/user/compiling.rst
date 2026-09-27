@@ -39,9 +39,11 @@ The following procedure illustrates how to compile a custom `OpenWrt
     cat feeds.conf.default >> feeds.conf
     ./scripts/feeds update -a
     ./scripts/feeds install -a
-    # replace with your desired arch target
-    arch="ar71xx"
-    echo "CONFIG_TARGET_$arch=y" > .config
+    # replace with your desired supported target and subtarget
+    target="ath79"
+    subtarget="generic"
+    echo "CONFIG_TARGET_$target=y" > .config
+    echo "CONFIG_TARGET_${target}_${subtarget}=y" >> .config
     echo "CONFIG_PACKAGE_openwisp-config=y" >> .config
     make defconfig
     # compile with verbose output
