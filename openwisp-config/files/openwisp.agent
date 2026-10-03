@@ -348,6 +348,17 @@ register() {
 			-p daemon.err
 		return 1
 	fi
+	# A transient server-side error (HTTP 5xx, e.g. 502/503/504 from a reverse
+	# proxy while the backend is restarting) carries no X-Openwisp-Controller
+	# header. Without this guard check_header below would treat it as a wrong
+	# server and call `exit 4`, killing the agent for good once procd's respawn
+	# limit is exhausted. Treat 5xx as a temporary failure and retry instead.
+	if head -n 1 "$REGISTRATION_PARAMETERS" | tr -d '\r' | grep -qE "^HTTP/[0-9.]+ 5[0-9][0-9]( |$)"; then
+		logger -s "Registration temporarily failed (controller returned 5xx), will retry: $(head -n 1 "$REGISTRATION_PARAMETERS" | tr -d '\r')" \
+			-t openwisp \
+			-p daemon.warning
+		return 2
+	fi
 	# exit if response does not seem to come from openwisp controller
 	check_header $REGISTRATION_PARAMETERS
 	if ! is_http_status $REGISTRATION_PARAMETERS 201; then
