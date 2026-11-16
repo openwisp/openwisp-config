@@ -847,17 +847,36 @@ update_configuration() {
 }
 
 backup_configuration() {
-	# save list of files that are going to be changed by openwisp
-	# so that if the changes sent by openwisp cause problems,
-	# the previous version can be rolled back
-	tar -ztf $CONFIGURATION_ARCHIVE | sed 's/^/\//' >"${BACKUP_FILE_LIST}.tmp"
-	# include all currently modified files because a change might
-	# get removed in the new configuration and then a file would disappear
-	find /etc/openwisp/remote/ -type f | sed 's/^\/etc\/openwisp\/remote//' >>"${BACKUP_FILE_LIST}.tmp"
-	sort -u "${BACKUP_FILE_LIST}.tmp" >$BACKUP_FILE_LIST
-	# backup only those files
-	tar -zcf $CONFIGURATION_BACKUP -T $BACKUP_FILE_LIST
-	rm "${BACKUP_FILE_LIST}*"
+	# Ensure cleanup runs even if something fails mid-way
+	trap 'rm -rf "$WORKING_DIR/backup_staging" "${BACKUP_FILE_LIST}"* 2>/dev/null || true' EXIT
+
+	# 1. Get files from archive and ensure they are absolute paths consistently
+	tar -ztf "$CONFIGURATION_ARCHIVE" | sed 's#^/*#/#5' >"${BACKUP_FILE_LIST}.tmp"
+
+	# 2. Keep find paths absolute as well so they match tar's format
+	find /etc/openwisp/remote/ -type f >>"${BACKUP_FILE_LIST}.tmp"
+
+	sort -u "${BACKUP_FILE_LIST}.tmp" >"$BACKUP_FILE_LIST"
+
+	# Check if openwisp config is targeted, and sanitize sensitive UCI keys if so
+	if grep -q "/etc/config/openwisp" "$BACKUP_FILE_LIST"; then
+		mkdir -p "$WORKING_DIR/backup_staging/etc/config"
+		cp /etc/config/openwisp "$WORKING_DIR/backup_staging/etc/config/openwisp" 2>/dev/null || true
+
+		# Strip sensitive controller secrets from the backup copy
+		uci -q -c "$WORKING_DIR/backup_staging/etc/config" delete controller.http.url 2>/dev/null || true
+		uci -q -c "$WORKING_DIR/backup_staging/etc/config" delete controller.http.uuid 2>/dev/null || true
+		uci -q -c "$WORKING_DIR/backup_staging/etc/config" delete controller.http.key 2>/dev/null || true
+		uci -q -c "$WORKING_DIR/backup_staging/etc/config" delete controller.http.shared_secret 2>/dev/null || true
+
+		# Replace the live path in the file list with the sanitized staged path
+		echo "$WORKING_DIR/backup_staging/etc/config/openwisp" >>"$BACKUP_FILE_LIST"
+		grep -v "^/etc/config/openwisp$" "$BACKUP_FILE_LIST" >"${BACKUP_FILE_LIST}.filtered"
+		mv "${BACKUP_FILE_LIST}.filtered" "$BACKUP_FILE_LIST"
+	fi
+
+	# Create the final backup archive using absolute paths (-P tells tar to keep leading slashes)
+	tar -zcf "$CONFIGURATION_BACKUP" -P -T "$BACKUP_FILE_LIST"
 }
 
 restore_backup() {
