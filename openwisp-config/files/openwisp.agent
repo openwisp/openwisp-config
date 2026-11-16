@@ -813,7 +813,11 @@ update_configuration() {
 	touch $APPLYING_CONF
 
 	# performs backup of files that are going to be changed
-	backup_configuration
+	# performs backup of files that are going to be changed
+	if ! backup_configuration; then
+		rm -f "$APPLYING_CONF"
+		return 1
+	fi
 
 	# testing enabled
 	if [ "$TEST_CONFIG" -eq "1" ]; then
@@ -848,40 +852,50 @@ update_configuration() {
 
 backup_configuration() {
 	# Ensure cleanup runs even if something fails mid-way
-	trap 'rm -rf "$WORKING_DIR/backup_staging" "${BACKUP_FILE_LIST}"* 2>/dev/null || true' EXIT
+	trap 'rm -rf "$WORKING_DIR/backup_staging" "$WORKING_DIR/uci_tmp" "${BACKUP_FILE_LIST}"* "${CONFIGURATION_BACKUP}.tar" 2>/dev/null || true' EXIT
 
 	# 1. Get files from archive and ensure they are absolute paths consistently
-	tar -ztf "$CONFIGURATION_ARCHIVE" | sed 's#^/*#/#5' >"${BACKUP_FILE_LIST}.tmp"
+	tar -ztf "$CONFIGURATION_ARCHIVE" | sed 's#^/*#/#' >"${BACKUP_FILE_LIST}.tmp"
 
 	# 2. Keep find paths absolute as well so they match tar's format
-	find /etc/openwisp/remote/ -type f >>"${BACKUP_FILE_LIST}.tmp"
+	find /etc/openwisp/remote/ -type f >>"${BACKUP_FILE_LIST}.tmp" 2>/dev/null || true
 
 	sort -u "${BACKUP_FILE_LIST}.tmp" >"$BACKUP_FILE_LIST"
 
 	# Check if openwisp config is targeted, and sanitize sensitive UCI keys if so
-	if grep -q "/etc/config/openwisp" "$BACKUP_FILE_LIST"; then
-		mkdir -p "$WORKING_DIR/backup_staging/etc/config"
+	if grep -q "^/etc/config/openwisp$" "$BACKUP_FILE_LIST"; then
+		mkdir -p "$WORKING_DIR/backup_staging/etc/config" "$WORKING_DIR/uci_tmp"
 		if [ -f /etc/config/openwisp ]; then
-    if ! cp /etc/config/openwisp "$WORKING_DIR/backup_staging/etc/config/openwisp"; then
-        logger -t openwisp "Error: Failed to copy /etc/config/openwisp to staging area."
-        return 1
-    fi
-fi
+			if ! cp /etc/config/openwisp "$WORKING_DIR/backup_staging/etc/config/openwisp"; then
+				logger -t openwisp "Error: Failed to copy /etc/config/openwisp to staging area."
+				return 1
+			fi
 
-		# Strip sensitive controller secrets from the backup copy
-		uci -q -c "$WORKING_DIR/backup_staging/etc/config" delete controller.http.url 2>/dev/null || true
-		uci -q -c "$WORKING_DIR/backup_staging/etc/config" delete controller.http.uuid 2>/dev/null || true
-		uci -q -c "$WORKING_DIR/backup_staging/etc/config" delete controller.http.key 2>/dev/null || true
-		uci -q -c "$WORKING_DIR/backup_staging/etc/config" delete controller.http.shared_secret 2>/dev/null || true
+			# Strip sensitive controller secrets and commit changes to the staged file
+			uci -q -c "$WORKING_DIR/backup_staging/etc/config" -t "$WORKING_DIR/uci_tmp" delete openwisp.http.url 2>/dev/null || true
+			uci -q -c "$WORKING_DIR/backup_staging/etc/config" -t "$WORKING_DIR/uci_tmp" delete openwisp.http.uuid 2>/dev/null || true
+			uci -q -c "$WORKING_DIR/backup_staging/etc/config" -t "$WORKING_DIR/uci_tmp" delete openwisp.http.key 2>/dev/null || true
+			uci -q -c "$WORKING_DIR/backup_staging/etc/config" -t "$WORKING_DIR/uci_tmp" delete openwisp.http.shared_secret 2>/dev/null || true
+			uci -q -c "$WORKING_DIR/backup_staging/etc/config" -t "$WORKING_DIR/uci_tmp" commit openwisp 2>/dev/null || true
+		fi
 
-		# Replace the live path in the file list with the sanitized staged path
-		echo "$WORKING_DIR/backup_staging/etc/config/openwisp" >>"$BACKUP_FILE_LIST"
+		# Remove the live path so it is not archived directly from /etc/config/openwisp
 		grep -v "^/etc/config/openwisp$" "$BACKUP_FILE_LIST" >"${BACKUP_FILE_LIST}.filtered"
 		mv "${BACKUP_FILE_LIST}.filtered" "$BACKUP_FILE_LIST"
 	fi
 
-	# Create the final backup archive using absolute paths (-P tells tar to keep leading slashes)
-	tar -zcf "$CONFIGURATION_BACKUP" -P -T "$BACKUP_FILE_LIST"
+	# Create the final backup archive without BusyBox-unsupported -P flag
+	if [ -s "$BACKUP_FILE_LIST" ]; then
+		tar -zcf "$CONFIGURATION_BACKUP" -C / -T "$BACKUP_FILE_LIST" || return 1
+		if [ -f "$WORKING_DIR/backup_staging/etc/config/openwisp" ]; then
+			gunzip -c "$CONFIGURATION_BACKUP" >"${CONFIGURATION_BACKUP}.tar" || return 1
+			tar -rf "${CONFIGURATION_BACKUP}.tar" -C "$WORKING_DIR/backup_staging" "etc/config/openwisp" || return 1
+			gzip -c "${CONFIGURATION_BACKUP}.tar" >"$CONFIGURATION_BACKUP" || return 1
+			rm -f "${CONFIGURATION_BACKUP}.tar"
+		fi
+	elif [ -f "$WORKING_DIR/backup_staging/etc/config/openwisp" ]; then
+		tar -zcf "$CONFIGURATION_BACKUP" -C "$WORKING_DIR/backup_staging" "etc/config/openwisp" || return 1
+	fi
 }
 
 restore_backup() {
