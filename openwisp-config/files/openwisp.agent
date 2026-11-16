@@ -861,7 +861,12 @@ backup_configuration() {
 	# Check if openwisp config is targeted, and sanitize sensitive UCI keys if so
 	if grep -q "/etc/config/openwisp" "$BACKUP_FILE_LIST"; then
 		mkdir -p "$WORKING_DIR/backup_staging/etc/config"
-		cp /etc/config/openwisp "$WORKING_DIR/backup_staging/etc/config/openwisp" 2>/dev/null || true
+		if [ -f /etc/config/openwisp ]; then
+    if ! cp /etc/config/openwisp "$WORKING_DIR/backup_staging/etc/config/openwisp"; then
+        logger -t openwisp "Error: Failed to copy /etc/config/openwisp to staging area."
+        return 1
+    fi
+fi
 
 		# Strip sensitive controller secrets from the backup copy
 		uci -q -c "$WORKING_DIR/backup_staging/etc/config" delete controller.http.url 2>/dev/null || true
