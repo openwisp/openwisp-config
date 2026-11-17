@@ -217,6 +217,89 @@ function TestUpdateConfig.test_removal_list_options()
   luaunit.assertNotNil(string.find(networkContents, "option test_restore '2'"))
 end
 
+function TestUpdateConfig.test_backup_sanitization()
+  local tmp_dir = "update-test/sanitize-test"
+  os.execute("rm -rf " .. tmp_dir)
+  os.execute("mkdir -p " .. tmp_dir .. "/bin " .. tmp_dir .. "/work " .. tmp_dir .. "/archive_src/etc/config " .. tmp_dir .. "/extracted")
+
+  -- 1. Create a sample openwisp config containing both safe and sensitive options
+  local cfg = io.open(tmp_dir .. "/archive_src/etc/config/openwisp", "w")
+  cfg:write([[
+config controller 'http'
+	option url 'https://openwisp.example.com'
+	option uuid '12345678-1234-1234-1234-1234567890ab'
+	option key 'supersecretkey'
+	option shared_secret 'anothersecret'
+	option verify_ssl '1'
+]])
+  cfg:close()
+
+  -- 2. Package it into a test CONFIGURATION_ARCHIVE
+  os.execute("tar -zcf " .. tmp_dir .. "/config.tar.gz -C " .. tmp_dir .. "/archive_src .")
+
+  -- 3. Provide a lightweight uci wrapper in PATH if host lacks OpenWrt uci binary
+  local uci_mock = io.open(tmp_dir .. "/bin/uci", "w")
+  uci_mock:write([[#!/bin/sh
+# Minimal UCI delete/commit handler for host test environments
+CONF_DIR=""
+TARGET=""
+CMD=""
+while [ $# -gt 0 ]; do
+  case "$1" in
+    -q) shift ;;
+    -c) CONF_DIR="$2"; shift 2 ;;
+    -t) shift 2 ;;
+    delete) CMD="delete"; TARGET="$2"; shift 2 ;;
+    commit) CMD="commit"; TARGET="$2"; shift 2 ;;
+    *) shift ;;
+  esac
+done
+if [ "$CMD" = "delete" ] && [ -n "$CONF_DIR" ]; then
+  OPT="${TARGET##*.}"
+  sed -i "/^[[:space:]]*option[[:space:]]\+${OPT}[[:space:]]/d" "$CONF_DIR/openwisp"
+fi
+exit 0
+]])
+  uci_mock:close()
+  os.execute("chmod +x " .. tmp_dir .. "/bin/uci")
+
+  -- 4. Extract backup_configuration() from ../files/openwisp.agent and execute it
+  local agent_file = io.open("../files/openwisp.agent", "r")
+  local agent_src = agent_file:read("*a")
+  agent_file:close()
+
+  local func_src = string.match(agent_src, "(backup_configuration%(%)%s*%b{})")
+  luaunit.assertNotNil(func_src, "Could not locate backup_configuration() in openwisp.agent")
+
+  local runner = io.open(tmp_dir .. "/run_backup.sh", "w")
+  runner:write("#!/bin/sh\n")
+  runner:write("export PATH=\"$(pwd)/" .. tmp_dir .. "/bin:$PATH\"\n")
+  runner:write("WORKING_DIR=\"$(pwd)/" .. tmp_dir .. "/work\"\n")
+  runner:write("CONFIGURATION_ARCHIVE=\"$(pwd)/" .. tmp_dir .. "/config.tar.gz\"\n")
+  runner:write("CONFIGURATION_BACKUP=\"$(pwd)/" .. tmp_dir .. "/backup.tar.gz\"\n")
+  runner:write("logger() { :; }\n")
+  runner:write(func_src .. "\n")
+  runner:write("backup_configuration\n")
+  runner:close()
+
+  local rc = os.execute("sh " .. tmp_dir .. "/run_backup.sh")
+  luaunit.assertTrue(rc == 0 or rc == true, "backup_configuration() exited with non-zero status")
+
+  -- 5. Extract resulting backup archive and verify sensitive keys were stripped
+  os.execute("tar -xzf " .. tmp_dir .. "/backup.tar.gz -C " .. tmp_dir .. "/extracted")
+  local out_file = io.open(tmp_dir .. "/extracted/etc/config/openwisp", "r")
+  luaunit.assertNotNil(out_file, "Sanitized etc/config/openwisp missing from backup archive")
+  local out_contents = out_file:read("*a")
+  out_file:close()
+
+  luaunit.assertNil(string.find(out_contents, "option key "), "Sensitive key was not stripped")
+  luaunit.assertNil(string.find(out_contents, "option shared_secret "), "Sensitive shared_secret was not stripped")
+  luaunit.assertNotNil(string.find(out_contents, "option verify_ssl '1'"), "Non-sensitive option was unexpectedly removed")
+
+  -- 6. Clean up temporary test artifacts
+  os.execute("rm -rf " .. tmp_dir)
+end
+
 function TestUpdateConfig.test_invalid_extra_file_path_is_skipped()
   os.execute('mkdir -p invalid-conf')
   os.execute('tar -zxf good-config.tar.gz -C invalid-conf')
@@ -229,3 +312,4 @@ function TestUpdateConfig.test_invalid_extra_file_path_is_skipped()
 end
 
 os.exit(luaunit.LuaUnit.run())
+

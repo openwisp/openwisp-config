@@ -195,7 +195,6 @@ CONFIGURATION_ARCHIVE="$WORKING_DIR/configuration.tar.gz"
 CONFIGURATION_CHECKSUM="$WORKING_DIR/checksum"
 PERSISTENT_CHECKSUM="/etc/openwisp/checksum"
 CONFIGURATION_BACKUP="$WORKING_DIR/backup.tar.gz"
-BACKUP_FILE_LIST="$WORKING_DIR/backup_file_list.conf"
 REGISTRATION_PARAMETERS="$WORKING_DIR/registration_parameters"
 TEST_CHECKSUM="$WORKING_DIR/test_checksum"
 UPDATE_INFO="$WORKING_DIR/update_info"
@@ -812,7 +811,6 @@ update_configuration() {
 	# configuration is still being applied
 	touch $APPLYING_CONF
 
-	
 	# performs backup of files that are going to be changed
 	if ! backup_configuration; then
 		rm -f "$APPLYING_CONF" "$CONFIGURATION_CHECKSUM"
@@ -879,7 +877,7 @@ backup_configuration() {
 	if [ -f "$staging_dir/etc/config/openwisp" ]; then
 		uci -q -c "$staging_dir/etc/config" -t "$uci_tmp" delete openwisp.http.shared_secret 2>/dev/null || true
 		uci -q -c "$staging_dir/etc/config" -t "$uci_tmp" delete openwisp.http.key 2>/dev/null || true
-		
+
 		if ! uci -q -c "$staging_dir/etc/config" -t "$uci_tmp" commit openwisp; then
 			logger -t openwisp "Error: Failed to commit sanitized openwisp configuration."
 			rm -rf "$staging_dir" "$uci_tmp"
