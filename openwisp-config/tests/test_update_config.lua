@@ -224,14 +224,12 @@ function TestUpdateConfig.test_backup_sanitization()
 
   -- 1. Create a sample openwisp config containing both safe and sensitive options
   local cfg = io.open(tmp_dir .. "/archive_src/etc/config/openwisp", "w")
-  cfg:write([[
-config controller 'http'
-	option url 'https://openwisp.example.com'
-	option uuid '12345678-1234-1234-1234-1234567890ab'
-	option key 'supersecretkey'
-	option shared_secret 'anothersecret'
-	option verify_ssl '1'
-]])
+  cfg:write("config controller 'http'\n")
+  cfg:write("	option url 'https://openwisp.example.com'\n")
+  cfg:write("	option uuid '12345678-1234-1234-1234-1234567890ab'\n")
+  cfg:write("	option key 'supersecretkey'\n")
+  cfg:write("	option shared_secret 'anothersecret'\n")
+  cfg:write("	option verify_ssl '1'\n")
   cfg:close()
 
   -- 2. Package it into a test CONFIGURATION_ARCHIVE
@@ -239,27 +237,25 @@ config controller 'http'
 
   -- 3. Provide a lightweight uci wrapper in PATH if host lacks OpenWrt uci binary
   local uci_mock = io.open(tmp_dir .. "/bin/uci", "w")
-  uci_mock:write([[#!/bin/sh
-# Minimal UCI delete/commit handler for host test environments
-CONF_DIR=""
-TARGET=""
-CMD=""
-while [ $# -gt 0 ]; do
-  case "$1" in
-    -q) shift ;;
-    -c) CONF_DIR="$2"; shift 2 ;;
-    -t) shift 2 ;;
-    delete) CMD="delete"; TARGET="$2"; shift 2 ;;
-    commit) CMD="commit"; TARGET="$2"; shift 2 ;;
-    *) shift ;;
-  esac
-done
-if [ "$CMD" = "delete" ] && [ -n "$CONF_DIR" ]; then
-  OPT="${TARGET##*.}"
-  sed -i "/^[[:space:]]*option[[:space:]]\+${OPT}[[:space:]]/d" "$CONF_DIR/openwisp"
-fi
-exit 0
-]])
+  uci_mock:write("#!/bin/sh\n")
+  uci_mock:write("CONF_DIR=\"\"\n")
+  uci_mock:write("TARGET=\"\"\n")
+  uci_mock:write("CMD=\"\"\n")
+  uci_mock:write("while [ $# -gt 0 ]; do\n")
+  uci_mock:write("  case \"$1\" in\n")
+  uci_mock:write("    -q) shift ;;\n")
+  uci_mock:write("    -c) CONF_DIR=\"$2\"; shift 2 ;;\n")
+  uci_mock:write("    -t) shift 2 ;;\n")
+  uci_mock:write("    delete) CMD=\"delete\"; TARGET=\"$2\"; shift 2 ;;\n")
+  uci_mock:write("    commit) CMD=\"commit\"; TARGET=\"$2\"; shift 2 ;;\n")
+  uci_mock:write("    *) shift ;;\n")
+  uci_mock:write("  esac\n")
+  uci_mock:write("done\n")
+  uci_mock:write("if [ \"$CMD\" = \"delete\" ] && [ -n \"$CONF_DIR\" ]; then\n")
+  uci_mock:write("  OPT=\"${TARGET##*.}\"\n")
+  uci_mock:write("  sed -i \"/^[[:space:]]*option[[:space:]]\\+${OPT}[[:space:]]/d\" \"$CONF_DIR/openwisp\"\n")
+  uci_mock:write("fi\n")
+  uci_mock:write("exit 0\n")
   uci_mock:close()
   os.execute("chmod +x " .. tmp_dir .. "/bin/uci")
 
@@ -273,10 +269,10 @@ exit 0
 
   local runner = io.open(tmp_dir .. "/run_backup.sh", "w")
   runner:write("#!/bin/sh\n")
-  runner:write("export PATH=\"$(pwd)/" .. tmp_dir .. "/bin:$PATH\"\n")
-  runner:write("WORKING_DIR=\"$(pwd)/" .. tmp_dir .. "/work\"\n")
-  runner:write("CONFIGURATION_ARCHIVE=\"$(pwd)/" .. tmp_dir .. "/config.tar.gz\"\n")
-  runner:write("CONFIGURATION_BACKUP=\"$(pwd)/" .. tmp_dir .. "/backup.tar.gz\"\n")
+  runner:write("export PATH=\"" .. tmp_dir .. "/bin:$PATH\"\n")
+  runner:write("WORKING_DIR=\"" .. tmp_dir .. "/work\"\n")
+  runner:write("CONFIGURATION_ARCHIVE=\"" .. tmp_dir .. "/config.tar.gz\"\n")
+  runner:write("CONFIGURATION_BACKUP=\"" .. tmp_dir .. "/backup.tar.gz\"\n")
   runner:write("logger() { :; }\n")
   runner:write(func_src .. "\n")
   runner:write("backup_configuration\n")
@@ -286,12 +282,17 @@ exit 0
   luaunit.assertTrue(rc == 0 or rc == true, "backup_configuration() exited with non-zero status")
 
   -- 5. Extract resulting backup archive and verify sensitive keys were stripped
-  os.execute("tar -xzf " .. tmp_dir .. "/backup.tar.gz -C " .. tmp_dir .. "/extracted")
+ os.execute("tar -xzf " .. tmp_dir .. "/backup.tar.gz -C " .. tmp_dir .. "/extracted")
   local out_file = io.open(tmp_dir .. "/extracted/etc/config/openwisp", "r")
   luaunit.assertNotNil(out_file, "Sanitized etc/config/openwisp missing from backup archive")
   local out_contents = out_file:read("*a")
   out_file:close()
 
+  -- Core connection endpoints must be preserved to prevent agent orphaning
+  luaunit.assertNotNil(string.find(out_contents, "option url "), "Core connection url was unexpectedly removed")
+  luaunit.assertNotNil(string.find(out_contents, "option uuid "), "Core connection uuid was unexpectedly removed")
+
+  -- Sensitive secrets must be stripped
   luaunit.assertNil(string.find(out_contents, "option key "), "Sensitive key was not stripped")
   luaunit.assertNil(string.find(out_contents, "option shared_secret "), "Sensitive shared_secret was not stripped")
   luaunit.assertNotNil(string.find(out_contents, "option verify_ssl '1'"), "Non-sensitive option was unexpectedly removed")
