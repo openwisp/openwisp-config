@@ -18,10 +18,14 @@ class TestCiInstaller(unittest.TestCase):
                 executable = path / name
                 executable.write_text(
                     f'#!/bin/sh\nprintf "%s\\n" "{name} $*" >> "$CALLS"\n'
+                    f'exit "${{{name.upper()}_STATUS:-0}}"\n'
                 )
                 executable.chmod(0o755)
+            inherited = os.environ.copy()
+            inherited.pop("CI_SYSTEM_DEPS_READY", None)
+            inherited.pop("CI_SYSTEM_DEPS_ONLY", None)
             env = {
-                **os.environ,
+                **inherited,
                 "PATH": f"{path}:{os.environ['PATH']}",
                 "CALLS": str(log),
                 **variables,
@@ -56,4 +60,16 @@ class TestCiInstaller(unittest.TestCase):
         self.assertEqual(result.returncode, 0, result.stderr)
         self.assertEqual(
             calls, ["python -m pip install --upgrade -r requirements-test.txt"]
+        )
+
+    def test_system_failure_stops_before_python_installation(self):
+        result, calls = self.run_installer(SUDO_STATUS="17")
+        self.assertEqual(result.returncode, 17)
+        self.assertEqual(calls, ["sudo ./install-dev.sh"])
+
+    def test_python_failure_is_returned(self):
+        result, calls = self.run_installer(PYTHON_STATUS="18")
+        self.assertEqual(result.returncode, 18)
+        self.assertEqual(
+            calls[-1], "python -m pip install --upgrade -r requirements-test.txt"
         )
