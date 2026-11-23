@@ -1,14 +1,48 @@
 #!/bin/bash
+# Run the complete Lua suite or explicitly selected test files.
 set -e
-luacheck ./openwisp-config/ -a
+
+tests=(
+	test_remove_default_wifi.lua
+	test_restore_unmanaged.lua
+	test_store_unmanaged.lua
+	test_uci_autoname.lua
+	test_update_bad_config.lua
+	test_update_bug_missing_file.lua
+	test_update_config.lua
+	test_net.lua
+	test_utils.lua
+	test_random_number.lua
+)
+selected=()
+for argument in "$@"; do
+	case "$argument" in
+		-v) continue ;;
+		openwisp-config/tests/*) name=${argument#openwisp-config/tests/} ;;
+		*)
+			echo "Unsupported test argument: $argument" >&2
+			exit 2
+			;;
+	esac
+	valid=0
+	for test in "${tests[@]}"; do
+		if [ "$name" = "$test" ]; then
+			valid=1
+			break
+		fi
+	done
+	if [ "$valid" -ne 1 ] || [ -L "$argument" ]; then
+		echo "Unsupported test argument: $argument" >&2
+		exit 2
+	fi
+	selected+=("$name")
+done
+
+if [ "${#selected[@]}" -eq 0 ]; then
+	luacheck ./openwisp-config/ -a
+	selected=("${tests[@]}")
+fi
 cd openwisp-config/tests/
-lua test_remove_default_wifi.lua -v
-lua test_restore_unmanaged.lua -v
-lua test_store_unmanaged.lua -v
-lua test_uci_autoname.lua -v
-lua test_update_bad_config.lua -v
-lua test_update_bug_missing_file.lua -v
-lua test_update_config.lua -v
-lua test_net.lua -v
-lua test_utils.lua -v
-lua test_random_number.lua -v
+for test in "${selected[@]}"; do
+	lua "$test" -v
+done

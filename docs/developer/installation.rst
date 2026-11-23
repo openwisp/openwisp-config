@@ -116,6 +116,16 @@ You can run all the unit tests by launching the dedicated script:
 
     ./runtests
 
+To run a single Lua test file, pass its path, for example:
+
+.. code-block:: shell
+
+    ./runtests openwisp-config/tests/test_net.lua
+
+The entry point accepts the ``-v`` flag and the existing Lua test files.
+It rejects other arguments. This validation does not sandbox test code or
+project configuration.
+
 Alternatively, you can run specific tests, e.g.:
 
 .. code-block:: shell

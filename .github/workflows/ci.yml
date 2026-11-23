@@ -16,7 +16,7 @@ concurrency:
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
-  tests:
+  test:
     name: QA-Checks and Tests
     runs-on: ubuntu-24.04
 
@@ -27,17 +27,29 @@ jobs:
           persist-credentials: false
 
       - name: Set up Python
+        id: python
         uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
         with:
           python-version: "3.13"
-          cache: pip
-          cache-dependency-path: requirements-test.txt
+
+      - name: Identify runner image
+        id: platform
+        run: echo "image_os=$ImageOS" >> "$GITHUB_OUTPUT"
+
+      - name: Cache pip downloads
+        id: cache
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ~/.cache/pip
+          key: >-
+            ${{ format('{0}-{1}-{2}-pip-{3}-{4}', runner.os, runner.arch,
+                steps.platform.outputs.image_os, steps.python.outputs.python-version,
+                hashFiles('requirements-test.txt', 'requirements.txt', 'setup.py',
+                'install-ci-deps.sh', 'install-dev.sh')) }}
 
       - name: Install Dependencies
         id: deps
-        run: |
-          sudo ./install-dev.sh
-          pip install --upgrade -r requirements-test.txt
+        run: ./install-ci-deps.sh
 
       - name: QA-Checks
         run: ./run-qa-checks
@@ -52,9 +64,12 @@ jobs:
         if: ${{ !cancelled() && steps.deps.conclusion == 'success' }}
         run: ./runtests
 
+      - name: CI entry point tests
+        run: python -m unittest discover -s openwisp-config/tests -p 'test_ci_*.py'
+
   build:
     name: Build and Upload Packages
-    needs: tests
+    needs: test
     runs-on: ubuntu-24.04
     env:
       BUILD_DIR: "/home/runner/work/build"
