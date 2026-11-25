@@ -110,6 +110,12 @@ to do this, you can take a look at the `install-dev.sh
 <https://github.com/openwisp/openwisp-config/blob/master/install-dev.sh>`_
 script.
 
+Install the Python dependencies for the test entry point:
+
+.. code-block:: shell
+
+    python -m pip install -r requirements-test.txt
+
 You can run all the unit tests by launching the dedicated script:
 
 .. code-block:: shell
