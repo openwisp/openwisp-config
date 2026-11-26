@@ -1,14 +1,53 @@
-#!/bin/bash
-set -e
-luacheck ./openwisp-config/ -a
-cd openwisp-config/tests/
-lua test_remove_default_wifi.lua -v
-lua test_restore_unmanaged.lua -v
-lua test_store_unmanaged.lua -v
-lua test_uci_autoname.lua -v
-lua test_update_bad_config.lua -v
-lua test_update_bug_missing_file.lua -v
-lua test_update_config.lua -v
-lua test_net.lua -v
-lua test_utils.lua -v
-lua test_random_number.lua -v
+#!/usr/bin/env python3
+"""Run the complete Lua suite or explicitly selected test files."""
+
+import subprocess
+import sys
+from pathlib import Path
+
+from openwisp_utils.test.runner import (
+    InvalidTestArgument,
+    compile_test_file_pattern,
+    parse_test_files,
+)
+
+
+def main():
+    tests = (
+        "test_remove_default_wifi.lua",
+        "test_restore_unmanaged.lua",
+        "test_store_unmanaged.lua",
+        "test_uci_autoname.lua",
+        "test_update_bad_config.lua",
+        "test_update_bug_missing_file.lua",
+        "test_update_config.lua",
+        "test_net.lua",
+        "test_utils.lua",
+        "test_random_number.lua",
+    )
+    pattern = compile_test_file_pattern(("openwisp-config/tests",), kind="lua")
+    try:
+        files, _ = parse_test_files(
+            sys.argv[1:], pattern, ("-v",), require_exists=False
+        )
+        selected = [Path(match.group(0)).name for match in files]
+        for name in selected:
+            if name not in tests:
+                raise InvalidTestArgument(f"Unsupported test argument: {name}")
+    except InvalidTestArgument as error:
+        print(error, file=sys.stderr)
+        return 2
+    if not selected:
+        status = subprocess.call(["luacheck", "./openwisp-config/", "-a"])
+        if status:
+            return status
+        selected = tests
+    for test in selected:
+        status = subprocess.call(["lua", test, "-v"], cwd="openwisp-config/tests")
+        if status:
+            return status
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())
