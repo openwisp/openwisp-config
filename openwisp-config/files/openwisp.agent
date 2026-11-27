@@ -195,7 +195,6 @@ CONFIGURATION_ARCHIVE="$WORKING_DIR/configuration.tar.gz"
 CONFIGURATION_CHECKSUM="$WORKING_DIR/checksum"
 PERSISTENT_CHECKSUM="/etc/openwisp/checksum"
 CONFIGURATION_BACKUP="$WORKING_DIR/backup.tar.gz"
-BACKUP_FILE_LIST="$WORKING_DIR/backup_file_list.conf"
 REGISTRATION_PARAMETERS="$WORKING_DIR/registration_parameters"
 TEST_CHECKSUM="$WORKING_DIR/test_checksum"
 UPDATE_INFO="$WORKING_DIR/update_info"
@@ -813,7 +812,10 @@ update_configuration() {
 	touch $APPLYING_CONF
 
 	# performs backup of files that are going to be changed
-	backup_configuration
+	if ! backup_configuration; then
+		rm -f "$APPLYING_CONF" "$CONFIGURATION_CHECKSUM"
+		return 1
+	fi
 
 	# testing enabled
 	if [ "$TEST_CONFIG" -eq "1" ]; then
@@ -847,17 +849,51 @@ update_configuration() {
 }
 
 backup_configuration() {
-	# save list of files that are going to be changed by openwisp
-	# so that if the changes sent by openwisp cause problems,
-	# the previous version can be rolled back
-	tar -ztf $CONFIGURATION_ARCHIVE | sed 's/^/\//' >"${BACKUP_FILE_LIST}.tmp"
-	# include all currently modified files because a change might
-	# get removed in the new configuration and then a file would disappear
-	find /etc/openwisp/remote/ -type f | sed 's/^\/etc\/openwisp\/remote//' >>"${BACKUP_FILE_LIST}.tmp"
-	sort -u "${BACKUP_FILE_LIST}.tmp" >$BACKUP_FILE_LIST
-	# backup only those files
-	tar -zcf $CONFIGURATION_BACKUP -T $BACKUP_FILE_LIST
-	rm "${BACKUP_FILE_LIST}*"
+	local staging_dir="$WORKING_DIR/backup_staging"
+	local uci_tmp="$WORKING_DIR/uci_tmp"
+
+	# Clean up any previous staging leftovers
+	rm -rf "$staging_dir" "$uci_tmp"
+	mkdir -p "$staging_dir" "$uci_tmp"
+
+	# 1. Extract existing configuration archive into staging dir if present
+	if [ -f "$CONFIGURATION_ARCHIVE" ]; then
+		tar -xzf "$CONFIGURATION_ARCHIVE" -C "$staging_dir" 2>/dev/null || true
+	fi
+
+	# 2. Include remote files if present on the system
+	if [ -d /etc/openwisp/remote ]; then
+		mkdir -p "$staging_dir/etc/openwisp/remote"
+		cp -r /etc/openwisp/remote/. "$staging_dir/etc/openwisp/remote/" 2>/dev/null || true
+	fi
+
+	# 3. Fallback: ensure local /etc/config/openwisp is included if present
+	if [ -f /etc/config/openwisp ]; then
+		mkdir -p "$staging_dir/etc/config"
+		cp /etc/config/openwisp "$staging_dir/etc/config/openwisp"
+	fi
+
+	# 4. Sanitize high-risk secrets while preserving core connection endpoints (url, uuid) for valid rollback restoration
+	if [ -f "$staging_dir/etc/config/openwisp" ]; then
+		uci -q -c "$staging_dir/etc/config" -t "$uci_tmp" delete openwisp.http.shared_secret 2>/dev/null || true
+		uci -q -c "$staging_dir/etc/config" -t "$uci_tmp" delete openwisp.http.key 2>/dev/null || true
+
+		if ! uci -q -c "$staging_dir/etc/config" -t "$uci_tmp" commit openwisp; then
+			logger -t openwisp "Error: Failed to commit sanitized openwisp configuration."
+			rm -rf "$staging_dir" "$uci_tmp"
+			return 1
+		fi
+	fi
+
+	# 5. Create the final backup archive in a single create step (Fully BusyBox compatible)
+	if ! tar -zcf "$CONFIGURATION_BACKUP" -C "$staging_dir" .; then
+		logger -t openwisp "Error: Failed to create configuration backup."
+		rm -rf "$staging_dir" "$uci_tmp"
+		return 1
+	fi
+
+	# Clean up staging directory immediately upon successful return
+	rm -rf "$staging_dir" "$uci_tmp"
 }
 
 restore_backup() {
