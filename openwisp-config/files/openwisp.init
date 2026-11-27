@@ -82,21 +82,27 @@ service_triggers() {
 	procd_add_reload_trigger openwisp
 }
 
-stop_service() {
-	logger -s "$PROG_NAME stopping" -t openwisp -p daemon.info
-}
-
-reload_service() {
-	logger -s "$PROG_NAME received reload trigger" -t openwisp -p daemon.info
-	# avoid reloading while configuration is being applied
+wait_applying_config() {
+	# avoid stopping/reloading while configuration is being applied
 	# will wait for a maximum of 30 seconds
 	for _ in $(seq 1 30); do
 		if [ -f "$CONTROL_FILE" ]; then
 			sleep 1
 		else
-			break
+			return 0
 		fi
 	done
+	# timed out: remove stale marker so we can proceed
 	rm -f "$CONTROL_FILE"
+}
+
+stop_service() {
+	logger -s "$PROG_NAME stopping" -t openwisp -p daemon.info
+	wait_applying_config
+}
+
+reload_service() {
+	logger -s "$PROG_NAME received reload trigger" -t openwisp -p daemon.info
+	wait_applying_config
 	start
 }
