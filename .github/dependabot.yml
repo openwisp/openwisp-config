@@ -10,5 +10,7 @@ updates:
     directory: "/" # The root directory where the Ansible role is located
     schedule:
       interval: "monthly" # Check for updates monthly
+    cooldown:
+      default-days: 7
     commit-message:
       prefix: "[ci] "
